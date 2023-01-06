@@ -1,0 +1,23 @@
+{
+    "name": "akki/sylius-registration-drawing-bundle",
+    "description": "Registration drawings for Sylius. Manage and export to multiple formats.",
+    "type": "sylius-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Akki",
+            "email": "support@akki.fr"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/akki-team/sylius-registration-drawing-bundle.git"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Akki\\SyliusRegistrationDrawingBundle\\": "src/"
+        }
+    }
+}

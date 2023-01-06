@@ -1,0 +1,17 @@
+sylius:
+    ui:
+        registration_drawings: "Dessins d'enregistrement"
+        manage_your_registration_drawings: "Gérez vos dessins d'enregistrement"
+    form:
+        registration_drawing:
+            name: "Nom"
+            format: "Format"
+            delimiter: "Délimiteur"
+            periodicity: "Périodicité"
+            day: "Jour"
+            send_mode: "Mode d\'envoi"
+            deposit_address: "Adresse de depot"
+            user: "Utilisateur"
+            ssh_key: "Clé SSH"
+            created_at: "Date de création"
+            updated_at: "Date de mise à jour"

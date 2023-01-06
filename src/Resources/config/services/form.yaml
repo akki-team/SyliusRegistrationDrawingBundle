@@ -1,0 +1,9 @@
+# Define additional forms
+services:
+    sylius_registration_drawing.form.type.registration_drawing:
+        class: Akki\SyliusRegistrationDrawingBundle\Form\Type\RegistrationDrawingType
+        arguments:
+            - '%sylius_registration_drawing.model.registration_drawing.class%'
+            - []
+        tags:
+            - { name: form.type, alias: registration_drawing }
