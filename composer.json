@@ -12,7 +12,7 @@
     "repositories": [
         {
             "type": "git",
-            "url": "https://github.com/akki-team/sylius-registration-drawing-bundle.git"
+            "url": "https://github.com/akki-team/SyliusRegistrationDrawingBundle.git"
         }
     ],
     "autoload": {
