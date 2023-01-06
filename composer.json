@@ -9,12 +9,6 @@
             "email": "support@akki.fr"
         }
     ],
-    "repositories": [
-        {
-            "type": "git",
-            "url": "https://github.com/akki-team/SyliusRegistrationDrawingBundle.git"
-        }
-    ],
     "autoload": {
         "psr-4": {
             "Akki\\SyliusRegistrationDrawingBundle\\": "src/"
