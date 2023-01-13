@@ -9,6 +9,10 @@
             "email": "support@akki.fr"
         }
     ],
+    "require": {
+        "php": "^7.4",
+        "sylius/sylius": "~1.8.0"
+    },
     "autoload": {
         "psr-4": {
             "Akki\\SyliusRegistrationDrawingBundle\\": "src/"

@@ -1,17 +1,25 @@
-sylius:
+sylius_registration_drawing:
     ui:
         registration_drawings: "Dessins d'enregistrement"
         manage_your_registration_drawings: "Gérez vos dessins d'enregistrement"
+        new_registration_drawing: "Nouveau dessin d'enregistrement"
+        manage_fields_of_your_drawings: "Gérez les champs de vos dessins"
     form:
         registration_drawing:
             name: "Nom"
             format: "Format"
-            delimiter: "Délimiteur"
+            delimiter: "Délimiteur (si format CSV)"
             periodicity: "Périodicité"
             day: "Jour"
-            send_mode: "Mode d\'envoi"
+            send_mode: "Mode d'envoi"
             deposit_address: "Adresse de depot"
             user: "Utilisateur"
             ssh_key: "Clé SSH"
             created_at: "Date de création"
             updated_at: "Date de mise à jour"
+        drawing_field:
+            name: "Nom"
+    admin:
+        bloc_general: "Général"
+        bloc_fields: "Champs"
+        add_fields: "Ajouter des champs"

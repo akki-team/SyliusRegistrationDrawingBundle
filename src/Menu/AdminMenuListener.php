@@ -18,8 +18,8 @@ final class AdminMenuListener
         /* Admin Registration drawings Menu */
         $menu
             ->getChild('marketplace')
-            ->addChild('registration_drawings', ['route' => 'sylius_admin_registration_drawing_index'])
-            ->setLabel('sylius.ui.registration_drawings')
+            ->addChild('registration_drawings', ['route' => 'sylius_registration_drawing_admin_registration_drawing_index'])
+            ->setLabel('sylius_registration_drawing.ui.registration_drawings')
             ->setLabelAttribute('icon', 'file alternate')
         ;
     }

@@ -34,7 +34,7 @@ class DrawingField implements ResourceInterface, TimestampableInterface
     private $equivalent;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Akki\SyliusRegistrationDrawingBundle\src\Entity\OutputFormats", inversedBy="fields")
+     * @ORM\ManyToOne(targetEntity="Akki\SyliusRegistrationDrawingBundle\Entity\OutputFormats", inversedBy="fields")
      * @ORM\JoinColumn(name="type_id", referencedColumnName="id", nullable=false, onDelete="CASCADE")
      */
     private $type;

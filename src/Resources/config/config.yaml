@@ -1,2 +1,9 @@
 imports:
     - { resource: packages/_sylius.yaml }
+    - { resource: grids/registration_drawing.yaml }
+    - { resource: grids/drawing_field.yaml }
+
+sylius_grid:
+    templates:
+        action:
+            create_drawing_field: "@RegistrationDrawingBundle/Resources/views/Field/create.html.twig"

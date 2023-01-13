@@ -1,57 +1,14 @@
 sylius_resource:
     resources:
-        sylius_registration_drawing:
+        sylius_registration_drawing.registration_drawing:
             driver: doctrine/orm
             classes:
                 model: Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing
                 form: Akki\SyliusRegistrationDrawingBundle\Form\Type\RegistrationDrawingType
-                
-sylius_grid:
-    grids:
-        sylius_admin_registration_drawing:
-            driver:
-                name: doctrine/orm
-                options:
-                    class: "%sylius_registration_drawing.model.registration_drawing.class%"
-            fields:
-                name:
-                    type: string
-                    label: sylius.form.registration_drawing.name
-                    sortable: ~
-                format:
-                    type: string
-                    label: sylius.form.registration_drawing.format
-                    sortable: ~
-                createdAt:
-                    type: datetime
-                    label: sylius.form.registration_drawing.created_at
-                    sortable: ~
-                    options:
-                        format: d-m-Y H:i
-                updatedAt:
-                    type: datetime
-                    label: sylius.form.registration_drawing.updated_at
-                    sortable: ~
-                    options:
-                        format: d-m-Y H:i
-            filters:
-                name:
-                    type: string
-                    label: sylius.ui.name
-                    options:
-                        fields: [ name ]
-            actions:
-                main:
-                    create:
-                        type: create
-                item:
-                    update:
-                        type: update
-                    delete:
-                        type: delete
-                bulk:
-                    delete:
-                        type: delete
-                        options:
-                            link:
-                                route: sylius_admin_registration_drawing_bulk_delete
+
+        sylius_registration_drawing.drawing_field:
+            driver: doctrine/orm
+            classes:
+                model: Akki\SyliusRegistrationDrawingBundle\Entity\DrawingField
+                form: Akki\SyliusRegistrationDrawingBundle\Form\Type\DrawingFieldType
+                controller: Akki\SyliusRegistrationDrawingBundle\Controller\DrawingFieldController

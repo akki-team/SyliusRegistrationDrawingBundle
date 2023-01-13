@@ -101,7 +101,7 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     /**
      * @return string
      */
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -117,7 +117,7 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     /**
      * @return string
      */
-    public function getFormat(): string
+    public function getFormat(): ?string
     {
         return $this->format;
     }
@@ -149,7 +149,7 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     /**
      * @return string
      */
-    public function getPeriodicity(): string
+    public function getPeriodicity(): ?string
     {
         return $this->periodicity;
     }
@@ -165,7 +165,7 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     /**
      * @return string
      */
-    public function getDay(): string
+    public function getDay(): ?string
     {
         return $this->day;
     }
@@ -181,7 +181,7 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     /**
      * @return string
      */
-    public function getSendMode(): string
+    public function getSendMode(): ?string
     {
         return $this->sendMode;
     }
@@ -197,7 +197,7 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     /**
      * @return string
      */
-    public function getDepositAddress(): string
+    public function getDepositAddress(): ?string
     {
         return $this->depositAddress;
     }
@@ -213,7 +213,7 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     /**
      * @return string
      */
-    public function getUser(): string
+    public function getUser(): ?string
     {
         return $this->user;
     }
@@ -229,7 +229,7 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     /**
      * @return string
      */
-    public function getSshKey(): string
+    public function getSshKey(): ?string
     {
         return $this->sshKey;
     }

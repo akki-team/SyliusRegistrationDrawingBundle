@@ -36,7 +36,7 @@ class OutputFormats implements ResourceInterface, TimestampableInterface
 
     /**
      * @ORM\OneToMany(
-     *     targetEntity="Akki\SyliusRegistrationDrawingBundle\src\Entity\DrawingField",
+     *     targetEntity="Akki\SyliusRegistrationDrawingBundle\Entity\DrawingField",
      *     mappedBy="type",
      *     orphanRemoval=true,
      *     cascade={"all"}

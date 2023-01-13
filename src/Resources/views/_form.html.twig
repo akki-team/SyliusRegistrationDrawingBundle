@@ -1,2 +1,2 @@
-{% set menu = knp_menu_get('sylius_registration_drawing.form.type.registration_drawing', [], {'registration_drawing': registration_drawing}) %}
-{{ knp_menu_render(menu, {'template': '@AkkiSyliusRegistrationDrawingBundle/Ressource/views/_menu.html.twig', 'form': form, 'name': registration_drawing}) }}
+{% set menu = knp_menu_get('sylius.admin.registration_drawing_form', [], {'registration_drawing': registration_drawing}) %}
+{{ knp_menu_render(menu, {'template': '@RegistrationDrawingBundle/Resources/views/_menu.html.twig', 'form': form, 'registration_drawing': registration_drawing}) }}

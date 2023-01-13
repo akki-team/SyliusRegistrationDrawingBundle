@@ -7,3 +7,18 @@ services:
             - []
         tags:
             - { name: form.type, alias: registration_drawing }
+
+    sylius_registration_drawing.form.type.drawing_field:
+        class: Akki\SyliusRegistrationDrawingBundle\Form\Type\DrawingFieldType
+        arguments:
+            - '%sylius_registration_drawing.model.drawing_field.class%'
+            - []
+        tags:
+            - { name: form.type, alias: drawing_field }
+
+    sylius_registration_drawing.form.type.drawing_field_choice:
+        class: Akki\SyliusRegistrationDrawingBundle\Form\Type\DrawingFieldChoiceType
+        arguments:
+            - '@sylius_registration_drawing.repository.drawing_field'
+        tags:
+            - { name: form.type, alias: drawing_field_choice }

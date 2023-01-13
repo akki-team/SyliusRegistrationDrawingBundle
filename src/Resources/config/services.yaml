@@ -2,3 +2,12 @@ imports:
     - { resource: services/controller.yaml }
     - { resource: services/event_listener.yaml }
     - { resource: services/form.yaml }
+
+services:
+    Akki\SyliusRegistrationDrawingBundle\Controller\DrawingFieldController:
+        autowire: false
+
+    Akki\SyliusRegistrationDrawingBundle\Menu\RegistrationDrawingFormMenuBuilder:
+        arguments: [ '@knp_menu.factory', '@event_dispatcher']
+        tags:
+            - { name: knp_menu.menu_builder, method: createMenu, alias: sylius.admin.registration_drawing_form }

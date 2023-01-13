@@ -1,0 +1,10 @@
+<div class="ui tab" data-tab="fields">
+    <h3 class="ui top attached header">{{ 'sylius_registration_drawing.admin.bloc_fields'|trans }}</h3>
+
+    <div class="ui attached segment">
+        {{ render(url('sylius_admin_get_drawing_fields')) }}
+        <div id="attributesContainer" data-count="{{ form.name|length }}">
+            {{ form_widget(form.name) }}
+        </div>
+    </div>
+</div>
