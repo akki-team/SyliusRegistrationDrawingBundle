@@ -3,8 +3,99 @@
 
     <div class="ui attached segment">
         {{ render(url('sylius_admin_get_drawing_fields')) }}
-        <div id="attributesContainer" data-count="{{ form.name|length }}">
-            {{ form_widget(form.name) }}
+
+        <div id="fieldsContainer">
+
         </div>
+
     </div>
 </div>
+
+<script>
+    const addFieldsBtn = document.querySelector('#addFieldsBtn');
+    const fieldsContainer = document.querySelector('#fieldsContainer');
+
+    addFieldsBtn.addEventListener('click', () => {
+        clearInputs();
+        const selectedFiles = Array.from(document.querySelector('#attributeChoice').getElementsByTagName('a'));
+        addInputs(selectedFiles);
+    })
+
+    function addInputs(fields) {
+        fields.forEach((field) => {
+            createFieldInputs(field);
+        });
+    }
+
+    function createFieldInputs(field) {
+        const fieldSlug = field.innerText.toLowerCase().replaceAll(' ', '-');
+        const fieldId = field.dataset.value;
+        const formats = {
+            'd/m/Y': 'Date d/m/Y',
+            'Y/m/d': 'Date Y/m/d',
+        };
+
+        const inputsContainer = document.createElement('div');
+        inputsContainer.setAttribute('class', 'three fields');
+
+        const divider = document.createElement('h4');
+        divider.setAttribute('class', 'ui dividing header');
+        divider.innerText = field.innerText;
+
+        const fieldPositionTag = document.createElement('div');
+        fieldPositionTag.setAttribute('class', 'field');
+        const inputPositionLabel = document.createElement('label');
+        inputPositionLabel.setAttribute('for', `${fieldSlug}-position-${fieldId}`);
+        inputPositionLabel.innerText = 'Position';
+        const inputPosition = document.createElement('input');
+        inputPosition.setAttribute('type', 'number');
+        inputPosition.setAttribute('id', `${fieldSlug}-position-${fieldId}`);
+        inputPosition.setAttribute('name', `${fieldSlug}-position-${fieldId}`);
+        fieldPositionTag.append(inputPositionLabel);
+        fieldPositionTag.append(inputPosition);
+
+        const fieldLengthTag = document.createElement('div');
+        fieldLengthTag.setAttribute('class', 'field');
+        const inputLengthLabel = document.createElement('label');
+        inputLengthLabel.setAttribute('for', `${fieldSlug}-length-${fieldId}`);
+        inputLengthLabel.innerText = 'Taille';
+        const inputLength = document.createElement('input');
+        inputLength.setAttribute('type', 'number');
+        inputLength.setAttribute('name', `${fieldSlug}-length-${fieldId}`);
+        fieldLengthTag.append(inputLengthLabel);
+        fieldLengthTag.append(inputLength);
+
+        const fieldFormatTag = document.createElement('div');
+        fieldFormatTag.setAttribute('class', 'field');
+        const inputFormatLabel = document.createElement('label');
+        inputFormatLabel.setAttribute('for', `${fieldSlug}-Format-${fieldId}`);
+        inputFormatLabel.innerText = 'Format (Si format date)';
+        const inputFormat = document.createElement('select');
+        inputFormat.setAttribute('id', `${fieldSlug}-format-${fieldId}`);
+        inputFormat.setAttribute('name', `${fieldSlug}-format-${fieldId}`);
+        const defaultoption = document.createElement('option');
+        defaultoption.setAttribute('value', '');
+        defaultoption.setAttribute('selected', 'selected');
+        inputFormat.append(defaultoption);
+        fieldFormatTag.append(inputFormatLabel);
+        fieldFormatTag.append(inputFormat);
+
+        for (const [key, value] of Object.entries(formats)) {
+            const option = document.createElement('option');
+            option.setAttribute('value', key);
+            option.innerText = value;
+            inputFormat.append(option);
+        }
+
+        inputsContainer.append(fieldPositionTag);
+        inputsContainer.append(fieldLengthTag);
+        inputsContainer.append(fieldFormatTag);
+
+        fieldsContainer.append(divider);
+        fieldsContainer.append(inputsContainer);
+    }
+
+    function clearInputs() {
+        Array.from(fieldsContainer.children).forEach(el => el.remove());
+    }
+</script>

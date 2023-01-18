@@ -29,6 +29,11 @@ class DrawingFieldAssociation implements ResourceInterface, TimestampableInterfa
     private $drawingId;
 
     /**
+     * @ORM\Column(type="integer", nullable=false, name="field_id")
+     */
+    private $fieldId;
+
+    /**
      * @ORM\Column(type="integer", nullable=true, name="order")
      */
     private $order;
@@ -89,9 +94,25 @@ class DrawingFieldAssociation implements ResourceInterface, TimestampableInterfa
     /**
      * @param int $drawingId
      */
-    public function setDrawingId($drawingId): void
+    public function setDrawingId(int $drawingId): void
     {
         $this->drawingId = $drawingId;
+    }
+
+    /**
+     * @return int
+     */
+    public function getFieldId(): int
+    {
+        return $this->fieldId;
+    }
+
+    /**
+     * @param int $fieldId
+     */
+    public function setFieldId(int $fieldId): void
+    {
+        $this->fieldId = $fieldId;
     }
 
     /**

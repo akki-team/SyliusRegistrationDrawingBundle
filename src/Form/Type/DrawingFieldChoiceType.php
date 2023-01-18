@@ -37,6 +37,7 @@ class DrawingFieldChoiceType extends AbstractType
                     return $this->fieldRepository->findAll();
                 },
                 'choice_label' => 'name',
+                'choice_value' => 'id',
             ])
         ;
     }
