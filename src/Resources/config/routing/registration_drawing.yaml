@@ -3,7 +3,7 @@ sylius_registration_drawing:
     alias: sylius_registration_drawing.registration_drawing
     templates: "@SyliusAdmin\\Crud"
     except: ['show', 'index', 'update']
-    redirect: update
+    redirect: index
     grid: sylius_admin_registration_drawing
     section: admin
     permission: true
@@ -53,7 +53,7 @@ sylius_admin_registration_drawing_delete:
       redirect: referer
       permission: true
 
-sylius_admin_registration_drawing_update:
+sylius_registration_drawing_admin_registration_drawing_update:
   path: /registration_drawings/{id}/edit
   methods: [GET, PUT, PATCH]
   defaults:
@@ -69,19 +69,19 @@ sylius_admin_registration_drawing_update:
         templates:
           form: "@RegistrationDrawingBundle/Resources/views/_form.html.twig"
 
-sylius_admin_registration_drawing_create:
+sylius_registration_drawing_admin_registration_drawing_create:
   path: /registration_drawings/new
   methods: [GET, POST]
   defaults:
-    _controller: sylius_registration_drawing.controller.registration_drawing:createAction
+    _controller: sylius_registration_drawing.controller.registration_drawing:createDrawing
     _sylius:
       section: admin
       permission: true
       template: "@SyliusAdmin/Crud/create.html.twig"
-      redirect: sylius_admin_registration_drawing_index
+      redirect: referer
       vars:
         subheader: sylius_registration_drawing.ui.manage_your_registration_drawings
         templates:
           form: "@RegistrationDrawingBundle/Resources/views/_form.html.twig"
         route:
-          name: sylius_admin_registration_drawing_create
+          name: sylius_registration_drawing_admin_registration_drawing_create

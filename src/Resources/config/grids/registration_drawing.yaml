@@ -5,24 +5,26 @@ sylius_grid:
         name: doctrine/orm
         options:
           class: "%sylius_registration_drawing.model.registration_drawing.class%"
+      sorting:
+        updatedAt: desc
       fields:
         name:
           type: string
-          label: sylius.form.registration_drawing.name
+          label: sylius_registration_drawing.form.registration_drawing.name
           sortable: ~
         format:
           type: string
-          label: sylius.form.registration_drawing.format
+          label: sylius_registration_drawing.form.registration_drawing.format
           sortable: ~
         createdAt:
           type: datetime
-          label: sylius.form.registration_drawing.created_at
+          label: sylius_registration_drawing.form.registration_drawing.created_at
           sortable: ~
           options:
             format: d-m-Y H:i
         updatedAt:
           type: datetime
-          label: sylius.form.registration_drawing.updated_at
+          label: sylius_registration_drawing.form.registration_drawing.updated_at
           sortable: ~
           options:
             format: d-m-Y H:i
@@ -37,6 +39,8 @@ sylius_grid:
           create:
             type: create
         item:
+          send:
+            type: send
           update:
             type: update
           delete:
@@ -47,3 +51,6 @@ sylius_grid:
             options:
               link:
                 route: sylius_admin_registration_drawing_bulk_delete
+  templates:
+    action:
+      send: "@RegistrationDrawingBundle/Resources/views/Grid/Action/create.html.twig"

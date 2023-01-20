@@ -4,10 +4,7 @@
     <div class="ui attached segment">
         {{ render(url('sylius_admin_get_drawing_fields')) }}
 
-        <div id="fieldsContainer">
-
-        </div>
-
+        <div id="fieldsContainer"></div>
     </div>
 </div>
 
@@ -22,17 +19,19 @@
     })
 
     function addInputs(fields) {
-        fields.forEach((field) => {
-            createFieldInputs(field);
+        fields.forEach((field, index) => {
+            createFieldInputs(field, index);
         });
     }
 
-    function createFieldInputs(field) {
+    function createFieldInputs(field, index) {
         const fieldSlug = field.innerText.toLowerCase().replaceAll(' ', '-');
         const fieldId = field.dataset.value;
         const formats = {
             'd/m/Y': 'Date d/m/Y',
             'Y/m/d': 'Date Y/m/d',
+            'd-m-Y': 'Date Y-m-d',
+            'Y-m-d': 'Date Y-m-d',
         };
 
         const inputsContainer = document.createElement('div');
@@ -42,29 +41,49 @@
         divider.setAttribute('class', 'ui dividing header');
         divider.innerText = field.innerText;
 
+        // Input ordre
+        const fieldOrderTag = document.createElement('div');
+        fieldOrderTag.setAttribute('class', 'field');
+        const inputOrderLabel = document.createElement('label');
+        inputOrderLabel.setAttribute('for', `${fieldSlug}-order-${fieldId}`);
+        inputOrderLabel.innerText = 'Ordre';
+        const inputOrder = document.createElement('input');
+        inputOrder.setAttribute('type', 'number');
+        inputOrder.setAttribute('id', `${fieldSlug}-order-${fieldId}`);
+        inputOrder.setAttribute('name', `fields[${fieldSlug}-order-${fieldId}]`);
+        inputOrder.setAttribute('min', '0');
+        inputOrder.setAttribute('value', index + 1);
+        fieldOrderTag.append(inputOrderLabel);
+        fieldOrderTag.append(inputOrder);
+
+        // Input position
         const fieldPositionTag = document.createElement('div');
         fieldPositionTag.setAttribute('class', 'field');
         const inputPositionLabel = document.createElement('label');
         inputPositionLabel.setAttribute('for', `${fieldSlug}-position-${fieldId}`);
-        inputPositionLabel.innerText = 'Position';
+        inputPositionLabel.innerText = 'Position (si longueur fixe)';
         const inputPosition = document.createElement('input');
         inputPosition.setAttribute('type', 'number');
         inputPosition.setAttribute('id', `${fieldSlug}-position-${fieldId}`);
-        inputPosition.setAttribute('name', `${fieldSlug}-position-${fieldId}`);
+        inputPosition.setAttribute('name', `fields[${fieldSlug}-position-${fieldId}]`);
+        inputPosition.setAttribute('min', '0');
         fieldPositionTag.append(inputPositionLabel);
         fieldPositionTag.append(inputPosition);
 
+        // Input taille
         const fieldLengthTag = document.createElement('div');
         fieldLengthTag.setAttribute('class', 'field');
         const inputLengthLabel = document.createElement('label');
         inputLengthLabel.setAttribute('for', `${fieldSlug}-length-${fieldId}`);
-        inputLengthLabel.innerText = 'Taille';
+        inputLengthLabel.innerText = 'Taille (si longueur fixe)';
         const inputLength = document.createElement('input');
         inputLength.setAttribute('type', 'number');
-        inputLength.setAttribute('name', `${fieldSlug}-length-${fieldId}`);
+        inputLength.setAttribute('name', `fields[${fieldSlug}-length-${fieldId}]`);
+        inputLength.setAttribute('min', '0');
         fieldLengthTag.append(inputLengthLabel);
         fieldLengthTag.append(inputLength);
 
+        // Input format
         const fieldFormatTag = document.createElement('div');
         fieldFormatTag.setAttribute('class', 'field');
         const inputFormatLabel = document.createElement('label');
@@ -72,7 +91,7 @@
         inputFormatLabel.innerText = 'Format (Si format date)';
         const inputFormat = document.createElement('select');
         inputFormat.setAttribute('id', `${fieldSlug}-format-${fieldId}`);
-        inputFormat.setAttribute('name', `${fieldSlug}-format-${fieldId}`);
+        inputFormat.setAttribute('name', `fields[${fieldSlug}-format-${fieldId}]`);
         const defaultoption = document.createElement('option');
         defaultoption.setAttribute('value', '');
         defaultoption.setAttribute('selected', 'selected');
@@ -87,9 +106,25 @@
             inputFormat.append(option);
         }
 
+        // Input liste de valeurs
+        const fieldSelectionTag = document.createElement('div');
+        fieldSelectionTag.setAttribute('class', 'field');
+        const inputSelectionLabel = document.createElement('label');
+        inputSelectionLabel.setAttribute('for', `${fieldSlug}-selection-${fieldId}`);
+        inputSelectionLabel.innerText = 'Liste de valeurs';
+        const inputSelection = document.createElement('input');
+        inputSelection.setAttribute('type', 'text');
+        inputSelection.setAttribute('id', `${fieldSlug}-selection-${fieldId}`);
+        inputSelection.setAttribute('name', `fields[${fieldSlug}-selection-${fieldId}]`);
+        inputSelection.setAttribute('placeholder', 'm => MR;f => MME;u => NR;');
+        fieldSelectionTag.append(inputSelectionLabel);
+        fieldSelectionTag.append(inputSelection);
+
+        inputsContainer.append(fieldOrderTag);
         inputsContainer.append(fieldPositionTag);
         inputsContainer.append(fieldLengthTag);
         inputsContainer.append(fieldFormatTag);
+        inputsContainer.append(fieldSelectionTag);
 
         fieldsContainer.append(divider);
         fieldsContainer.append(inputsContainer);

@@ -46,11 +46,13 @@ class Constants
         self::SUNDAY => self::SUNDAY,
     ];
 
-    public const SSH_MODE = 'SSH';
     public const SFTP_MODE = 'SFTP';
+    public const SSH_MODE = 'SSH';
 
     public const SENDING_METHODS = [
-        self::SSH_MODE => self::SSH_MODE,
-        self::SFTP_MODE => self::SFTP_MODE
+        self::SFTP_MODE => self::SFTP_MODE,
+        self::SSH_MODE => self::SSH_MODE
     ];
+
+    public const FIELDS_OPTIONS = ['order', 'position', 'length', 'format', 'selection'];
 }

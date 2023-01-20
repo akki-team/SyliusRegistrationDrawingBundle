@@ -4,6 +4,8 @@ sylius_registration_drawing:
         manage_your_registration_drawings: "Gérez vos dessins d'enregistrement"
         new_registration_drawing: "Nouveau dessin d'enregistrement"
         manage_fields_of_your_drawings: "Gérez les champs de vos dessins"
+        edit_registration_drawing: "Modification d'un dessin d'enregistrement"
+        send_registration_drawing: "Envoyer"
     form:
         registration_drawing:
             name: "Nom"

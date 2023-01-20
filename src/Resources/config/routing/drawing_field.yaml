@@ -23,9 +23,3 @@ sylius_admin_get_drawing_fields:
     _controller: sylius_registration_drawing.controller.drawing_field:renderFieldsAction
     template: "@RegistrationDrawingBundle/Resources/views/Field/fieldChoice.html.twig"
 
-sylius_admin_render_field_forms:
-  path: /field-forms
-  methods: [GET]
-  defaults:
-    _controller: sylius_registration_drawing.controller.drawing_field:renderFieldValueFormsAction
-    template: "@RegistrationDrawingBundle/Resources/views/Field/fieldValueForms.html.twig"

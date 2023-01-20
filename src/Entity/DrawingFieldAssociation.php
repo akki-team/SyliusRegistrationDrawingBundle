@@ -34,7 +34,7 @@ class DrawingFieldAssociation implements ResourceInterface, TimestampableInterfa
     private $fieldId;
 
     /**
-     * @ORM\Column(type="integer", nullable=true, name="order")
+     * @ORM\Column(type="integer", nullable=true, name="ordre")
      */
     private $order;
 
@@ -52,6 +52,11 @@ class DrawingFieldAssociation implements ResourceInterface, TimestampableInterfa
      * @ORM\Column(type="string", nullable=true, name="format")
      */
     private $format;
+
+    /**
+     * @ORM\Column(type="string", nullable=true, name="selection")
+     */
+    private $selection;
 
     /**
      * @var DateTime
@@ -177,6 +182,22 @@ class DrawingFieldAssociation implements ResourceInterface, TimestampableInterfa
     public function setFormat(?string $format): void
     {
         $this->format = $format;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getSelection(): ?string
+    {
+        return $this->selection;
+    }
+
+    /**
+     * @param string|null $selection
+     */
+    public function setSelection(?string $selection): void
+    {
+        $this->selection = $selection;
     }
 
     /**
