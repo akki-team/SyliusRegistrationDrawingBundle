@@ -69,6 +69,16 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     private $sshKey;
 
     /**
+     * @ORM\OneToMany(
+     *     targetEntity="App\Entity\Vendor\Vendor",
+     *     mappedBy="registrationDrawing",
+     *     orphanRemoval=true,
+     *     cascade={"all"}
+     * )
+     */
+    private $vendors;
+
+    /**
      * @var DateTime
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime", nullable=false, name="created_at")
@@ -240,6 +250,22 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     public function setSshKey(string $sshKey): void
     {
         $this->sshKey = $sshKey;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getVendors()
+    {
+        return $this->vendors;
+    }
+
+    /**
+     * @param mixed $vendors
+     */
+    public function setVendors($vendors): void
+    {
+        $this->vendors = $vendors;
     }
 
     /**

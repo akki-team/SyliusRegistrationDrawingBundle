@@ -16,6 +16,18 @@ sylius_grid:
           type: string
           label: sylius_registration_drawing.form.registration_drawing.format
           sortable: ~
+        periodicity:
+          type: string
+          label: sylius_registration_drawing.form.registration_drawing.periodicity
+          sortable: ~
+        day:
+          type: string
+          label: sylius_registration_drawing.form.registration_drawing.day
+          sortable: ~
+        send_mode:
+          type: string
+          label: sylius_registration_drawing.form.registration_drawing.send_mode
+          sortable: ~
         createdAt:
           type: datetime
           label: sylius_registration_drawing.form.registration_drawing.created_at
@@ -39,8 +51,6 @@ sylius_grid:
           create:
             type: create
         item:
-          send:
-            type: send
           update:
             type: update
           delete:
@@ -51,6 +61,3 @@ sylius_grid:
             options:
               link:
                 route: sylius_admin_registration_drawing_bulk_delete
-  templates:
-    action:
-      send: "@RegistrationDrawingBundle/Resources/views/Grid/Action/create.html.twig"

@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Akki\SyliusRegistrationDrawingBundle\Controller;
 
+use Akki\SyliusRegistrationDrawingBundle\Entity\DrawingField;
 use Akki\SyliusRegistrationDrawingBundle\Entity\DrawingFieldAssociation;
+use Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing;
 use Akki\SyliusRegistrationDrawingBundle\Helpers\Constants;
+use Akki\SyliusRegistrationDrawingBundle\Repository\DrawingFieldAssociationRepositoryInterface;
 use FOS\RestBundle\View\View;
 use Sylius\Bundle\ResourceBundle\Controller\ResourceController;
+use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Sylius\Component\Resource\ResourceActions;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,6 +25,7 @@ class RegistrationDrawingController extends ResourceController
      */
     public function createDrawing(Request $request): Response
     {
+        /** @var RepositoryInterface $entityRepository */
         $configuration = $this->requestConfigurationFactory->create($this->metadata, $request);
 
         $this->isGrantedOr403($configuration, ResourceActions::CREATE);
@@ -132,4 +137,26 @@ class RegistrationDrawingController extends ResourceController
 
         return false;
     }
+
+    /**
+     * @param RegistrationDrawing $registrationDrawing
+     * @return array
+     */
+    public function prepareDrawingHeaderToCSVExport(RegistrationDrawing $registrationDrawing): array
+    {
+        $header = [];
+
+        $drawingFieldAssociationRepository = $this->container->get('sylius_registration_drawing.repository.drawing_field_association');
+        $drawingFieldRepository = $this->container->get('sylius_registration_drawing.repository.drawing_field');
+
+        $fields = $drawingFieldAssociationRepository->getFields($registrationDrawing->getId());
+
+        /** @var DrawingField $field */
+        foreach ($fields as $field) {
+            $header[] = $drawingFieldRepository->find($field->getFieldId())->getName();
+        }
+
+        return $header;
+    }
+
 }

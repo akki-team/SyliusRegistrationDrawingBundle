@@ -1,21 +1,3 @@
-sylius_admin_drawing_field:
-  resource: |
-    alias: sylius_registration_drawing.drawing_field
-    section: admin
-    templates: "@SyliusAdmin\\Crud"
-    except: ['show', 'create']
-    redirect: update
-    grid: sylius_admin_drawing_field
-    permission: true
-    vars:
-        all:
-            subheader: sylius_registration_drawing.ui.manage_fields_of_your_drawings
-            templates:
-                form: "@RegistrationDrawingBundle/Resources/views/Attribute/_form.html.twig"
-        index:
-            icon: cubes
-  type: sylius.resource
-
 sylius_admin_get_drawing_fields:
   path: /fields
   methods: [GET]

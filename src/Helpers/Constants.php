@@ -24,8 +24,8 @@ class Constants
     public const DELIMITER_SEMICOLON = ';';
 
     public const DELIMITERS = [
-        self::DELIMITER_COMMA => self::DELIMITER_COMMA,
         self::DELIMITER_SEMICOLON => self::DELIMITER_SEMICOLON,
+        self::DELIMITER_COMMA => self::DELIMITER_COMMA
     ];
 
     public const MONDAY = 'LUNDI';
@@ -43,7 +43,7 @@ class Constants
         self::THURSDAY => self::THURSDAY,
         self::FRIDAY => self::FRIDAY,
         self::SATURDAY => self::SATURDAY,
-        self::SUNDAY => self::SUNDAY,
+        self::SUNDAY => self::SUNDAY
     ];
 
     public const SFTP_MODE = 'SFTP';

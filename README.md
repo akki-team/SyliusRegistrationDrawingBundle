@@ -1,7 +1,7 @@
 ## Sylius Registration Drawing Bundle
 
 ## Description
-Registration drawings for Sylius. Manage and export to multiple formats.
+Registration drawings for Sylius. Manage and export to multiple formats (works with the Sylius marketplace plugin).
 
 ## Installation
 
@@ -37,7 +37,24 @@ sylius_registration_drawing:
     resource: "@RegistrationDrawingBundle/Resources/config/routing.yaml"
 ```
 
-9. Finish the installation updating the database schema and installing assets
+5. Add the RegistrationDrawingTrait to the Vendor entity
+```php
+<?php
+// Entity/Vendor.php
+
+class Vendor extends BaseVendor
+{
+    use RegistrationDrawingTrait;
+```
+
+6. Add the form field in your admin view to add registration drawings selection
+```html
+// templates/bundles/OdiseoSyliusMarketplacePlugin/Admin/Vendor/Tab/_details.html.twig
+
+{{ form_row(form.registrationDrawing) }}
+```
+
+7. Finish the installation updating the database schema and installing assets
 
 ```
 php bin/console doctrine:migrations:migrate
