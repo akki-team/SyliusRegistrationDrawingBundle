@@ -16,7 +16,7 @@ class VendorTypeExtension extends AbstractTypeExtension
             ->add('registrationDrawing', EntityType::class, [
                 'required' => false,
                 'class' => RegistrationDrawing::class,
-                'label' => 'sylius_registration_drawing.ui.registration_drawings',
+                'label' => 'sylius_registration_drawing.ui.registration_drawing',
                 'choice_label' => 'name',
                 'choice_value' => 'id'
             ]);

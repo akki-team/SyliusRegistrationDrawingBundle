@@ -1,6 +1,7 @@
 sylius_registration_drawing:
     ui:
         registration_drawings: "Dessins d'enregistrement"
+        registration_drawing: "Dessin d'enregistrement"
         manage_your_registration_drawings: "Gérez vos dessins d'enregistrement"
         new_registration_drawing: "Nouveau dessin d'enregistrement"
         manage_fields_of_your_drawings: "Gérez les champs de vos dessins"

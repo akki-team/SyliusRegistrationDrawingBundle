@@ -20,4 +20,19 @@ class DrawingFieldAssociationRepository extends EntityRepository
             ->getResult()
         ;
     }
+
+    /**
+     * @param int $registrationDrawingId
+     * @return array
+     */
+    public function getFieldsByPosition(int $registrationDrawingId): array
+    {
+        return $this->createQueryBuilder('f')
+            ->where('f.drawingId = :drawingId')
+            ->setParameter('drawingId', $registrationDrawingId)
+            ->orderBy('f.position', 'ASC')
+            ->getQuery()
+            ->getResult()
+            ;
+    }
 }

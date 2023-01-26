@@ -8,14 +8,17 @@ use Akki\SyliusRegistrationDrawingBundle\Entity\DrawingField;
 use Akki\SyliusRegistrationDrawingBundle\Entity\DrawingFieldAssociation;
 use Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing;
 use Akki\SyliusRegistrationDrawingBundle\Helpers\Constants;
-use Akki\SyliusRegistrationDrawingBundle\Repository\DrawingFieldAssociationRepositoryInterface;
+use Akki\SyliusRegistrationDrawingBundle\Helpers\MbHelper;
+use Akki\SyliusRegistrationDrawingBundle\Repository\DrawingFieldAssociationRepository;
+use App\Entity\Vendor\Vendor;
 use FOS\RestBundle\View\View;
 use Sylius\Bundle\ResourceBundle\Controller\ResourceController;
+use Sylius\Component\Core\Model\Order;
+use Sylius\Component\Core\Model\OrderItem;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Sylius\Component\Resource\ResourceActions;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class RegistrationDrawingController extends ResourceController
 {
@@ -142,7 +145,7 @@ class RegistrationDrawingController extends ResourceController
      * @param RegistrationDrawing $registrationDrawing
      * @return array
      */
-    public function prepareDrawingHeaderToCSVExport(RegistrationDrawing $registrationDrawing): array
+    private function prepareDrawingHeaderToCSVExport(RegistrationDrawing $registrationDrawing): array
     {
         $header = [];
 
@@ -157,6 +160,198 @@ class RegistrationDrawingController extends ResourceController
         }
 
         return $header;
+//        return array_map(fn (DrawingField $field): string => $field->getName(), $this->getDrawingRegistrationFields($registrationDrawing));
+    }
+
+    /**
+     * @param RegistrationDrawing $registrationDrawing
+     * @param OrderItem $orderItem
+     * @return array
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    private function prepareDrawingfieldsToExport(RegistrationDrawing $registrationDrawing, OrderItem $orderItem): array
+    {
+        $fieldAssociations = $this->getDrawingRegistrationFields($registrationDrawing);
+        $datas = [];
+
+        /** @var DrawingFieldAssociation $fieldAssociation */
+        foreach ($fieldAssociations as $fieldAssociation) {
+            /** @var DrawingField $field */
+            $field = $this->container->get('sylius_registration_drawing.repository.drawing_field')->find($fieldAssociation->getFieldId());
+            $listAccessors = $field->getEquivalent();
+
+            $accessors = explode('/', $listAccessors);
+
+            $data = $orderItem;
+
+            foreach ($accessors as $accessor) {
+                $data = $this->getAccessor($accessor, $data);
+
+                if ($data === false) {
+                    break;
+                }
+            }
+
+            if ($data !== false) {
+                // Formats dateTime
+                if (!empty($fieldAssociation->getFormat())) {
+                    $data = $data->format($fieldAssociation->getFormat());
+                }
+
+                // Selection
+                if (!empty($fieldAssociation->getSelection())) {
+                    $data = $this->substitute($data, $fieldAssociation->getSelection());
+                }
+
+                if ($registrationDrawing->getFormat() === Constants::FIXED_LENGTH_FORMAT) {
+                    if (!empty($fieldAssociation->getLength())) {
+                        $data = $this->applyPad($data, $fieldAssociation->getLength());
+                    }
+                }
+            }
+
+            $datas[] = $data;
+        }
+
+        return $datas;
+    }
+
+    /**
+     * @param RegistrationDrawing $registrationDrawing
+     * @return array
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    private function getDrawingRegistrationFields(RegistrationDrawing $registrationDrawing): array
+    {
+        /** @var DrawingFieldAssociationRepository $repository */
+        $repository = $this->container->get('sylius_registration_drawing.repository.drawing_field_association');
+
+        if ($registrationDrawing->getFormat() === Constants::CSV_FORMAT) {
+            return $repository->getFields($registrationDrawing->getId());
+        } else {
+            return $repository->getFieldsByPosition($registrationDrawing->getId());
+        }
+    }
+
+    /**
+     * @param $accessor
+     * @param $data
+     * @return mixed
+     */
+    private function getAccessor($accessor, $data)
+    {
+        $getter = 'get' . $accessor;
+        if (method_exists($data, $getter)) {
+            return call_user_func_array([$data, $getter], []);
+        }
+
+        $getter = 'is' . $accessor;
+        if (method_exists($data, $getter)) {
+            return call_user_func_array([$data, $getter], []);
+        }
+
+        return false;
+    }
+
+    /**
+     * @param Vendor $vendor
+     * @param array $orders
+     * @return false|Response
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function exportDrawing(Vendor $vendor, array $orders)
+    {
+        $headers = $this->prepareDrawingHeaderToCSVExport($vendor->getRegistrationDrawing());
+
+        $fields = [];
+
+        /** @var Order $order */
+        foreach ($orders as $order) {
+            $items = $order->getItems();
+
+            /** @var OrderItem $item */
+            foreach ($items as $item) {
+                $product = $item->getProduct();
+
+                if ($product->getVendor() === null) {
+                    continue;
+                }
+
+                $data = $this->prepareDrawingfieldsToExport($product->getVendor()->getRegistrationDrawing(), $item);
+
+                $fields[] = $data;
+            }
+        }
+
+        if ($vendor->getRegistrationDrawing()->getFormat() === Constants::CSV_FORMAT) {
+            $writer = $this->container->get('Akki\SyliusRegistrationDrawingBundle\Service\ExportService')->exportCSV($headers, $fields, $vendor->getRegistrationDrawing()->getDelimiter());
+
+            $response = new Response($writer->getContent());
+            $response->headers->set('Content-Type', 'text/csv; charset=UTF-8');
+            $response->headers->set('Content-Transfer-Encoding', 'binary');
+            $response->headers->set('Content-Description', 'File Transfer');
+            $response->headers->set('Content-Disposition', 'attachment; filename="export_drawing.csv"');
+
+            return $response;
+        } else {
+            $fileName = "export_drawing.txt";
+            $filePath = './exportDrawing/'.$fileName;
+
+            $this->container->get('Akki\SyliusRegistrationDrawingBundle\Service\ExportService')->exportFixedLength($fields, $filePath);
+
+            return false;
+        }
+    }
+
+    /**
+     * @param $data
+     * @param string $selections
+     * @return string
+     */
+    private function substitute($data, string $selections): string
+    {
+        $returnedData = $data;
+        $couples = explode(';', $selections);
+
+        foreach ($couples as $couple) {
+            $coupleValues = explode('=>', $couple);
+            if (count($coupleValues) > 1) {
+                $keyCouple = trim($coupleValues[0]);
+                $valueCouple = trim($coupleValues[1]);
+
+                if ($keyCouple === $data) {
+                    $returnedData = $valueCouple;
+                    break;
+                }
+            }
+        }
+
+        return $returnedData;
+    }
+
+    /**
+     * @param $value
+     * @param $zone
+     * @return string
+     */
+    private function applyPad($value, $zone): string
+    {
+        $value = trim($value) ;
+
+        $length = mb_strlen($value) ;
+        if ($length > $zone){
+            $value = mb_substr($value, 0, $zone) ;
+        }
+
+        if ($length < $zone){
+            $value = MbHelper::mb_str_pad($value, $zone) ;
+        }
+
+        return $value ;
+
     }
 
 }

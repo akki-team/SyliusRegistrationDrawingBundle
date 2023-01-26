@@ -61,3 +61,9 @@ php bin/console doctrine:migrations:migrate
 php bin/console sylius:theme:assets:install
 php bin/console cache:clear
 ```
+
+8. This bundle provide a command to generate exported files.
+
+```
+php bin/console export-drawings:generate
+```

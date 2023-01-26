@@ -29,9 +29,17 @@
         const fieldId = field.dataset.value;
         const formats = {
             'd/m/Y': 'Date d/m/Y',
+            'd/m/Y H:i': 'Date d/m/Y H:i',
             'Y/m/d': 'Date Y/m/d',
+            'Y/m/d H:i': 'Date Y/m/d H:i',
             'd-m-Y': 'Date Y-m-d',
+            'd-m-Y H:i': 'Date Y-m-d H:i',
             'Y-m-d': 'Date Y-m-d',
+            'Y-m-d H:i': 'Date Y-m-d H:i',
+            'dmY': 'Date dmY',
+            'dmY H:i': 'Date dmY H:i',
+            'Ymd': 'Date Ymd',
+            'Ymd H:i': 'Date Ymd H:i',
         };
 
         const inputsContainer = document.createElement('div');
@@ -53,6 +61,7 @@
         inputOrder.setAttribute('name', `fields[${fieldSlug}-order-${fieldId}]`);
         inputOrder.setAttribute('min', '0');
         inputOrder.setAttribute('value', index + 1);
+        inputOrder.setAttribute('required', 'required');
         fieldOrderTag.append(inputOrderLabel);
         fieldOrderTag.append(inputOrder);
 
@@ -117,6 +126,15 @@
         inputSelection.setAttribute('id', `${fieldSlug}-selection-${fieldId}`);
         inputSelection.setAttribute('name', `fields[${fieldSlug}-selection-${fieldId}]`);
         inputSelection.setAttribute('placeholder', 'm => MR;f => MME;u => NR;');
+        inputSelection.setAttribute('pattern', '^([^;=>]+=>[^;=>]+)(;([^;=>]+=>[^;=>]+))+$');
+        inputSelection.addEventListener('change', () => {
+            const selectionRegex = new RegExp(/^([^;=>]+=>[^;=>]+)(;([^;=>]+=>[^;=>]+))+$/);
+            if (selectionRegex.test(inputSelection.value)) {
+                return true
+            } else {
+                alert("Format de la liste de valeurs invalide !");
+            }
+        });
         fieldSelectionTag.append(inputSelectionLabel);
         fieldSelectionTag.append(inputSelection);
 
