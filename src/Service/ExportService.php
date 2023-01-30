@@ -30,15 +30,10 @@ class ExportService
 
     /**
      * @param array $fields
-     * @param string $path
-     * @return void
+     * @return string
      */
-    public function exportFixedLength(array $fields, string $path)
+    public function exportFixedLength(array $fields): string
     {
-        $text = '';
-        $fields = implode('', $fields) ;
-        $text .= $fields."\n";
-
-        file_put_contents($path, $text);
+        return implode('', $fields)."\n";
     }
 }

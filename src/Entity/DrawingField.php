@@ -29,7 +29,7 @@ class DrawingField implements ResourceInterface, TimestampableInterface
     private $name;
 
     /**
-     * @ORM\Column(type="string", nullable=false, name="equivalent")
+     * @ORM\Column(type="string", nullable=true, name="equivalent")
      */
     private $equivalent;
 

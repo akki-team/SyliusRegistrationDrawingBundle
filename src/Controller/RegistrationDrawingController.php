@@ -19,6 +19,7 @@ use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Sylius\Component\Resource\ResourceActions;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Intl\Intl;
 
 class RegistrationDrawingController extends ResourceController
 {
@@ -160,7 +161,6 @@ class RegistrationDrawingController extends ResourceController
         }
 
         return $header;
-//        return array_map(fn (DrawingField $field): string => $field->getName(), $this->getDrawingRegistrationFields($registrationDrawing));
     }
 
     /**
@@ -202,6 +202,36 @@ class RegistrationDrawingController extends ResourceController
                 // Selection
                 if (!empty($fieldAssociation->getSelection())) {
                     $data = $this->substitute($data, $fieldAssociation->getSelection());
+                }
+
+                if ($registrationDrawing->getFormat() === Constants::FIXED_LENGTH_FORMAT) {
+                    if (!empty($fieldAssociation->getLength())) {
+                        $data = $this->applyPad($data, $fieldAssociation->getLength());
+                    }
+                }
+            } else {
+                // Gestion des champs de flux de retour
+                if (in_array($field->getName(), Constants::RETURN_FLOW_FIELDS)) {
+                    if ($registrationDrawing->getFormat() === Constants::FIXED_LENGTH_FORMAT) {
+                        if (!empty($fieldAssociation->getLength())) {
+                            $data = $this->applyPad('', $fieldAssociation->getLength());
+                        } else {
+                            $data = '';
+                        }
+                    }
+                }
+
+                // Gestion des champs avec data à construire
+                if ($field->getName() === Constants::DATE_TRANSMISSION_FIELD) {
+                    $data = (new \DateTime())->format($fieldAssociation->getFormat());
+                }
+
+                if (($field->getName() === Constants::BILLING_COUNTRY_FIELD)) {
+                    $data = Intl::getRegionBundle()->getCountryName($orderItem->getOrder()->getBillingAddress()->getCountryCode());
+                }
+
+                if (($field->getName() === Constants::SHIPPING_COUNTRY_FIELD)) {
+                    $data = Intl::getRegionBundle()->getCountryName($orderItem->getShippingAddress()->getCountryCode());
                 }
 
                 if ($registrationDrawing->getFormat() === Constants::FIXED_LENGTH_FORMAT) {
@@ -258,11 +288,12 @@ class RegistrationDrawingController extends ResourceController
     /**
      * @param Vendor $vendor
      * @param array $orders
-     * @return false|Response
+     * @param string $filePath
+     * @return string
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function exportDrawing(Vendor $vendor, array $orders)
+    public function exportDrawing(Vendor $vendor, array $orders, string $filePath)
     {
         $headers = $this->prepareDrawingHeaderToCSVExport($vendor->getRegistrationDrawing());
 
@@ -289,20 +320,15 @@ class RegistrationDrawingController extends ResourceController
         if ($vendor->getRegistrationDrawing()->getFormat() === Constants::CSV_FORMAT) {
             $writer = $this->container->get('Akki\SyliusRegistrationDrawingBundle\Service\ExportService')->exportCSV($headers, $fields, $vendor->getRegistrationDrawing()->getDelimiter());
 
-            $response = new Response($writer->getContent());
-            $response->headers->set('Content-Type', 'text/csv; charset=UTF-8');
-            $response->headers->set('Content-Transfer-Encoding', 'binary');
-            $response->headers->set('Content-Description', 'File Transfer');
-            $response->headers->set('Content-Disposition', 'attachment; filename="export_drawing.csv"');
+            file_put_contents($filePath, $writer->getContent());
 
-            return $response;
+            return $writer->getContent();
         } else {
-            $fileName = "export_drawing.txt";
-            $filePath = './exportDrawing/'.$fileName;
+            $text = $this->container->get('Akki\SyliusRegistrationDrawingBundle\Service\ExportService')->exportFixedLength($fields);
 
-            $this->container->get('Akki\SyliusRegistrationDrawingBundle\Service\ExportService')->exportFixedLength($fields, $filePath);
+            file_put_contents($filePath, $text);
 
-            return false;
+            return $text;
         }
     }
 

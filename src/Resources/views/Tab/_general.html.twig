@@ -18,7 +18,10 @@
     </div>
     <div class="two fields">
         {{ form_row(form.user) }}
-        {{ form_row(form.ssh_key) }}
+    </div>
+    <div class="two fields">
+        {{ form_row(form.host) }}
+        {{ form_row(form.port) }}
     </div>
     <div class="ui hidden divider"></div>
     {{ form_widget(form) }}

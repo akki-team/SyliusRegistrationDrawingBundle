@@ -64,9 +64,14 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     private $user;
 
     /**
-     * @ORM\Column(type="string", nullable=false, name="ssh_key")
+     * @ORM\Column(type="string", nullable=false, name="host")
      */
-    private $sshKey;
+    private $host;
+
+    /**
+     * @ORM\Column(type="string", nullable=false, name="port")
+     */
+    private $port;
 
     /**
      * @ORM\OneToMany(
@@ -237,22 +242,6 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     }
 
     /**
-     * @return string
-     */
-    public function getSshKey(): ?string
-    {
-        return $this->sshKey;
-    }
-
-    /**
-     * @param string $sshKey
-     */
-    public function setSshKey(string $sshKey): void
-    {
-        $this->sshKey = $sshKey;
-    }
-
-    /**
      * @return mixed
      */
     public function getVendors()
@@ -298,6 +287,38 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     public function setUpdatedAt(?DateTimeInterface $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getHost()
+    {
+        return $this->host;
+    }
+
+    /**
+     * @param mixed $host
+     */
+    public function setHost($host): void
+    {
+        $this->host = $host;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPort()
+    {
+        return $this->port;
+    }
+
+    /**
+     * @param mixed $port
+     */
+    public function setPort($port): void
+    {
+        $this->port = $port;
     }
 
 }

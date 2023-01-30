@@ -55,4 +55,20 @@ class Constants
     ];
 
     public const FIELDS_OPTIONS = ['order', 'position', 'length', 'format', 'selection'];
+
+    public const RETURN_FLOW_FIELDS = [
+        'N_client payeur_editeur',
+        'N_client destinataire editeur',
+        'Premier N° à servir-editeur',
+        'Daté Premier N° à servir_editeur',
+        'Date installation_editeur',
+        'Date annulation (rétractation)_editeur',
+        'Dernier N° servi_editeur',
+        'Daté Dernier N° servi_editeur',
+        'Motif si rejet'
+    ];
+
+    public const DATE_TRANSMISSION_FIELD = 'Date transmission';
+    public const BILLING_COUNTRY_FIELD = 'Pays payeur';
+    public const SHIPPING_COUNTRY_FIELD = 'Pays Destinataire';
 }

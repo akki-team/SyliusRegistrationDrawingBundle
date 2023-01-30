@@ -6,6 +6,8 @@ use Akki\SyliusRegistrationDrawingBundle\Controller\RegistrationDrawingControlle
 use Akki\SyliusRegistrationDrawingBundle\Helpers\Constants;
 use App\Entity\Vendor\Vendor;
 use App\Repository\OrderRepositoryInterface;
+use App\Service\ExportEditeur\GeneratedFileService;
+use DateTime;
 use Exception;
 use Odiseo\SyliusVendorPlugin\Repository\VendorRepositoryInterface;
 use Symfony\Component\Console\Command\Command;
@@ -13,6 +15,7 @@ use Symfony\Component\Console\Command\LockableTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 class ExportDrawingsCommand extends Command
 {
@@ -20,27 +23,46 @@ class ExportDrawingsCommand extends Command
 
     protected static $defaultName = 'export-drawings:generate';
 
+    /** @var OrderRepositoryInterface $orderRepository */
     protected OrderRepositoryInterface $orderRepository ;
 
+    /** @var VendorRepositoryInterface $vendorRepository */
     protected VendorRepositoryInterface $vendorRepository ;
 
+    /** @var RegistrationDrawingController $registrationDrawingController */
     protected RegistrationDrawingController $registrationDrawingController ;
+
+    /** @var GeneratedFileService $generatedFileService */
+    private GeneratedFileService $generatedFileService;
+
+    /** @var string $kernelProjectDir */
+    protected string $kernelProjectDir;
+
+    private const DIRECTORY_PUBLIC = '/var';
+    private const DIRECTORY_EXPORT = '/exportsEditeur/';
+    private const DIRECTORY_EXPORT_SFTP = '/exportsEditeurSynchroFTP/';
 
     /**
      * @param OrderRepositoryInterface $orderRepository
      * @param VendorRepositoryInterface $vendorRepository
      * @param RegistrationDrawingController $registrationDrawingController
+     * @param GeneratedFileService $generatedFileService
+     * @param KernelInterface $kernel
      */
     public function __construct(
         OrderRepositoryInterface $orderRepository,
         VendorRepositoryInterface $vendorRepository,
-        RegistrationDrawingController $registrationDrawingController
+        RegistrationDrawingController $registrationDrawingController,
+        GeneratedFileService $generatedFileService,
+        KernelInterface $kernel
     )
     {
         parent::__construct();
         $this->orderRepository = $orderRepository;
         $this->vendorRepository = $vendorRepository;
         $this->registrationDrawingController = $registrationDrawingController;
+        $this->generatedFileService = $generatedFileService;
+        $this->kernelProjectDir = $kernel->getProjectDir();
     }
 
     /**
@@ -56,8 +78,11 @@ class ExportDrawingsCommand extends Command
     }
 
     /**
-     * {@inheritdoc}
-     * @throws Exception
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -83,20 +108,50 @@ class ExportDrawingsCommand extends Command
                     $startDate = date('Y-m-d', $timestampStartLastMonth);
                     $timestampEndLastMonth = strtotime('last day of last month');
                     $endDate = date('Y-m-d', $timestampEndLastMonth);
+
+                    $startDateFormated = date('Ymd', $timestampStartLastMonth);
+                    $endDateFormated = date('Ymd', $timestampEndLastMonth);
+                    $dateTimeStart = DateTime::createFromFormat ( 'Ymd', $startDateFormated);
+                    $dateTimeEnd = DateTime::createFromFormat ( 'Ymd', $endDateFormated);
                 } else {
                     $timestampStartLastWeek = strtotime('monday last week');
                     $startDate = date('Y-m-d', $timestampStartLastWeek);
                     $timestampEndLastWeek = strtotime('sunday last week');
                     $endDate = date('Y-m-d', $timestampEndLastWeek);
+
+                    $startDateFormated = date('Ymd', $timestampStartLastWeek);
+                    $endDateFormated = date('Ymd', $timestampEndLastWeek);
+                    $dateTimeStart = DateTime::createFromFormat ( 'Ymd', $startDateFormated);
+                    $dateTimeEnd = DateTime::createFromFormat ( 'Ymd', $endDateFormated);
                 }
 
                 $orders = $this->orderRepository->findAllTransmittedForExportVendor($vendor, $startDate, $endDate);
 
+                $fileName = $vendor->getRegistrationDrawing()->getFormat() === Constants::CSV_FORMAT ? "{$vendor->getCodeEditeur()}_{$startDate}_{$endDate}.csv" : "{$vendor->getCodeEditeur()}_{$startDate}_{$endDate}.txt";
+                $filePath = $this->kernelProjectDir.self::DIRECTORY_PUBLIC.self::DIRECTORY_EXPORT.$fileName;
+
                 if (!empty($orders)) {
-                    $this->registrationDrawingController->exportDrawing($vendor, $orders);
+                    $export = $this->registrationDrawingController->exportDrawing($vendor, $orders, $filePath);
+
+                    $this->generatedFileService->addFile($vendor, $fileName, $filePath, $dateTimeStart, $dateTimeEnd);
+
+                    $filePathSynchroSFTPRoot = $this->kernelProjectDir.self::DIRECTORY_PUBLIC.self::DIRECTORY_EXPORT_SFTP;
+                    $filePathSynchroSFTPEditor = $filePathSynchroSFTPRoot.$vendor->getCodeEditeur();
+                    $fullFilelName = $filePathSynchroSFTPEditor.'/'.$fileName;
+                    if (!is_dir($filePathSynchroSFTPEditor)) {
+                        if (!mkdir($filePathSynchroSFTPEditor, 0777, true) && !is_dir($filePathSynchroSFTPEditor)) {
+                            throw new \RuntimeException(sprintf('Directory "%s" was not created', $filePathSynchroSFTPEditor));
+                        }
+                    }
+                    chmod($filePathSynchroSFTPRoot, 0777);
+                    chmod($filePathSynchroSFTPEditor, 0777);
+                    file_put_contents($fullFilelName, $export);
+                    chmod($fullFilelName, 0777);
+
+                    $outputStyle->writeln("fin génération de l'export des commandes du $startDate au $endDate pour l'éditeur {$vendor->getName()} déposé ici : $filePath");
                 }
             }
-        }else{
+        } else {
             $outputStyle->writeln('Aucun éditeur trouvé.');
         }
 

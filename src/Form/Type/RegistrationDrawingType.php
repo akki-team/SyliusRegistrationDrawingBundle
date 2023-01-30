@@ -77,9 +77,14 @@ final class RegistrationDrawingType extends AbstractResourceType
                 'label' => 'sylius_registration_drawing.form.registration_drawing.user',
             ])
 
-            ->add('ssh_key', TextType::class, [
+            ->add('host', TextType::class, [
                 'required' => true,
-                'label' => 'sylius_registration_drawing.form.registration_drawing.ssh_key',
+                'label' => 'sylius_registration_drawing.form.registration_drawing.host',
+            ])
+
+            ->add('port', TextType::class, [
+                'required' => true,
+                'label' => 'sylius_registration_drawing.form.registration_drawing.port',
             ])
         ;
     }
