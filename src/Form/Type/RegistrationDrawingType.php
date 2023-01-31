@@ -6,8 +6,8 @@ namespace Akki\SyliusRegistrationDrawingBundle\Form\Type;
 
 use Akki\SyliusRegistrationDrawingBundle\Helpers\Constants;
 use Sylius\Bundle\ResourceBundle\Form\Type\AbstractResourceType;
-use Symfony\Component\Form\ChoiceList\ChoiceList;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -82,7 +82,7 @@ final class RegistrationDrawingType extends AbstractResourceType
                 'label' => 'sylius_registration_drawing.form.registration_drawing.host',
             ])
 
-            ->add('port', TextType::class, [
+            ->add('port', IntegerType::class, [
                 'required' => true,
                 'label' => 'sylius_registration_drawing.form.registration_drawing.port',
             ])

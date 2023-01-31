@@ -10,7 +10,6 @@ use Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing;
 use Akki\SyliusRegistrationDrawingBundle\Helpers\Constants;
 use Akki\SyliusRegistrationDrawingBundle\Helpers\MbHelper;
 use Akki\SyliusRegistrationDrawingBundle\Repository\DrawingFieldAssociationRepository;
-use App\Entity\Vendor\Vendor;
 use FOS\RestBundle\View\View;
 use Sylius\Bundle\ResourceBundle\Controller\ResourceController;
 use Sylius\Component\Core\Model\Order;
@@ -286,16 +285,16 @@ class RegistrationDrawingController extends ResourceController
     }
 
     /**
-     * @param Vendor $vendor
+     * @param RegistrationDrawing $registrationDrawing
      * @param array $orders
      * @param string $filePath
      * @return string
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function exportDrawing(Vendor $vendor, array $orders, string $filePath)
+    public function exportDrawing(RegistrationDrawing $registrationDrawing, array $orders, string $filePath)
     {
-        $headers = $this->prepareDrawingHeaderToCSVExport($vendor->getRegistrationDrawing());
+        $headers = $this->prepareDrawingHeaderToCSVExport($registrationDrawing);
 
         $fields = [];
 
@@ -317,8 +316,8 @@ class RegistrationDrawingController extends ResourceController
             }
         }
 
-        if ($vendor->getRegistrationDrawing()->getFormat() === Constants::CSV_FORMAT) {
-            $writer = $this->container->get('Akki\SyliusRegistrationDrawingBundle\Service\ExportService')->exportCSV($headers, $fields, $vendor->getRegistrationDrawing()->getDelimiter());
+        if ($registrationDrawing->getFormat() === Constants::CSV_FORMAT) {
+            $writer = $this->container->get('Akki\SyliusRegistrationDrawingBundle\Service\ExportService')->exportCSV($headers, $fields, $registrationDrawing->getDelimiter());
 
             file_put_contents($filePath, $writer->getContent());
 

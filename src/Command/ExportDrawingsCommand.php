@@ -3,12 +3,11 @@
 namespace Akki\SyliusRegistrationDrawingBundle\Command;
 
 use Akki\SyliusRegistrationDrawingBundle\Controller\RegistrationDrawingController;
+use Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing;
 use Akki\SyliusRegistrationDrawingBundle\Helpers\Constants;
-use App\Entity\Vendor\Vendor;
-use App\Repository\OrderRepositoryInterface;
+use Akki\SyliusRegistrationDrawingBundle\Repository\RegistrationDrawingRepositoryInterface;
 use App\Service\ExportEditeur\GeneratedFileService;
 use DateTime;
-use Exception;
 use Odiseo\SyliusVendorPlugin\Repository\VendorRepositoryInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
@@ -23,8 +22,8 @@ class ExportDrawingsCommand extends Command
 
     protected static $defaultName = 'export-drawings:generate';
 
-    /** @var OrderRepositoryInterface $orderRepository */
-    protected OrderRepositoryInterface $orderRepository ;
+    /** @var RegistrationDrawingRepositoryInterface $registrationDrawingRepository */
+    protected RegistrationDrawingRepositoryInterface $registrationDrawingRepository ;
 
     /** @var VendorRepositoryInterface $vendorRepository */
     protected VendorRepositoryInterface $vendorRepository ;
@@ -43,14 +42,14 @@ class ExportDrawingsCommand extends Command
     private const DIRECTORY_EXPORT_SFTP = '/exportsEditeurSynchroFTP/';
 
     /**
-     * @param OrderRepositoryInterface $orderRepository
+     * @param RegistrationDrawingRepositoryInterface $registrationDrawingRepository
      * @param VendorRepositoryInterface $vendorRepository
      * @param RegistrationDrawingController $registrationDrawingController
      * @param GeneratedFileService $generatedFileService
      * @param KernelInterface $kernel
      */
     public function __construct(
-        OrderRepositoryInterface $orderRepository,
+        RegistrationDrawingRepositoryInterface $registrationDrawingRepository,
         VendorRepositoryInterface $vendorRepository,
         RegistrationDrawingController $registrationDrawingController,
         GeneratedFileService $generatedFileService,
@@ -58,7 +57,7 @@ class ExportDrawingsCommand extends Command
     )
     {
         parent::__construct();
-        $this->orderRepository = $orderRepository;
+        $this->registrationDrawingRepository = $registrationDrawingRepository;
         $this->vendorRepository = $vendorRepository;
         $this->registrationDrawingController = $registrationDrawingController;
         $this->generatedFileService = $generatedFileService;
@@ -96,12 +95,12 @@ class ExportDrawingsCommand extends Command
 
         $outputStyle->writeln('Debut génération des commandes éditeurs');
 
-        $vendors = $this->vendorRepository->findAll() ;
+        $registrationDrawings = $this->registrationDrawingRepository->findAll() ;
 
-        if (!empty($vendors)) {
-            /** @var Vendor $vendor */
-            foreach ($vendors as $vendor) {
-                $periodicity = $vendor->getRegistrationDrawing()->getPeriodicity();
+        if (!empty($registrationDrawings)) {
+            /** @var RegistrationDrawing $registrationDrawing */
+            foreach ($registrationDrawings as $drawing) {
+                $periodicity = $drawing->getPeriodicity();
 
                 if ($periodicity === Constants::PERIODICITY_MONTHLY) {
                     $timestampStartLastMonth = strtotime('last day of last month');
@@ -125,18 +124,18 @@ class ExportDrawingsCommand extends Command
                     $dateTimeEnd = DateTime::createFromFormat ( 'Ymd', $endDateFormated);
                 }
 
-                $orders = $this->orderRepository->findAllTransmittedForExportVendor($vendor, $startDate, $endDate);
+                $orders = $this->registrationDrawingRepository->findAllTransmittedForDrawingExport($drawing->getVendors(), $startDate, $endDate);
 
-                $fileName = $vendor->getRegistrationDrawing()->getFormat() === Constants::CSV_FORMAT ? "{$vendor->getCodeEditeur()}_{$startDate}_{$endDate}.csv" : "{$vendor->getCodeEditeur()}_{$startDate}_{$endDate}.txt";
+                $fileName = $drawing->getFormat() === Constants::CSV_FORMAT ? "{$drawing->getName()}_{$startDate}_{$endDate}.csv" : "{$drawing->getName()}_{$startDate}_{$endDate}.txt";
                 $filePath = $this->kernelProjectDir.self::DIRECTORY_PUBLIC.self::DIRECTORY_EXPORT.$fileName;
 
                 if (!empty($orders)) {
-                    $export = $this->registrationDrawingController->exportDrawing($vendor, $orders, $filePath);
+                    $export = $this->registrationDrawingController->exportDrawing($drawing, $orders, $filePath);
 
-                    $this->generatedFileService->addFile($vendor, $fileName, $filePath, $dateTimeStart, $dateTimeEnd);
+                    $this->generatedFileService->addFile(array_shift($drawing->getVendors()), $fileName, $filePath, $dateTimeStart, $dateTimeEnd);
 
                     $filePathSynchroSFTPRoot = $this->kernelProjectDir.self::DIRECTORY_PUBLIC.self::DIRECTORY_EXPORT_SFTP;
-                    $filePathSynchroSFTPEditor = $filePathSynchroSFTPRoot.$vendor->getCodeEditeur();
+                    $filePathSynchroSFTPEditor = $filePathSynchroSFTPRoot.$drawing->getId();
                     $fullFilelName = $filePathSynchroSFTPEditor.'/'.$fileName;
                     if (!is_dir($filePathSynchroSFTPEditor)) {
                         if (!mkdir($filePathSynchroSFTPEditor, 0777, true) && !is_dir($filePathSynchroSFTPEditor)) {
@@ -148,7 +147,7 @@ class ExportDrawingsCommand extends Command
                     file_put_contents($fullFilelName, $export);
                     chmod($fullFilelName, 0777);
 
-                    $outputStyle->writeln("fin génération de l'export des commandes du $startDate au $endDate pour l'éditeur {$vendor->getName()} déposé ici : $filePath");
+                    $outputStyle->writeln("fin génération de l'export des commandes du $startDate au $endDate pour le dessin d'enregistrement {$drawing->getName()} déposé ici : $filePath");
                 }
             }
         } else {

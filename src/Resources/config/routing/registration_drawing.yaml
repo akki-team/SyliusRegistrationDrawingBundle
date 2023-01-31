@@ -37,7 +37,7 @@ sylius_admin_registration_drawing_bulk_delete:
     _controller: sylius_registration_drawing.controller.registration_drawing:bulkDeleteAction
     _sylius:
       section: admin
-      redirect: referer
+      redirect: sylius_registration_drawing_admin_registration_drawing_index
       permission: true
       repository:
         method: findById
@@ -50,7 +50,7 @@ sylius_admin_registration_drawing_delete:
     _controller: sylius_registration_drawing.controller.registration_drawing:deleteAction
     _sylius:
       section: admin
-      redirect: referer
+      redirect: sylius_registration_drawing_admin_registration_drawing_index
       permission: true
 
 sylius_registration_drawing_admin_registration_drawing_update:
@@ -61,7 +61,7 @@ sylius_registration_drawing_admin_registration_drawing_update:
     _sylius:
       section: admin
       permission: true
-      redirect: referer
+      redirect: sylius_registration_drawing_admin_registration_drawing_index
       template: "@SyliusAdmin/Crud/update.html.twig"
       vars:
         subheader: sylius_registration_drawing.ui.manage_your_registration_drawings

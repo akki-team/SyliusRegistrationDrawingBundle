@@ -69,7 +69,7 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     private $host;
 
     /**
-     * @ORM\Column(type="string", nullable=false, name="port")
+     * @ORM\Column(type="integer", nullable=false, name="port")
      */
     private $port;
 
@@ -306,7 +306,7 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     }
 
     /**
-     * @return mixed
+     * @return int
      */
     public function getPort()
     {
@@ -314,9 +314,9 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     }
 
     /**
-     * @param mixed $port
+     * @param int $port
      */
-    public function setPort($port): void
+    public function setPort(int $port): void
     {
         $this->port = $port;
     }

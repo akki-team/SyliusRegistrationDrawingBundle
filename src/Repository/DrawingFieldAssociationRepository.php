@@ -4,7 +4,7 @@ namespace Akki\SyliusRegistrationDrawingBundle\Repository;
 
 use Sylius\Bundle\ResourceBundle\Doctrine\ORM\EntityRepository;
 
-class DrawingFieldAssociationRepository extends EntityRepository
+class DrawingFieldAssociationRepository extends EntityRepository implements DrawingFieldAssociationRepositoryInterface
 {
     /**
      * @param int $registrationDrawingId
