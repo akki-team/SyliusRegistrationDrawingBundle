@@ -34,6 +34,11 @@ class ExportService
      */
     public function exportFixedLength(array $fields): string
     {
+        $text = '';
+
+//        foreach ($fields as $field) {
+//            $text .=
+//        }
         return implode('', $fields)."\n";
     }
 }

@@ -13,7 +13,7 @@
         "php": "^7.4",
         "sylius/sylius": "~1.8.0",
         "odiseoteam/sylius-marketplace-plugin": "1.5.1",
-        "league/csv": "^9.8"
+        "league/csv": "^9.4"
     },
     "autoload": {
         "psr-4": {

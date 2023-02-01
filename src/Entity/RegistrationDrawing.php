@@ -77,8 +77,7 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
      * @ORM\OneToMany(
      *     targetEntity="App\Entity\Vendor\Vendor",
      *     mappedBy="registrationDrawing",
-     *     orphanRemoval=true,
-     *     cascade={"all"}
+     *     orphanRemoval=true
      * )
      */
     private $vendors;

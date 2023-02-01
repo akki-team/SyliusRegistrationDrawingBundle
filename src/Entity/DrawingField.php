@@ -86,9 +86,9 @@ class DrawingField implements ResourceInterface, TimestampableInterface
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getEquivalent(): string
+    public function getEquivalent(): ?string
     {
         return $this->equivalent;
     }

@@ -125,10 +125,9 @@
         inputSelection.setAttribute('type', 'text');
         inputSelection.setAttribute('id', `${fieldSlug}-selection-${fieldId}`);
         inputSelection.setAttribute('name', `fields[${fieldSlug}-selection-${fieldId}]`);
-        inputSelection.setAttribute('placeholder', 'm => MR;f => MME;u => NR;');
-        inputSelection.setAttribute('pattern', '^([^;=>]+=>[^;=>]+)(;([^;=>]+=>[^;=>]+))+$');
+        inputSelection.setAttribute('placeholder', 'm => MR;f => MME;u => NR');
         inputSelection.addEventListener('change', () => {
-            const selectionRegex = new RegExp(/^([^;=>]+=>[^;=>]+)(;([^;=>]+=>[^;=>]+))+$/);
+            const selectionRegex = new RegExp(/^([^;=>]+=>[^;=>]+)(;([^;=>]+=>[^;=>]+))*$/);
             if (selectionRegex.test(inputSelection.value)) {
                 return true
             } else {

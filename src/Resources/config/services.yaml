@@ -13,3 +13,13 @@ services:
         arguments: []
         tags:
             - { name: controller.service_arguments }
+
+    Akki\SyliusRegistrationDrawingBundle\Command\ExportDrawingsCommand:
+        arguments:
+            - '@sylius_registration_drawing.repository.registration_drawing'
+            - '@sylius.repository.order'
+            - '@odiseo_sylius_vendor_plugin.repository.vendor'
+            - '@sylius_registration_drawing.controller.registration_drawing'
+            - '@App\Service\ExportEditeur\GeneratedFileService'
+            - '@kernel'
+        tags: [ 'console.command' ]

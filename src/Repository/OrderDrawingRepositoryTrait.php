@@ -2,24 +2,22 @@
 
 namespace Akki\SyliusRegistrationDrawingBundle\Repository;
 
-use App\Entity\Order\Order;
+use Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing;
 use Doctrine\ORM\QueryBuilder;
-use Sylius\Bundle\ResourceBundle\Doctrine\ORM\EntityRepository;
-use Sylius\Component\Order\Model\OrderInterface;
+use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Payment\Model\PaymentInterface;
 
-class RegistrationDrawingRepository extends EntityRepository implements RegistrationDrawingRepositoryInterface
+trait OrderDrawingRepositoryTrait
 {
     /**
-     * @param array $vendors
+     * @param RegistrationDrawing $registrationDrawing
      * @param string $dateDebut
      * @param string $dateFin
      * @return array|null
      */
-    public function findAllTransmittedForDrawingExport(array $vendors, string $dateDebut, string $dateFin): ?array
+    public function findAllTransmittedForDrawingExport(RegistrationDrawing $registrationDrawing, string $dateDebut, string $dateFin): ?array
     {
-        $query =  $this->createListByVendorsQueryBuilder($vendors);
-
+        $query =  $this->createListByVendorsQueryBuilder($registrationDrawing->getVendors()) ;
         $query->andWhere('o.state != :state_new')
             ->andWhere('o.state != :state_cancelled')
             ->setParameter('state_new', OrderInterface::STATE_NEW)
@@ -47,13 +45,12 @@ class RegistrationDrawingRepository extends EntityRepository implements Registra
     }
 
     /**
-     * @param array $vendors
+     * @param $vendors
      * @return QueryBuilder
      */
-    public function createListByVendorsQueryBuilder(array $vendors): QueryBuilder
+    public function createListByVendorsQueryBuilder($vendors): QueryBuilder
     {
         return $this->createQueryBuilder('o')
-            ->from(Order::class, 'o')
             ->innerJoin('o.channel', 'channel')
             ->innerJoin('o.items', 'items')
             ->innerJoin('items.variant', 'variant')

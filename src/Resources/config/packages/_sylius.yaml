@@ -6,7 +6,6 @@ sylius_resource:
                 model: Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing
                 form: Akki\SyliusRegistrationDrawingBundle\Form\Type\RegistrationDrawingType
                 controller: Akki\SyliusRegistrationDrawingBundle\Controller\RegistrationDrawingController
-                repository: Akki\SyliusRegistrationDrawingBundle\Repository\RegistrationDrawingRepository
 
         sylius_registration_drawing.drawing_field:
             driver: doctrine/orm

@@ -47,14 +47,24 @@ class Vendor extends BaseVendor
     use RegistrationDrawingTrait;
 ```
 
-6. Add the form field in your admin view to add registration drawings selection
+6. Add the OrderDrawingRepositoryTrait to the OrderRepository entity
+```php
+<?php
+// Repository/OrderRepository.php
+
+class OrderRepository extends BaseOrderRepository implements OrderRepositoryInterface
+{
+    use OrderDrawingRepositoryTrait;
+```
+
+7. Add the form field in your admin view to add registration drawings selection
 ```html
 // templates/bundles/OdiseoSyliusMarketplacePlugin/Admin/Vendor/Tab/_details.html.twig
 
 {{ form_row(form.registrationDrawing) }}
 ```
 
-7. Finish the installation updating the database schema and installing assets
+8. Finish the installation updating the database schema and installing assets
 
 ```
 php bin/console doctrine:migrations:migrate
@@ -62,7 +72,7 @@ php bin/console sylius:theme:assets:install
 php bin/console cache:clear
 ```
 
-8. This bundle provide a command to generate exported files.
+9. This bundle provide a command to generate exported files.
 
 ```
 php bin/console export-drawings:generate

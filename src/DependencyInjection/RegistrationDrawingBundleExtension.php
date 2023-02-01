@@ -2,6 +2,7 @@
 
 namespace Akki\SyliusRegistrationDrawingBundle\DependencyInjection;
 
+use Exception;
 use Sylius\Bundle\CoreBundle\DependencyInjection\PrependDoctrineMigrationsTrait;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\FileLocator;
@@ -10,8 +11,11 @@ use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
-class RegistrationDrawingBundleExtension extends Extension
+class RegistrationDrawingBundleExtension extends Extension implements PrependExtensionInterface
 {
+
+    use PrependDoctrineMigrationsTrait;
+
     /**
      * {@inheritdoc}
      * @throws Exception
@@ -42,7 +46,7 @@ class RegistrationDrawingBundleExtension extends Extension
 
     protected function getMigrationsDirectory(): string
     {
-        return '@RegistrationDrawingBundle/Migrations';
+        return '@SyliusRegistrationDrawingBundle/Migrations';
     }
 
     protected function getNamespacesOfMigrationsExecutedBefore(): array

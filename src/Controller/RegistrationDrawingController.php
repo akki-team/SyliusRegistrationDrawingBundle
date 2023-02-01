@@ -179,23 +179,30 @@ class RegistrationDrawingController extends ResourceController
             /** @var DrawingField $field */
             $field = $this->container->get('sylius_registration_drawing.repository.drawing_field')->find($fieldAssociation->getFieldId());
             $listAccessors = $field->getEquivalent();
+            $data = false;
 
-            $accessors = explode('/', $listAccessors);
+            if (!is_null($listAccessors)) {
+                $accessors = explode('/', $listAccessors);
 
-            $data = $orderItem;
+                $data = $orderItem;
 
-            foreach ($accessors as $accessor) {
-                $data = $this->getAccessor($accessor, $data);
+                foreach ($accessors as $accessor) {
+                    $data = $this->getAccessor($accessor, $data);
 
-                if ($data === false) {
-                    break;
+                    if ($data === false) {
+                        break;
+                    }
                 }
             }
 
             if ($data !== false) {
                 // Formats dateTime
-                if (!empty($fieldAssociation->getFormat())) {
-                    $data = $data->format($fieldAssociation->getFormat());
+                if ($data instanceof \DateTime) {
+                    if (!empty($fieldAssociation->getFormat())) {
+                        $data = $data->format($fieldAssociation->getFormat());
+                    } else {
+                        $data = $data->format('d-m-Y H:i');
+                    }
                 }
 
                 // Selection
@@ -221,8 +228,12 @@ class RegistrationDrawingController extends ResourceController
                 }
 
                 // Gestion des champs avec data à construire
+                if ($field->getName() === Constants::OFFER_TYPE_FIELD) {
+                    $data = $orderItem->getProduct()->isOffreADL() ? Constants::ADL_OFFER_TYPE : Constants::ADD_OFFER_TYPE;
+                }
+
                 if ($field->getName() === Constants::DATE_TRANSMISSION_FIELD) {
-                    $data = (new \DateTime())->format($fieldAssociation->getFormat());
+                    $data = (new \DateTime('now'))->format('d-m-Y H:i');
                 }
 
                 if (($field->getName() === Constants::BILLING_COUNTRY_FIELD)) {
@@ -240,7 +251,9 @@ class RegistrationDrawingController extends ResourceController
                 }
             }
 
-            $datas[] = $data;
+            $data = $data ?? false;
+
+            $datas[] = $data === false ? '': $data;
         }
 
         return $datas;

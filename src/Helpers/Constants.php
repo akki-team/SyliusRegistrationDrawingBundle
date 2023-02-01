@@ -68,7 +68,11 @@ class Constants
         'Motif si rejet'
     ];
 
+    public const OFFER_TYPE_FIELD = 'Type d\'offre';
     public const DATE_TRANSMISSION_FIELD = 'Date transmission';
     public const BILLING_COUNTRY_FIELD = 'Pays payeur';
     public const SHIPPING_COUNTRY_FIELD = 'Pays Destinataire';
+
+    public const ADL_OFFER_TYPE = 'ADL';
+    public const ADD_OFFER_TYPE = 'ADD';
 }
