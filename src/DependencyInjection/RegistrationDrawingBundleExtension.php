@@ -46,7 +46,7 @@ class RegistrationDrawingBundleExtension extends Extension implements PrependExt
 
     protected function getMigrationsDirectory(): string
     {
-        return '@SyliusRegistrationDrawingBundle/Migrations';
+        return '@RegistrationDrawingBundle/Migrations';
     }
 
     protected function getNamespacesOfMigrationsExecutedBefore(): array
