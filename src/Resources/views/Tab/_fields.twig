@@ -4,14 +4,21 @@
     const addFieldsBtn = document.querySelector('#addFieldsBtn');
     const fieldsContainer = document.querySelector('#fieldsContainer');
 
+    document.querySelectorAll('.remove-field').forEach(
+        el => el.addEventListener('click', (event) => {
+            deleteField(event);
+        }),
+    );
+
     addFieldsBtn.addEventListener('click', () => {
-        // clearInputs();
         const selectedFiles = Array.from(document.querySelector('#attributeChoice').getElementsByTagName('a'));
         addInputs(selectedFiles);
     })
 
     function slugify (value){
-        return String(value).replace(/[ ']+/g, '-');
+        const checkOne = String(value).replace(/[ ']+/g, '-'); // on remplace les espaces et quotes
+        const checkTwo = String(checkOne).replace(/[é()°¨à]+/g, ''); // on remplace quelques caractères
+        return String(checkTwo);
     }
 
     function inputAlreadyExists(field) {
@@ -29,6 +36,14 @@
                 createFieldInputs(field);
             }
         });
+    }
+
+    function deleteField(event) {
+        event.preventDefault();
+        const drawingColumn = event.currentTarget.closest('.drawing-column');
+        const h4DrawingColumn = drawingColumn.previousElementSibling;
+        drawingColumn.remove();
+        h4DrawingColumn.remove();
     }
 
     function createFieldInputs(field) {
@@ -71,7 +86,7 @@
         inputOrder.setAttribute('type', 'number');
         inputOrder.setAttribute('class', 'drawing-field-order');
         inputOrder.setAttribute('id', `${fieldSlug}-order-${fieldId}`);
-        inputOrder.setAttribute('name', `fields[${fieldSlug}-order-${fieldId}]`);
+        inputOrder.setAttribute('name', `fields[${fieldId}][order]]`);
         inputOrder.setAttribute('min', '0');
         inputOrder.setAttribute('value', index + 1);
         inputOrder.setAttribute('required', 'required');
@@ -87,7 +102,7 @@
         const inputPosition = document.createElement('input');
         inputPosition.setAttribute('type', 'number');
         inputPosition.setAttribute('id', `${fieldSlug}-position-${fieldId}`);
-        inputPosition.setAttribute('name', `fields[${fieldSlug}-position-${fieldId}]`);
+        inputPosition.setAttribute('name', `fields[${fieldId}][position]]`);
         inputPosition.setAttribute('min', '0');
         fieldPositionTag.append(inputPositionLabel);
         fieldPositionTag.append(inputPosition);
@@ -100,7 +115,7 @@
         inputLengthLabel.innerText = 'Taille (si longueur fixe)';
         const inputLength = document.createElement('input');
         inputLength.setAttribute('type', 'number');
-        inputLength.setAttribute('name', `fields[${fieldSlug}-length-${fieldId}]`);
+        inputLength.setAttribute('name', `fields[${fieldId}][length]]`);
         inputLength.setAttribute('min', '0');
         fieldLengthTag.append(inputLengthLabel);
         fieldLengthTag.append(inputLength);
@@ -113,7 +128,7 @@
         inputFormatLabel.innerText = 'Format (Si format date)';
         const inputFormat = document.createElement('select');
         inputFormat.setAttribute('id', `${fieldSlug}-format-${fieldId}`);
-        inputFormat.setAttribute('name', `fields[${fieldSlug}-format-${fieldId}]`);
+        inputFormat.setAttribute('name', `fields[${fieldId}][format]]`);
         const defaultoption = document.createElement('option');
         defaultoption.setAttribute('value', '');
         defaultoption.setAttribute('selected', 'selected');
@@ -137,7 +152,7 @@
         const inputSelection = document.createElement('input');
         inputSelection.setAttribute('type', 'text');
         inputSelection.setAttribute('id', `${fieldSlug}-selection-${fieldId}`);
-        inputSelection.setAttribute('name', `fields[${fieldSlug}-selection-${fieldId}]`);
+        inputSelection.setAttribute('name', `fields[${fieldId}][selection]]`);
         inputSelection.setAttribute('placeholder', 'm => MR;f => MME;u => NR');
         inputSelection.addEventListener('change', () => {
             const selectionRegex = new RegExp(/^([^;=>]+=>[^;=>]+)(;([^;=>]+=>[^;=>]+))*$/);
@@ -153,16 +168,10 @@
         fieldDeleteButton.setAttribute('class', 'field');
         const deleteButton = document.createElement('button');
         deleteButton.setAttribute('class', 'ui red right labeled icon button remove-field');
-        deleteButton.setAttribute('style', 'margin-top: 26px');
+        deleteButton.setAttribute('style', 'margin-top: 27px');
         deleteButton.innerText = 'Supprimer';
 
-        deleteButton.addEventListener('click', (event) => {
-            event.preventDefault();
-            const drawingColumn = event.currentTarget.closest('.drawing-column');
-            const h4DrawingColumn = drawingColumn.previousElementSibling;
-            drawingColumn.remove();
-            h4DrawingColumn.remove();
-        });
+        deleteButton.addEventListener('click', (event) => deleteField(event));
 
         const iDeleteButton = document.createElement('i');
         iDeleteButton.setAttribute('class', 'remove icon');
@@ -173,11 +182,5 @@
         fieldSelectionTag.append(inputSelectionLabel,inputSelection);
         inputsContainer.append(fieldOrderTag,fieldPositionTag,fieldLengthTag,fieldFormatTag,fieldSelectionTag,fieldDeleteButton);
         fieldsContainer.append(divider,inputsContainer);
-
-
-    }
-
-    function clearInputs() {
-        Array.from(fieldsContainer.children).forEach(el => el.remove());
     }
 </script>

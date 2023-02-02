@@ -131,8 +131,7 @@ class ExportDrawingsCommand extends Command
                     $dateTimeEnd = DateTime::createFromFormat ( 'Ymd', $endDateFormated);
                 }
 
-//                $orders = $this->orderRepository->findAllTransmittedForDrawingExport($drawing, $startDate, $endDate);
-                $orders = $this->orderRepository->findAllTransmittedForDrawingExport($drawing, '2022-08-01', '2022-08-31');
+                $orders = $this->orderRepository->findAllTransmittedForDrawingExport($drawing, $startDate, $endDate);
 
                 $fileName = $drawing->getFormat() === Constants::CSV_FORMAT ? "{$drawing->getName()}_{$startDate}_{$endDate}.csv" : "{$drawing->getName()}_{$startDate}_{$endDate}.txt";
                 $filePath = $this->kernelProjectDir.self::DIRECTORY_PUBLIC.self::DIRECTORY_EXPORT.$fileName;

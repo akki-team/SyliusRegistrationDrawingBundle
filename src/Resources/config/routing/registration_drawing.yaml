@@ -2,7 +2,7 @@ sylius_registration_drawing:
   resource: |
     alias: sylius_registration_drawing.registration_drawing
     templates: "@SyliusAdmin\\Crud"
-    except: ['show', 'index', 'update']
+    except: ['show', 'index']
     redirect: index
     grid: sylius_admin_registration_drawing
     section: admin
@@ -57,7 +57,7 @@ sylius_registration_drawing_admin_registration_drawing_update:
   path: /registration_drawings/{id}/edit
   methods: [GET, PUT, PATCH]
   defaults:
-    _controller: sylius_registration_drawing.controller.registration_drawing:updateAction
+    _controller: sylius_registration_drawing.controller.registration_drawing:updateDrawing
     _sylius:
       section: admin
       permission: true

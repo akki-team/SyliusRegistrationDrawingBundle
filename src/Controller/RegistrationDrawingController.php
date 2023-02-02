@@ -12,12 +12,15 @@ use Akki\SyliusRegistrationDrawingBundle\Helpers\MbHelper;
 use Akki\SyliusRegistrationDrawingBundle\Repository\DrawingFieldAssociationRepository;
 use FOS\RestBundle\View\View;
 use Sylius\Bundle\ResourceBundle\Controller\ResourceController;
+use Sylius\Bundle\ResourceBundle\Event\ResourceControllerEvent;
 use Sylius\Component\Core\Model\Order;
 use Sylius\Component\Core\Model\OrderItem;
+use Sylius\Component\Resource\Exception\UpdateHandlingException;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Sylius\Component\Resource\ResourceActions;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Intl\Intl;
 
 class RegistrationDrawingController extends ResourceController
@@ -87,6 +90,188 @@ class RegistrationDrawingController extends ResourceController
                 'form' => $form->createView(),
             ])
             ->setTemplate($configuration->getTemplate(ResourceActions::CREATE . '.html'))
+        ;
+
+        return $this->viewHandler->handle($configuration, $view);
+    }
+
+    /**
+     * @param Request $request
+     * @return Response
+     */
+    public function updateDrawing(Request $request): Response
+    {
+        $configuration = $this->requestConfigurationFactory->create($this->metadata, $request);
+
+        $this->isGrantedOr403($configuration, ResourceActions::UPDATE);
+        $resource = $this->findOr404($configuration);
+
+        $form = $this->resourceFormFactory->create($configuration, $resource);
+
+        if (in_array($request->getMethod(), ['POST', 'PUT', 'PATCH'], true) && $form->handleRequest($request)->isValid()) {
+            $resource = $form->getData();
+
+            // Sychronisation en BDD des champs du dessin d'enregistement
+            $fields = $request->request->get('fields');
+
+            $drawingFieldAssociationRepository = $this->get('sylius_registration_drawing.repository.drawing_field_association');
+            $drawingFieldAssociationManager = $this->get('sylius_registration_drawing.manager.drawing_field_association');
+
+            if (!is_null($fields)) {
+                foreach ($fields as $key => $value) {
+                    $fieldExist = $drawingFieldAssociationRepository->findBy(['drawingId' => $resource->getId(), 'fieldId' => $key]);
+
+                    if (count($fieldExist) > 0) {
+                        /** @var DrawingFieldAssociation $drawingFieldAssociation */
+                        $drawingFieldAssociation = array_shift($fieldExist);
+                        // update
+                        if (!empty($value['order'])) {
+                            $drawingFieldAssociation->setOrder((int)$value['order']);
+                        }
+                        if (!empty($value['position'])) {
+                            $drawingFieldAssociation->setPosition((int)$value['position']);
+                        }
+                        if (!empty($value['length'])) {
+                            $drawingFieldAssociation->setLength((int)$value['length']);
+                        }
+                        if (!empty($value['format'])) {
+                            $drawingFieldAssociation->setFormat($value['format']);
+                        }
+                        if (!empty($value['selection'])) {
+                            $drawingFieldAssociation->setSelection($value['selection']);
+                        }
+
+                        $drawingFieldAssociationManager->persist($drawingFieldAssociation);
+                    } else {
+                        // create
+                        $drawingFieldAssociationFactory = $this->get('sylius_registration_drawing.factory.drawing_field_association');
+
+                        /** @var DrawingFieldAssociation $drawingFieldAssociation */
+                        $drawingFieldAssociation = $drawingFieldAssociationFactory->createNew();
+
+                        $drawingFieldAssociation->setDrawingId($resource->getId());
+                        $drawingFieldAssociation->setFieldId($key);
+                        if (!empty($value['order'])) {
+                            $drawingFieldAssociation->setOrder((int)$value['order']);
+                        }
+                        if (!empty($value['position'])) {
+                            $drawingFieldAssociation->setPosition((int)$value['position']);
+                        }
+                        if (!empty($value['length'])) {
+                            $drawingFieldAssociation->setLength((int)$value['length']);
+                        }
+                        if (!empty($value['format'])) {
+                            $drawingFieldAssociation->setFormat($value['format']);
+                        }
+                        if (!empty($value['selection'])) {
+                            $drawingFieldAssociation->setSelection($value['selection']);
+                        }
+
+                        $drawingFieldAssociationManager->persist($drawingFieldAssociation);
+                    }
+                }
+
+                // Suppression des champs retirés
+                $existingFields = $drawingFieldAssociationRepository->findByDrawingId($resource->getId());
+
+                if (count($existingFields) > 0) {
+                    foreach ($fields as $key => $value) {
+                        /** @var DrawingFieldAssociation $drawingFieldAssociation */
+                        $drawingFieldAssociation = $drawingFieldAssociationRepository->findOneBy(['drawingId' => $resource->getId(), 'fieldId' => $key]);
+
+                        /** @var DrawingFieldAssociation $existingField */
+                        foreach ($existingFields as $existingField) {
+                            if (is_null($fields[$existingField->getId()])) {
+                                $drawingFieldAssociationManager->remove($drawingFieldAssociation);
+                            }
+                        }
+                    }
+                }
+
+                $drawingFieldAssociationManager->flush();
+            } else {
+                // Suppression des champs
+                $existingFields = $drawingFieldAssociationRepository->findByDrawingId($resource->getId());
+
+                /** @var DrawingFieldAssociation $existingField */
+                foreach ($existingFields as $existingField) {
+                    $drawingFieldAssociationManager->remove($existingField);
+                }
+
+                $drawingFieldAssociationManager->flush();
+            }
+
+            /** @var ResourceControllerEvent $event */
+            $event = $this->eventDispatcher->dispatchPreEvent(ResourceActions::UPDATE, $configuration, $resource);
+
+            if ($event->isStopped() && !$configuration->isHtmlRequest()) {
+                throw new HttpException($event->getErrorCode(), $event->getMessage());
+            }
+            if ($event->isStopped()) {
+                $this->flashHelper->addFlashFromEvent($configuration, $event);
+
+                $eventResponse = $event->getResponse();
+                if (null !== $eventResponse) {
+                    return $eventResponse;
+                }
+
+                return $this->redirectHandler->redirectToResource($configuration, $resource);
+            }
+
+            try {
+                $this->resourceUpdateHandler->handle($resource, $configuration, $this->manager);
+            } catch (UpdateHandlingException $exception) {
+                if (!$configuration->isHtmlRequest()) {
+                    return $this->viewHandler->handle(
+                        $configuration,
+                        View::create($form, $exception->getApiResponseCode())
+                    );
+                }
+
+                $this->flashHelper->addErrorFlash($configuration, $exception->getFlash());
+
+                return $this->redirectHandler->redirectToReferer($configuration);
+            }
+
+            if ($configuration->isHtmlRequest()) {
+                $this->flashHelper->addSuccessFlash($configuration, ResourceActions::UPDATE, $resource);
+            }
+
+            $postEvent = $this->eventDispatcher->dispatchPostEvent(ResourceActions::UPDATE, $configuration, $resource);
+
+            if (!$configuration->isHtmlRequest()) {
+                $view = $configuration->getParameters()->get('return_content', false) ? View::create($resource, Response::HTTP_OK) : View::create(null, Response::HTTP_NO_CONTENT);
+
+                return $this->viewHandler->handle($configuration, $view);
+            }
+
+            $postEventResponse = $postEvent->getResponse();
+            if (null !== $postEventResponse) {
+                return $postEventResponse;
+            }
+
+            return $this->redirectHandler->redirectToResource($configuration, $resource);
+        }
+
+        if (!$configuration->isHtmlRequest()) {
+            return $this->viewHandler->handle($configuration, View::create($form, Response::HTTP_BAD_REQUEST));
+        }
+
+        $initializeEvent = $this->eventDispatcher->dispatchInitializeEvent(ResourceActions::UPDATE, $configuration, $resource);
+        $initializeEventResponse = $initializeEvent->getResponse();
+        if (null !== $initializeEventResponse) {
+            return $initializeEventResponse;
+        }
+
+        $view = View::create()
+            ->setData([
+                'configuration' => $configuration,
+                'metadata' => $this->metadata,
+                'resource' => $resource,
+                $this->metadata->getName() => $resource,
+                'form' => $form->createView(),
+            ])
+            ->setTemplate($configuration->getTemplate(ResourceActions::UPDATE . '.html'))
         ;
 
         return $this->viewHandler->handle($configuration, $view);
