@@ -1,0 +1,252 @@
+<div class="ui tab" data-tab="fields">
+    <h3 class="ui top attached header">{{ 'sylius_registration_drawing.admin.bloc_fields'|trans }}</h3>
+
+    <div class="ui attached segment">
+        <div class="ui fluid action input" id="attributeChoice" style="margin-bottom: 15px;">
+            {{ form_widget(formFields, {'attr': {'class': 'ui fluid search dropdown', 'id': 'sylius_field_choice'}}) }}
+            <button id="addFieldsBtn" class="ui green labeled icon button" type="button">
+                <i class="icon plus"></i> {{ 'sylius_registration_drawing.admin.add_fields'|trans }}
+            </button>
+        </div>
+        <div id="fieldsContainer">
+{#            {{ dump(formFields) }}#}
+{#            {{ dump(fieldAssociations) }}#}
+{#            {{ dump(formFields.vars.choices) }}#}
+            {% set dateChoices = {
+                'd/m/Y': 'Date d/m/Y',
+                'd/m/Y H:i': 'Date d/m/Y H:i',
+                'Y/m/d': 'Date Y/m/d',
+                'Y/m/d H:i': 'Date Y/m/d H:i',
+                'd-m-Y': 'Date Y-m-d',
+                'd-m-Y H:i': 'Date Y-m-d H:i',
+                'Y-m-d': 'Date Y-m-d',
+                'Y-m-d H:i': 'Date Y-m-d H:i',
+                'dmY': 'Date dmY',
+                'dmY H:i': 'Date dmY H:i',
+                'Ymd': 'Date Ymd',
+                'Ymd H:i': 'Date Ymd H:i'
+            } %}
+            {% for field in fieldAssociations %}
+                {% set fieldId = field.fieldId %}
+                {% set fieldName = (formFields.vars.choices|filter(choice => choice.value is same as (fieldId|string))|first).label %}
+                {% set fieldNameSlugified = fieldName|replace({"'": "-", " ": "-"})|lower %}
+                <h4 class="ui dividing header">{{ fieldName }}</h4>
+                <div class="drawing-column three fields">
+                    <div class="field">
+                        <label for="{{ fieldNameSlugified }}-order-{{ fieldId }}">{{ 'sylius_registration_drawing.form.drawing_field.order'|trans }}</label>
+                        <input type="number" class="drawing-field-order" id="{{ fieldNameSlugified }}-order-{{ fieldId }}" name="fields[{{ fieldNameSlugified }}-order-{{ fieldId }}]" min="0" value="{{ field.order }}" required="required">
+                    </div>
+                    <div class="field">
+                        <label for="{{ fieldNameSlugified }}-position-{{ fieldId }}">{{ 'sylius_registration_drawing.form.drawing_field.position'|trans }}</label>
+                        <input type="number" id="{{ fieldNameSlugified }}-position-{{ fieldId }}" name="fields[{{ fieldNameSlugified }}-position-{{ fieldId }}]" min="0" value="{{ field.position }}">
+                    </div>
+                    <div class="field">
+                        <label for="{{ fieldNameSlugified }}-length-{{ fieldId }}">{{ 'sylius_registration_drawing.form.drawing_field.length'|trans }}</label>
+                        <input type="number" name="fields[{{ fieldNameSlugified }}-length-{{ fieldId }}]" min="0" value="{{ field.length }}">
+                    </div>
+                    <div class="field">
+                        <label for="{{ fieldNameSlugified }}-Format-{{ fieldId }}">{{ 'sylius_registration_drawing.form.drawing_field.format'|trans }}</label>
+                        <select id="{{ fieldNameSlugified }}-format-{{ fieldId }}" name="fields[{{ fieldNameSlugified }}-format-{{ fieldId }}]">
+                            <option value="" selected="selected"></option>
+                            {% for key, date in dateChoices %}
+                                <option value="{{ key }}">{{ date }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="{{ fieldNameSlugified }}-selection-{{ fieldId }}">{{ 'sylius_registration_drawing.form.drawing_field.list_values'|trans }}</label>
+                        <input type="text" id="{{ fieldNameSlugified }}-selection-{{ fieldId }}" name="fields[{{ fieldNameSlugified }}-selection-{{ fieldId }}]" placeholder="m => MR;f => MME;u => NR" value="{{ field.selection }}">
+                    </div>
+                    <div class="field">
+                        <button class="ui red right labeled icon button remove-field" style="margin-top: 26px">
+                            {{ 'sylius_registration_drawing.form.drawing_field.delete_field'|trans }}
+                            <i class="remove icon"></i>
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+
+            <script>
+                const addFieldsBtn = document.querySelector('#addFieldsBtn');
+                const fieldsContainer = document.querySelector('#fieldsContainer');
+
+                addFieldsBtn.addEventListener('click', () => {
+                    // clearInputs();
+                    const selectedFiles = Array.from(document.querySelector('#attributeChoice').getElementsByTagName('a'));
+                    addInputs(selectedFiles);
+                })
+
+                function slugify (value){
+                    return String(value).replace(/[ ']+/g, '-');
+                }
+
+                function inputAlreadyExists(field) {
+                    const fieldSlug = slugify(field.innerText.toLowerCase());
+                    const fieldId = field.dataset.value;
+
+                    const fieldOrderName = `#${fieldSlug}-order-${fieldId}`;
+
+                    return document.querySelector(fieldOrderName) !== null;
+                }
+
+                function addInputs(fields) {
+                    fields.forEach((field) => {
+                        if (!inputAlreadyExists(field)) {
+                            createFieldInputs(field);
+                        }
+                    });
+                }
+
+                function createFieldInputs(field) {
+                    const fieldSlug = slugify(field.innerText.toLowerCase());
+                    const fieldId = field.dataset.value;
+                    const formats = {
+                        'd/m/Y': 'Date d/m/Y',
+                        'd/m/Y H:i': 'Date d/m/Y H:i',
+                        'Y/m/d': 'Date Y/m/d',
+                        'Y/m/d H:i': 'Date Y/m/d H:i',
+                        'd-m-Y': 'Date Y-m-d',
+                        'd-m-Y H:i': 'Date Y-m-d H:i',
+                        'Y-m-d': 'Date Y-m-d',
+                        'Y-m-d H:i': 'Date Y-m-d H:i',
+                        'dmY': 'Date dmY',
+                        'dmY H:i': 'Date dmY H:i',
+                        'Ymd': 'Date Ymd',
+                        'Ymd H:i': 'Date Ymd H:i',
+                    };
+
+                    let index = Math.max(...Array.from(document.querySelectorAll('.drawing-field-order')).map(o => o.getAttribute('value')));
+                    if (index <0){
+                        index = 0;
+                    }
+
+                    const inputsContainer = document.createElement('div');
+                    inputsContainer.setAttribute('class', 'drawing-column three fields');
+
+                    const divider = document.createElement('h4');
+                    divider.setAttribute('class', 'ui dividing header');
+                    divider.innerText = field.innerText;
+
+                    // Input ordre
+                    const fieldOrderTag = document.createElement('div');
+                    fieldOrderTag.setAttribute('class', 'field');
+                    const inputOrderLabel = document.createElement('label');
+                    inputOrderLabel.setAttribute('for', `${fieldSlug}-order-${fieldId}`);
+                    inputOrderLabel.innerText = 'Ordre';
+                    const inputOrder = document.createElement('input');
+                    inputOrder.setAttribute('type', 'number');
+                    inputOrder.setAttribute('class', 'drawing-field-order');
+                    inputOrder.setAttribute('id', `${fieldSlug}-order-${fieldId}`);
+                    inputOrder.setAttribute('name', `fields[${fieldSlug}-order-${fieldId}]`);
+                    inputOrder.setAttribute('min', '0');
+                    inputOrder.setAttribute('value', index + 1);
+                    inputOrder.setAttribute('required', 'required');
+                    fieldOrderTag.append(inputOrderLabel);
+                    fieldOrderTag.append(inputOrder);
+
+                    // Input position
+                    const fieldPositionTag = document.createElement('div');
+                    fieldPositionTag.setAttribute('class', 'field');
+                    const inputPositionLabel = document.createElement('label');
+                    inputPositionLabel.setAttribute('for', `${fieldSlug}-position-${fieldId}`);
+                    inputPositionLabel.innerText = 'Position (si longueur fixe)';
+                    const inputPosition = document.createElement('input');
+                    inputPosition.setAttribute('type', 'number');
+                    inputPosition.setAttribute('id', `${fieldSlug}-position-${fieldId}`);
+                    inputPosition.setAttribute('name', `fields[${fieldSlug}-position-${fieldId}]`);
+                    inputPosition.setAttribute('min', '0');
+                    fieldPositionTag.append(inputPositionLabel);
+                    fieldPositionTag.append(inputPosition);
+
+                    // Input taille
+                    const fieldLengthTag = document.createElement('div');
+                    fieldLengthTag.setAttribute('class', 'field');
+                    const inputLengthLabel = document.createElement('label');
+                    inputLengthLabel.setAttribute('for', `${fieldSlug}-length-${fieldId}`);
+                    inputLengthLabel.innerText = 'Taille (si longueur fixe)';
+                    const inputLength = document.createElement('input');
+                    inputLength.setAttribute('type', 'number');
+                    inputLength.setAttribute('name', `fields[${fieldSlug}-length-${fieldId}]`);
+                    inputLength.setAttribute('min', '0');
+                    fieldLengthTag.append(inputLengthLabel);
+                    fieldLengthTag.append(inputLength);
+
+                    // Input format
+                    const fieldFormatTag = document.createElement('div');
+                    fieldFormatTag.setAttribute('class', 'field');
+                    const inputFormatLabel = document.createElement('label');
+                    inputFormatLabel.setAttribute('for', `${fieldSlug}-Format-${fieldId}`);
+                    inputFormatLabel.innerText = 'Format (Si format date)';
+                    const inputFormat = document.createElement('select');
+                    inputFormat.setAttribute('id', `${fieldSlug}-format-${fieldId}`);
+                    inputFormat.setAttribute('name', `fields[${fieldSlug}-format-${fieldId}]`);
+                    const defaultoption = document.createElement('option');
+                    defaultoption.setAttribute('value', '');
+                    defaultoption.setAttribute('selected', 'selected');
+                    inputFormat.append(defaultoption);
+                    fieldFormatTag.append(inputFormatLabel);
+                    fieldFormatTag.append(inputFormat);
+
+                    for (const [key, value] of Object.entries(formats)) {
+                        const option = document.createElement('option');
+                        option.setAttribute('value', key);
+                        option.innerText = value;
+                        inputFormat.append(option);
+                    }
+
+                    // Input liste de valeurs
+                    const fieldSelectionTag = document.createElement('div');
+                    fieldSelectionTag.setAttribute('class', 'field');
+                    const inputSelectionLabel = document.createElement('label');
+                    inputSelectionLabel.setAttribute('for', `${fieldSlug}-selection-${fieldId}`);
+                    inputSelectionLabel.innerText = 'Liste de valeurs';
+                    const inputSelection = document.createElement('input');
+                    inputSelection.setAttribute('type', 'text');
+                    inputSelection.setAttribute('id', `${fieldSlug}-selection-${fieldId}`);
+                    inputSelection.setAttribute('name', `fields[${fieldSlug}-selection-${fieldId}]`);
+                    inputSelection.setAttribute('placeholder', 'm => MR;f => MME;u => NR');
+                    inputSelection.addEventListener('change', () => {
+                        const selectionRegex = new RegExp(/^([^;=>]+=>[^;=>]+)(;([^;=>]+=>[^;=>]+))*$/);
+                        if (selectionRegex.test(inputSelection.value)) {
+                            return true
+                        } else {
+                            alert("Format de la liste de valeurs invalide !");
+                        }
+                    });
+
+                    //button delete
+                    const fieldDeleteButton = document.createElement('div');
+                    fieldDeleteButton.setAttribute('class', 'field');
+                    const deleteButton = document.createElement('button');
+                    deleteButton.setAttribute('class', 'ui red right labeled icon button remove-field');
+                    deleteButton.setAttribute('style', 'margin-top: 26px');
+                    deleteButton.innerText = 'Supprimer';
+
+                    deleteButton.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        const drawingColumn = event.currentTarget.closest('.drawing-column');
+                        const h4DrawingColumn = drawingColumn.previousElementSibling;
+                        drawingColumn.remove();
+                        h4DrawingColumn.remove();
+                    });
+
+                    const iDeleteButton = document.createElement('i');
+                    iDeleteButton.setAttribute('class', 'remove icon');
+                    deleteButton.append(iDeleteButton);
+                    fieldDeleteButton.append(deleteButton);
+
+
+                    fieldSelectionTag.append(inputSelectionLabel,inputSelection);
+                    inputsContainer.append(fieldOrderTag,fieldPositionTag,fieldLengthTag,fieldFormatTag,fieldSelectionTag,fieldDeleteButton);
+                    fieldsContainer.append(divider,inputsContainer);
+
+
+                }
+
+                function clearInputs() {
+                    Array.from(fieldsContainer.children).forEach(el => el.remove());
+                }
+            </script>
+        </div>
+    </div>
+</div>

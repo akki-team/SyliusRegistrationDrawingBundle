@@ -23,6 +23,12 @@ sylius_registration_drawing:
             updated_at: "Date de mise à jour"
         drawing_field:
             name: "Nom"
+            order: "Ordre"
+            position: "Position (si longueur fixe)"
+            length: "Taille (si longueur fixe)"
+            format: "Format (Si format date)"
+            list_values: "Liste de valeurs"
+            delete_field: "Supprimer"
     admin:
         bloc_general: "Général"
         bloc_fields: "Champs"

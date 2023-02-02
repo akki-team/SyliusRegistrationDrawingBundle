@@ -36,9 +36,10 @@ class ExportService
     {
         $text = '';
 
-//        foreach ($fields as $field) {
-//            $text .=
-//        }
-        return implode('', $fields)."\n";
+        foreach ($fields as $field) {
+            $text .= implode('', $field)."\n";
+        }
+
+        return $text;
     }
 }

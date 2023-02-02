@@ -1,31 +1,38 @@
-<div class="ui tab" data-tab="fields">
-    <h3 class="ui top attached header">{{ 'sylius_registration_drawing.admin.bloc_fields'|trans }}</h3>
-
-    <div class="ui attached segment">
-        {{ render(url('sylius_admin_get_drawing_fields')) }}
-
-        <div id="fieldsContainer"></div>
-    </div>
-</div>
+{{ render(url('sylius_admin_get_drawing_fields', {'id': form.vars.data.id})) }}
 
 <script>
     const addFieldsBtn = document.querySelector('#addFieldsBtn');
     const fieldsContainer = document.querySelector('#fieldsContainer');
 
     addFieldsBtn.addEventListener('click', () => {
-        clearInputs();
+        // clearInputs();
         const selectedFiles = Array.from(document.querySelector('#attributeChoice').getElementsByTagName('a'));
         addInputs(selectedFiles);
     })
 
+    function slugify (value){
+        return String(value).replace(/[ ']+/g, '-');
+    }
+
+    function inputAlreadyExists(field) {
+        const fieldSlug = slugify(field.innerText.toLowerCase());
+        const fieldId = field.dataset.value;
+
+        const fieldOrderName = `#${fieldSlug}-order-${fieldId}`;
+
+        return document.querySelector(fieldOrderName) !== null;
+    }
+
     function addInputs(fields) {
-        fields.forEach((field, index) => {
-            createFieldInputs(field, index);
+        fields.forEach((field) => {
+            if (!inputAlreadyExists(field)) {
+                createFieldInputs(field);
+            }
         });
     }
 
-    function createFieldInputs(field, index) {
-        const fieldSlug = field.innerText.toLowerCase().replaceAll(' ', '-');
+    function createFieldInputs(field) {
+        const fieldSlug = slugify(field.innerText.toLowerCase());
         const fieldId = field.dataset.value;
         const formats = {
             'd/m/Y': 'Date d/m/Y',
@@ -42,8 +49,13 @@
             'Ymd H:i': 'Date Ymd H:i',
         };
 
+        let index = Math.max(...Array.from(document.querySelectorAll('.drawing-field-order')).map(o => o.getAttribute('value')));
+        if (index <0){
+            index = 0;
+        }
+
         const inputsContainer = document.createElement('div');
-        inputsContainer.setAttribute('class', 'three fields');
+        inputsContainer.setAttribute('class', 'drawing-column three fields');
 
         const divider = document.createElement('h4');
         divider.setAttribute('class', 'ui dividing header');
@@ -57,6 +69,7 @@
         inputOrderLabel.innerText = 'Ordre';
         const inputOrder = document.createElement('input');
         inputOrder.setAttribute('type', 'number');
+        inputOrder.setAttribute('class', 'drawing-field-order');
         inputOrder.setAttribute('id', `${fieldSlug}-order-${fieldId}`);
         inputOrder.setAttribute('name', `fields[${fieldSlug}-order-${fieldId}]`);
         inputOrder.setAttribute('min', '0');
@@ -134,17 +147,34 @@
                 alert("Format de la liste de valeurs invalide !");
             }
         });
-        fieldSelectionTag.append(inputSelectionLabel);
-        fieldSelectionTag.append(inputSelection);
 
-        inputsContainer.append(fieldOrderTag);
-        inputsContainer.append(fieldPositionTag);
-        inputsContainer.append(fieldLengthTag);
-        inputsContainer.append(fieldFormatTag);
-        inputsContainer.append(fieldSelectionTag);
+        //button delete
+        const fieldDeleteButton = document.createElement('div');
+        fieldDeleteButton.setAttribute('class', 'field');
+        const deleteButton = document.createElement('button');
+        deleteButton.setAttribute('class', 'ui red right labeled icon button remove-field');
+        deleteButton.setAttribute('style', 'margin-top: 26px');
+        deleteButton.innerText = 'Supprimer';
 
-        fieldsContainer.append(divider);
-        fieldsContainer.append(inputsContainer);
+        deleteButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            const drawingColumn = event.currentTarget.closest('.drawing-column');
+            const h4DrawingColumn = drawingColumn.previousElementSibling;
+            drawingColumn.remove();
+            h4DrawingColumn.remove();
+        });
+
+        const iDeleteButton = document.createElement('i');
+        iDeleteButton.setAttribute('class', 'remove icon');
+        deleteButton.append(iDeleteButton);
+        fieldDeleteButton.append(deleteButton);
+
+
+        fieldSelectionTag.append(inputSelectionLabel,inputSelection);
+        inputsContainer.append(fieldOrderTag,fieldPositionTag,fieldLengthTag,fieldFormatTag,fieldSelectionTag,fieldDeleteButton);
+        fieldsContainer.append(divider,inputsContainer);
+
+
     }
 
     function clearInputs() {

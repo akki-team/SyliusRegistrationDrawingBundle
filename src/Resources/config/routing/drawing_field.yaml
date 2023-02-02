@@ -1,7 +1,7 @@
 sylius_admin_get_drawing_fields:
-  path: /fields
+  path: /fields/{id}
   methods: [GET]
   defaults:
     _controller: sylius_registration_drawing.controller.drawing_field:renderFieldsAction
-    template: "@RegistrationDrawingBundle/Resources/views/Field/fieldChoice.html.twig"
+    template: "@RegistrationDrawingBundle/Resources/views/Field/fields.html.twig"
 
