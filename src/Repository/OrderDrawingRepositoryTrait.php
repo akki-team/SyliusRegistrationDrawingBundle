@@ -23,8 +23,8 @@ trait OrderDrawingRepositoryTrait
             ->setParameter('state_new', OrderInterface::STATE_NEW)
             ->setParameter('state_cancelled', OrderInterface::STATE_CANCELLED)
 
-            ->join('o.payments', 'payments', 'WITH', 'payments.state = :paymentState')
-            ->setParameter('paymentState', PaymentInterface::STATE_COMPLETED)
+            ->join('o.payments', 'payments', 'WITH', 'payments.state IN (:paymentStates)')
+            ->setParameter('paymentStates', [PaymentInterface::STATE_COMPLETED, PaymentInterface::STATE_REFUNDED])
         ;
 
         if ($dateDebut !== '') {

@@ -15,6 +15,7 @@ use Sylius\Bundle\ResourceBundle\Controller\ResourceController;
 use Sylius\Bundle\ResourceBundle\Event\ResourceControllerEvent;
 use Sylius\Component\Core\Model\Order;
 use Sylius\Component\Core\Model\OrderItem;
+use Sylius\Component\Core\OrderPaymentStates;
 use Sylius\Component\Resource\Exception\UpdateHandlingException;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Sylius\Component\Resource\ResourceActions;
@@ -495,6 +496,14 @@ class RegistrationDrawingController extends ResourceController
 
         /** @var Order $order */
         foreach ($orders as $order) {
+            $isRefunded = $order->getPaymentState() === OrderPaymentStates::STATE_REFUNDED;
+            $periodStart = $registrationDrawing->getPeriodicity() === Constants::PERIODICITY_WEEKLY ? '- 1 week' : '-1 month';
+
+            // On ne prends pas en compte les commandes annulées dans la période précédente définie
+            if ($isRefunded && ($order->getCheckoutCompletedAt() > new \DateTime($periodStart))) {
+                continue;
+            }
+
             $items = $order->getItems();
 
             /** @var OrderItem $item */
