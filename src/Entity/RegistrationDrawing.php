@@ -18,7 +18,7 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     /**
      * @var int
      * @ORM\Id
-     * @ORM\Column(type="integer", nullable=true, name="id")
+     * @ORM\Column(type="integer", name="id")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -97,9 +97,9 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     private $updatedAt;
 
     /**
-     * @return int|null
+     * @return int
      */
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
