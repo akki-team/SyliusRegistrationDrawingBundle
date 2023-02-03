@@ -9,9 +9,6 @@
             </button>
         </div>
         <div id="fieldsContainer">
-{#            {{ dump(formFields) }}#}
-{#            {{ dump(fieldAssociations) }}#}
-{#            {{ dump(formFields.vars.choices) }}#}
             {% set dateChoices = {
                 'd/m/Y': 'Date d/m/Y',
                 'd/m/Y H:i': 'Date d/m/Y H:i',
@@ -64,6 +61,8 @@
                         </button>
                     </div>
                 </div>
+            {% else %}
+
             {% endfor %}
         </div>
     </div>

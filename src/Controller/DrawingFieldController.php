@@ -20,7 +20,8 @@ class DrawingFieldController extends ResourceController
         ]);
 
         $drawingFieldAssociationRepository = $this->get('sylius_registration_drawing.repository.drawing_field_association');
-        $drawingFieldAssociations = $drawingFieldAssociationRepository->getFields((int)$request->get('id'));
+        $fields = $drawingFieldAssociationRepository->getFields((int)$request->get('id'));
+        $drawingFieldAssociations = count($fields) > 0 ? $fields : [];
 
         return $this->render($template, [
             'formFields' => $formFields->createView(),

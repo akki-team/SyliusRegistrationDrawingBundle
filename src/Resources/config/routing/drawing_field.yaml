@@ -1,5 +1,5 @@
 sylius_admin_get_drawing_fields:
-  path: /fields/{id}
+  path: /fields
   methods: [GET]
   defaults:
     _controller: sylius_registration_drawing.controller.drawing_field:renderFieldsAction
