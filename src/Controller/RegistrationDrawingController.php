@@ -175,15 +175,12 @@ class RegistrationDrawingController extends ResourceController
                 $existingFields = $drawingFieldAssociationRepository->findByDrawingId($resource->getId());
 
                 if (count($existingFields) > 0) {
-                    foreach ($fields as $key => $value) {
+                    /** @var DrawingFieldAssociation $existingField */
+                    foreach ($existingFields as $existingField) {
                         /** @var DrawingFieldAssociation $drawingFieldAssociation */
-                        $drawingFieldAssociation = $drawingFieldAssociationRepository->findOneBy(['drawingId' => $resource->getId(), 'fieldId' => $key]);
-
-                        /** @var DrawingFieldAssociation $existingField */
-                        foreach ($existingFields as $existingField) {
-                            if (is_null($fields[$existingField->getId()])) {
-                                $drawingFieldAssociationManager->remove($drawingFieldAssociation);
-                            }
+                        $drawingFieldAssociation = $drawingFieldAssociationRepository->find($existingField->getId());
+                        if (is_null($fields[$existingField->getFieldId()])) {
+                            $drawingFieldAssociationManager->remove($drawingFieldAssociation);
                         }
                     }
                 }
