@@ -331,9 +331,9 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getSender(): string
+    public function getSender(): ?string
     {
         return $this->sender;
     }
@@ -347,9 +347,9 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getRecipients(): string
+    public function getRecipients(): ?string
     {
         return $this->recipients;
     }
