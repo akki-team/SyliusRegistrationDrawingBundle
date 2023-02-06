@@ -83,6 +83,16 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     private $vendors;
 
     /**
+     * @ORM\Column(type="string", nullable=false, name="sender")
+     */
+    private $sender;
+
+    /**
+     * @ORM\Column(type="text", nullable=false, name="recipients")
+     */
+    private $recipients;
+
+    /**
      * @var DateTime
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime", nullable=false, name="created_at")
@@ -318,6 +328,38 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     public function setPort(int $port): void
     {
         $this->port = $port;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSender(): string
+    {
+        return $this->sender;
+    }
+
+    /**
+     * @param string $sender
+     */
+    public function setSender(string $sender): void
+    {
+        $this->sender = $sender;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRecipients(): string
+    {
+        return $this->recipients;
+    }
+
+    /**
+     * @param string $recipients
+     */
+    public function setRecipients(string $recipients): void
+    {
+        $this->recipients = $recipients;
     }
 
 }

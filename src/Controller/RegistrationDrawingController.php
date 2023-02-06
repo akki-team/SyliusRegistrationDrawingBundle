@@ -484,15 +484,17 @@ class RegistrationDrawingController extends ResourceController
      * @param RegistrationDrawing $registrationDrawing
      * @param array $orders
      * @param string $filePath
-     * @return string
+     * @return array
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function exportDrawing(RegistrationDrawing $registrationDrawing, array $orders, string $filePath)
+    public function exportDrawing(RegistrationDrawing $registrationDrawing, array $orders, string $filePath): array
     {
         $headers = $this->prepareDrawingHeaderToCSVExport($registrationDrawing);
 
         $fields = [];
+        $totalLines = 0;
+        $totalCancellations = 0;
 
         /** @var Order $order */
         foreach ($orders as $order) {
@@ -516,6 +518,12 @@ class RegistrationDrawingController extends ResourceController
 
                 $data = $this->prepareDrawingfieldsToExport($product->getVendor()->getRegistrationDrawing(), $item);
 
+                if ($isRefunded) {
+                    $totalCancellations++;
+                } else {
+                    $totalLines++;
+                }
+
                 $fields[] = $data;
             }
         }
@@ -525,13 +533,13 @@ class RegistrationDrawingController extends ResourceController
 
             file_put_contents($filePath, $writer->getContent());
 
-            return $writer->getContent();
+            return [$writer->getContent(), $totalLines, $totalCancellations];
         } else {
             $text = $this->container->get('Akki\SyliusRegistrationDrawingBundle\Service\ExportService')->exportFixedLength($fields);
 
             file_put_contents($filePath, $text);
 
-            return $text;
+            return [$text, $totalLines, $totalCancellations];
         }
     }
 

@@ -141,7 +141,7 @@ class ExportDrawingsCommand extends Command
 
                     $drawingVendors = $drawing->getVendors()->toArray();
 
-                    $this->generatedFileService->addFile(array_shift($drawingVendors), $fileName, $filePath, $dateTimeStart, $dateTimeEnd);
+                    $this->generatedFileService->addFile(array_shift($drawingVendors), $fileName, $filePath, $dateTimeStart, $dateTimeEnd, $export[1], $export[2]);
 
                     $filePathSynchroSFTPRoot = $this->kernelProjectDir.self::DIRECTORY_PUBLIC.self::DIRECTORY_EXPORT_SFTP;
                     $filePathSynchroSFTPEditor = $filePathSynchroSFTPRoot.$drawing->getId();
@@ -153,7 +153,7 @@ class ExportDrawingsCommand extends Command
                     }
                     chmod($filePathSynchroSFTPRoot, 0777);
                     chmod($filePathSynchroSFTPEditor, 0777);
-                    file_put_contents($fullFilelName, $export);
+                    file_put_contents($fullFilelName, array_shift($export));
                     chmod($fullFilelName, 0777);
 
                     $outputStyle->writeln("fin génération de l'export des commandes du $startDate au $endDate pour le dessin d'enregistrement {$drawing->getName()} déposé ici : $filePath");

@@ -21,6 +21,8 @@ sylius_registration_drawing:
             port: "Port"
             created_at: "Date de création"
             updated_at: "Date de mise à jour"
+            sender: "Alias du sender"
+            recipients: "Destinataires"
         drawing_field:
             name: "Nom"
             order: "Ordre"
