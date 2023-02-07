@@ -387,4 +387,12 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
         $this->recipients = $recipients;
     }
 
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->getName();
+    }
+
 }
