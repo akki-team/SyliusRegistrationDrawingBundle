@@ -17,7 +17,7 @@
 
     function slugify (value){
         const checkOne = String(value).replace(/[ ']+/g, '-'); // on remplace les espaces et quotes
-        const checkTwo = String(checkOne).replace(/[é()°¨à]+/g, ''); // on remplace quelques caractères
+        const checkTwo = String(checkOne).replace(/[é()°¨à:]+/g, ''); // on remplace quelques caractères
         return String(checkTwo);
     }
 
