@@ -141,7 +141,7 @@ class ExportDrawingsCommand extends Command
 
                     $drawingVendors = $drawing->getVendors()->toArray();
 
-                    $this->generatedFileService->addFile(array_shift($drawingVendors), $fileName, $filePath, $dateTimeStart, $dateTimeEnd, $export[1], $export[2]);
+                    $this->generatedFileService->addFile(array_shift($drawingVendors), $fileName, $filePath, $dateTimeStart, $dateTimeEnd, $export[1], $export[2], $drawing);
 
                     $filePathSynchroSFTPRoot = $this->kernelProjectDir.self::DIRECTORY_PUBLIC.self::DIRECTORY_EXPORT_SFTP;
                     $filePathSynchroSFTPEditor = $filePathSynchroSFTPRoot.$drawing->getId();
