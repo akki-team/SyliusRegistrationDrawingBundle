@@ -93,6 +93,15 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     private $recipients;
 
     /**
+     * @ORM\OneToMany(
+     *     targetEntity="App\Entity\EditorExports\GeneratedFile",
+     *     mappedBy="registrationDrawing",
+     *     orphanRemoval=true
+     * )
+     */
+    private $generatedFiles;
+
+    /**
      * @var DateTime
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime", nullable=false, name="created_at")
@@ -264,6 +273,22 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     public function setVendors($vendors): void
     {
         $this->vendors = $vendors;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getGeneratedFiles()
+    {
+        return $this->generatedFiles;
+    }
+
+    /**
+     * @param mixed $generatedFiles
+     */
+    public function setGeneratedFiles($generatedFiles): void
+    {
+        $this->generatedFiles = $generatedFiles;
     }
 
     /**
