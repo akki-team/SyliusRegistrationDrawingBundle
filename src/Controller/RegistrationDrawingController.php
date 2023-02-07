@@ -57,6 +57,9 @@ class RegistrationDrawingController extends ResourceController
 
                     $drawingFieldAssociation->setDrawingId($newResource->getId());
                     $drawingFieldAssociation->setFieldId($key);
+                    if (isset($field['name'])) {
+                        $drawingFieldAssociation->setName($field['name']);
+                    }
                     if (isset($field['order'])) {
                         $drawingFieldAssociation->setOrder((int)$field['order']);
                     }
@@ -126,6 +129,9 @@ class RegistrationDrawingController extends ResourceController
                         /** @var DrawingFieldAssociation $drawingFieldAssociation */
                         $drawingFieldAssociation = array_shift($fieldExist);
                         // update
+                        if (!empty($value['name'])) {
+                            $drawingFieldAssociation->setName($value['name']);
+                        }
                         if (!empty($value['order'])) {
                             $drawingFieldAssociation->setOrder((int)$value['order']);
                         }
@@ -152,6 +158,9 @@ class RegistrationDrawingController extends ResourceController
 
                         $drawingFieldAssociation->setDrawingId($resource->getId());
                         $drawingFieldAssociation->setFieldId($key);
+                        if (!empty($value['name'])) {
+                            $drawingFieldAssociation->setName($value['name']);
+                        }
                         if (!empty($value['order'])) {
                             $drawingFieldAssociation->setOrder((int)$value['order']);
                         }
@@ -337,9 +346,9 @@ class RegistrationDrawingController extends ResourceController
 
         $fields = $drawingFieldAssociationRepository->getFields($registrationDrawing->getId());
 
-        /** @var DrawingField $field */
+        /** @var DrawingFieldAssociation $field */
         foreach ($fields as $field) {
-            $header[] = $drawingFieldRepository->find($field->getFieldId())->getName();
+            $header[] = $field->getName();
         }
 
         return $header;
@@ -410,6 +419,11 @@ class RegistrationDrawingController extends ResourceController
                     }
                 }
 
+                // Gestion des champs booléens
+                if (gettype($data) === "boolean") {
+                    $data = $data ? '1' : '0';
+                }
+
                 // Gestion des champs avec data à construire
                 if ($field->getName() === Constants::OFFER_TYPE_FIELD) {
                     $data = $orderItem->getProduct()->isOffreADL() ? Constants::ADL_OFFER_TYPE : Constants::ADD_OFFER_TYPE;
@@ -419,12 +433,16 @@ class RegistrationDrawingController extends ResourceController
                     $data = (new \DateTime('now'))->format('d-m-Y H:i');
                 }
 
-                if (($field->getName() === Constants::BILLING_COUNTRY_FIELD)) {
+                if ($field->getName() === Constants::BILLING_COUNTRY_FIELD) {
                     $data = Intl::getRegionBundle()->getCountryName($orderItem->getOrder()->getBillingAddress()->getCountryCode());
                 }
 
-                if (($field->getName() === Constants::SHIPPING_COUNTRY_FIELD)) {
+                if ($field->getName() === Constants::SHIPPING_COUNTRY_FIELD) {
                     $data = Intl::getRegionBundle()->getCountryName($orderItem->getShippingAddress()->getCountryCode());
+                }
+
+                if (($field->getName() === Constants::OFFER_AMOUNT_FIELD) && ($registrationDrawing->getCurrencyFormat() === Constants::CURRENCY_NUMBER_FORMAT)) {
+                    $data = number_format((float)$data, 2, $registrationDrawing->getCurrencyDelimiter(), '');
                 }
 
                 if ($registrationDrawing->getFormat() === Constants::FIXED_LENGTH_FORMAT) {

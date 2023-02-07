@@ -23,6 +23,8 @@ sylius_registration_drawing:
             updated_at: "Date de mise à jour"
             sender: "Alias du sender"
             recipients: "Destinataires"
+            currencyFormat: "Format monétaire"
+            currencyDelimiter: "Delimiteur monétaire (Si format nombre)"
         drawing_field:
             name: "Nom"
             order: "Ordre"

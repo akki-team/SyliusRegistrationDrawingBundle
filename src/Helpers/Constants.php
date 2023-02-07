@@ -72,7 +72,25 @@ class Constants
     public const DATE_TRANSMISSION_FIELD = 'Date transmission';
     public const BILLING_COUNTRY_FIELD = 'Pays payeur';
     public const SHIPPING_COUNTRY_FIELD = 'Pays Destinataire';
+    public const OFFER_AMOUNT_FIELD = 'Montant de l\'offre TTC';
 
     public const ADL_OFFER_TYPE = 'ADL';
     public const ADD_OFFER_TYPE = 'ADD';
+
+    public const CURRENCY_NUMBER_FORMAT = 'NOMBRE';
+    public const CURRENCY_HUNDREDTH_FORMAT = 'CENTIEME';
+
+    public const CURRENCY_FORMATS = [
+        self::CURRENCY_NUMBER_FORMAT => self::CURRENCY_NUMBER_FORMAT,
+        self::CURRENCY_HUNDREDTH_FORMAT => self::CURRENCY_HUNDREDTH_FORMAT
+    ];
+
+    public const CURRENCY_COMMA_DELIMITER = ',';
+    public const CURRENCY_POINT_DELIMITER = '.';
+
+    public const CURRENCY_DELIMITERS = [
+        self::CURRENCY_COMMA_DELIMITER => self::CURRENCY_COMMA_DELIMITER,
+        self::CURRENCY_POINT_DELIMITER => self::CURRENCY_POINT_DELIMITER
+    ];
+
 }

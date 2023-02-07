@@ -65,7 +65,7 @@
         };
 
         let index = Math.max(...Array.from(document.querySelectorAll('.drawing-field-order')).map(o => o.getAttribute('value')));
-        if (index <0){
+        if (index < 0){
             index = 0;
         }
 
@@ -75,6 +75,18 @@
         const divider = document.createElement('h4');
         divider.setAttribute('class', 'ui dividing header');
         divider.innerText = field.innerText;
+
+        // Input nom du champ
+        const fieldNameTag = document.createElement('div');
+        fieldNameTag.setAttribute('class', 'field');
+        const inputNameLabel = document.createElement('label');
+        inputNameLabel.setAttribute('for', `${fieldSlug}-name-${fieldId}`);
+        inputNameLabel.innerText = 'Nom';
+        const inputName = document.createElement('input');
+        inputName.setAttribute('type', 'text');
+        inputName.setAttribute('id', `${fieldSlug}-name-${fieldId}`);
+        inputName.setAttribute('name', `fields[${fieldId}][name]]`);
+        inputName.setAttribute('value', field.innerText);
 
         // Input ordre
         const fieldOrderTag = document.createElement('div');

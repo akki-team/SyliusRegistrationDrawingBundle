@@ -59,6 +59,22 @@ final class RegistrationDrawingType extends AbstractResourceType
                 'multiple' => false,
             ])
 
+            ->add('currencyFormat', ChoiceType::class, [
+                'required' => true,
+                'label' => 'sylius_registration_drawing.form.registration_drawing.currencyFormat',
+                'choices' => Constants::CURRENCY_FORMATS,
+                'expanded' => false,
+                'multiple' => false,
+            ])
+
+            ->add('currencyDelimiter', ChoiceType::class, [
+                'required' => true,
+                'label' => 'sylius_registration_drawing.form.registration_drawing.currencyDelimiter',
+                'choices' => Constants::CURRENCY_DELIMITERS,
+                'expanded' => false,
+                'multiple' => false,
+            ])
+
             ->add('send_mode', ChoiceType::class, [
                 'required' => true,
                 'label' => 'sylius_registration_drawing.form.registration_drawing.send_mode',

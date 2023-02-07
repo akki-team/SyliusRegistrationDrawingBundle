@@ -30,6 +30,10 @@
                 <h4 class="ui dividing header">{{ fieldName }}</h4>
                 <div class="drawing-column three fields">
                     <div class="field">
+                        <label for="{{ fieldNameSlugified }}-name-{{ fieldId }}">{{ 'sylius_registration_drawing.form.drawing_field.name'|trans }}</label>
+                        <input type="text" id="{{ fieldNameSlugified }}-name-{{ fieldId }}" name="fields[{{ fieldId }}][name]]" placeholder="m => MR;f => MME;u => NR" value="{{ field.name }}">
+                    </div>
+                    <div class="field">
                         <label for="{{ fieldNameSlugified }}-order-{{ fieldId }}">{{ 'sylius_registration_drawing.form.drawing_field.order'|trans }}</label>
                         <input type="number" class="drawing-field-order" id="{{ fieldNameSlugified }}-order-{{ fieldId }}" name="fields[{{ fieldId }}][order]" min="0" value="{{ loop.index }}" required="required">
                     </div>

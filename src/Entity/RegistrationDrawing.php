@@ -102,6 +102,16 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     private $generatedFiles;
 
     /**
+     * @ORM\Column(type="string", nullable=true, name="currency_format")
+     */
+    private $currencyFormat;
+
+    /**
+     * @ORM\Column(type="string", nullable=true, name="currency_delimiter")
+     */
+    private $currencyDelimiter;
+
+    /**
      * @var DateTime
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime", nullable=false, name="created_at")
@@ -385,6 +395,38 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     public function setRecipients(string $recipients): void
     {
         $this->recipients = $recipients;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCurrencyFormat(): ?string
+    {
+        return $this->currencyFormat;
+    }
+
+    /**
+     * @param string $currencyFormat
+     */
+    public function setCurrencyFormat(string $currencyFormat): void
+    {
+        $this->currencyFormat = $currencyFormat;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCurrencyDelimiter(): ?string
+    {
+        return $this->currencyDelimiter;
+    }
+
+    /**
+     * @param string $currencyDelimiter
+     */
+    public function setCurrencyDelimiter(string $currencyDelimiter): void
+    {
+        $this->currencyDelimiter = $currencyDelimiter;
     }
 
     /**

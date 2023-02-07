@@ -59,6 +59,11 @@ class DrawingFieldAssociation implements ResourceInterface, TimestampableInterfa
     private $selection;
 
     /**
+     * @ORM\Column(type="string", nullable=true, name="name")
+     */
+    private $name;
+
+    /**
      * @var DateTime
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime", nullable=false, name="created_at")
@@ -230,6 +235,22 @@ class DrawingFieldAssociation implements ResourceInterface, TimestampableInterfa
     public function setUpdatedAt(?DateTimeInterface $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     */
+    public function setName(string $name): void
+    {
+        $this->name = $name;
     }
 
 }
