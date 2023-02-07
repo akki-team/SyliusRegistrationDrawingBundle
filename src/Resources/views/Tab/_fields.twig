@@ -87,6 +87,8 @@
         inputName.setAttribute('id', `${fieldSlug}-name-${fieldId}`);
         inputName.setAttribute('name', `fields[${fieldId}][name]]`);
         inputName.setAttribute('value', field.innerText);
+        fieldNameTag.append(inputNameLabel);
+        fieldNameTag.append(inputName);
 
         // Input ordre
         const fieldOrderTag = document.createElement('div');
@@ -189,7 +191,6 @@
         iDeleteButton.setAttribute('class', 'remove icon');
         deleteButton.append(iDeleteButton);
         fieldDeleteButton.append(deleteButton);
-
 
         fieldSelectionTag.append(inputSelectionLabel,inputSelection);
         inputsContainer.append(fieldNameTag, fieldOrderTag,fieldPositionTag,fieldLengthTag,fieldFormatTag,fieldSelectionTag,fieldDeleteButton);
