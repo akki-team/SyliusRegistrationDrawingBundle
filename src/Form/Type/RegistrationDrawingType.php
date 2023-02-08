@@ -103,11 +103,6 @@ final class RegistrationDrawingType extends AbstractResourceType
                 'label' => 'sylius_registration_drawing.form.registration_drawing.port',
             ])
 
-            ->add('sender', TextType::class, [
-                'required' => true,
-                'label' => 'sylius_registration_drawing.form.registration_drawing.sender',
-            ])
-
             ->add('recipients', TextType::class, [
                 'required' => true,
                 'label' => 'sylius_registration_drawing.form.registration_drawing.recipients',
