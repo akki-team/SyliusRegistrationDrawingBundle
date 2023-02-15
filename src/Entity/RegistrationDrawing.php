@@ -374,9 +374,10 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     }
 
     /**
-     * @param string $password
+     * @param string|null $password
+     * @return void
      */
-    public function setPassword(string $password): void
+    public function setPassword(?string $password): void
     {
         $this->password = $password;
     }
