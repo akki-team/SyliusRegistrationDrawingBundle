@@ -25,6 +25,7 @@ sylius_registration_drawing:
             recipients: "Destinataires"
             currencyFormat: "Format monétaire"
             currencyDelimiter: "Delimiteur monétaire (Si format nombre)"
+            password: "Mot de passe"
         drawing_field:
             name: "Nom"
             order: "Ordre"

@@ -8,6 +8,7 @@ use Akki\SyliusRegistrationDrawingBundle\Helpers\Constants;
 use Sylius\Bundle\ResourceBundle\Form\Type\AbstractResourceType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -91,6 +92,11 @@ final class RegistrationDrawingType extends AbstractResourceType
             ->add('user', TextType::class, [
                 'required' => true,
                 'label' => 'sylius_registration_drawing.form.registration_drawing.user',
+            ])
+
+            ->add('password', PasswordType::class, [
+                'required' => true,
+                'label' => 'sylius_registration_drawing.form.registration_drawing.password',
             ])
 
             ->add('host', TextType::class, [

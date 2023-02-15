@@ -83,9 +83,9 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     private $vendors;
 
     /**
-     * @ORM\Column(type="string", nullable=false, name="sender")
+     * @ORM\Column(type="string", nullable=true, name="password")
      */
-    private $sender;
+    private $password;
 
     /**
      * @ORM\Column(type="text", nullable=false, name="recipients")
@@ -368,17 +368,17 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     /**
      * @return string|null
      */
-    public function getSender(): ?string
+    public function getPassword(): ?string
     {
-        return $this->sender;
+        return $this->password;
     }
 
     /**
-     * @param string $sender
+     * @param string $password
      */
-    public function setSender(string $sender): void
+    public function setPassword(string $password): void
     {
-        $this->sender = $sender;
+        $this->password = $password;
     }
 
     /**

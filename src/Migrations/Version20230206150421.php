@@ -20,12 +20,12 @@ final class Version20230206150421 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE registration_drawing ADD sender VARCHAR(255) NOT NULL, ADD recipients LONGTEXT NOT NULL');
+        $this->addSql('ALTER TABLE registration_drawing ADD password VARCHAR(255) NOT NULL, ADD recipients LONGTEXT NOT NULL');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE registration_drawing DROP sender, DROP recipients');
+        $this->addSql('ALTER TABLE registration_drawing DROP password, DROP recipients');
     }
 }
