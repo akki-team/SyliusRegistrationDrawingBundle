@@ -95,8 +95,9 @@ final class RegistrationDrawingType extends AbstractResourceType
             ])
 
             ->add('password', PasswordType::class, [
-                'required' => true,
+                'required' => false,
                 'label' => 'sylius_registration_drawing.form.registration_drawing.password',
+                'always_empty' => false,
             ])
 
             ->add('host', TextType::class, [
