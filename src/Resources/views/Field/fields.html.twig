@@ -23,7 +23,7 @@
                 'Ymd': 'Date Ymd',
                 'Ymd H:i': 'Date Ymd H:i'
             } %}
-            {% import "@RegistrationDrawingBundle/Resources/views/Field/_substituableFields.html.twig" %}
+            {% include "@RegistrationDrawingBundle/Resources/views/Field/_substituableFields.html.twig" %}
             {% for field in fieldAssociations %}
                 {% set fieldId = field.fieldId %}
                 {% set fieldName = (formFields.vars.choices|filter(choice => choice.value is same as (fieldId|string))|first).label %}
