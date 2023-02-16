@@ -34,6 +34,7 @@ sylius_registration_drawing:
             format: "Format (Si format date)"
             list_values: "Liste de valeurs"
             delete_field: "Supprimer"
+            list_values_field: "Valeurs du champ:"
     admin:
         bloc_general: "Général"
         bloc_fields: "Champs"

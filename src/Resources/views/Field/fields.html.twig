@@ -27,6 +27,15 @@
                 {% set fieldId = field.fieldId %}
                 {% set fieldName = (formFields.vars.choices|filter(choice => choice.value is same as (fieldId|string))|first).label %}
                 {% set fieldNameSlugified = fieldName|replace({"'": "-", " ": "-"})|lower %}
+                {% set isSubstituableField = false %}
+                {% set fieldOutput = [] %}
+                {% for f in substituableFields %}
+                    {% if f['field'] == fieldName %}
+                        {% set isSubstituableField = true %}
+                        {% set fieldOutput = f['values'] %}
+                    {% endif %}
+                {% endfor %}
+
                 <h4 class="ui dividing header">{{ fieldName }}</h4>
                 <div class="drawing-column three fields">
                     <div class="field">
@@ -57,6 +66,9 @@
                     <div class="field">
                         <label for="{{ fieldNameSlugified }}-selection-{{ fieldId }}">{{ 'sylius_registration_drawing.form.drawing_field.list_values'|trans }}</label>
                         <input type="text" id="{{ fieldNameSlugified }}-selection-{{ fieldId }}" name="fields[{{ fieldId }}][selection]]" placeholder="m => MR;f => MME;u => NR" value="{{ field.selection }}">
+                        {% if isSubstituableField %}
+                            <help>{{ 'sylius_registration_drawing.form.drawing_field.list_values_field'|trans }} [{% for output in fieldOutput %}{{ output }}{% if not loop.last %}, {% endif %}{% endfor %}].</help>
+                        {% endif %}
                     </div>
                     <div class="field">
                         <button class="ui red right labeled icon button remove-field" style="margin-top: 27px">

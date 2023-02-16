@@ -1,5 +1,7 @@
 {{ render(url('sylius_admin_get_drawing_fields', {'id': form.vars.data.id})) }}
 
+<div class="js-subst-fields" data-subst-fields="{{ substituableFields|json_encode }}"></div>
+
 <script>
     const addFieldsBtn = document.querySelector('#addFieldsBtn');
     const fieldsContainer = document.querySelector('#fieldsContainer');
@@ -176,6 +178,17 @@
                 alert("Format de la liste de valeurs invalide !");
             }
         });
+        const substFields = JSON.parse(document.querySelector('.js-subst-fields').dataset.substFields);
+        let substFieldsValues = [];
+        const inputSelectionHelp = document.createElement('help');
+        if (substFields.includes(field.innerText)) {
+            for (const f of Object.entries(substFields)) {
+               if (f['field'] === field.innerText) {
+                   substFieldsValues = f['values'];
+               }
+            }
+            inputSelectionHelp.innerText = `Valeurs du champ: ${substFieldsValues}`;
+        }
 
         //button delete
         const fieldDeleteButton = document.createElement('div');
@@ -193,6 +206,9 @@
         fieldDeleteButton.append(deleteButton);
 
         fieldSelectionTag.append(inputSelectionLabel,inputSelection);
+        if (substFieldsValues !== []) {
+            fieldSelectionTag.append(inputSelectionHelp);
+        }
         inputsContainer.append(fieldNameTag, fieldOrderTag,fieldPositionTag,fieldLengthTag,fieldFormatTag,fieldSelectionTag,fieldDeleteButton);
         fieldsContainer.append(divider,inputsContainer);
     }

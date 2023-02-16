@@ -2,6 +2,9 @@
 
 namespace Akki\SyliusRegistrationDrawingBundle\Helpers;
 
+use Sylius\Component\Customer\Model\CustomerInterface;
+use Sylius\Component\Order\Model\OrderInterface;
+
 class Constants
 {
     public const CSV_FORMAT = 'CSV';
@@ -74,6 +77,12 @@ class Constants
     public const SHIPPING_COUNTRY_FIELD = 'Pays Destinataire';
     public const OFFER_AMOUNT_FIELD = 'Montant de l\'offre TTC';
 
+    public const MOVEMENT_TYPE_FIELD = 'Type mouvement';
+    public const PAYER_CIVILITY_FIELD = 'Civilité Payeur';
+    public const RECIPIENT_CIVILITY_FIELD = 'Civilité Destinataire';
+    public const PAYER_EMAIL_OPT_IN_FIELD = 'Opt-in Email payeur';
+    public const RECIPIENT_EMAIL_OPT_IN_FIELD = 'Opt-in Email Destinataire : Optout par défaut';
+
     public const ADL_OFFER_TYPE = 'ADL';
     public const ADD_OFFER_TYPE = 'ADD';
 
@@ -91,6 +100,51 @@ class Constants
     public const CURRENCY_DELIMITERS = [
         self::CURRENCY_COMMA_DELIMITER => self::CURRENCY_COMMA_DELIMITER,
         self::CURRENCY_POINT_DELIMITER => self::CURRENCY_POINT_DELIMITER
+    ];
+
+    public const BOOLEANS_VALUES = ['0', '1'];
+
+    public const SUBSTITUABLE_FIELDS = [
+        0 => [
+            'field' => self::MOVEMENT_TYPE_FIELD,
+            'values' => [
+                OrderInterface::STATE_CART,
+                OrderInterface::STATE_NEW,
+                OrderInterface::STATE_CANCELLED,
+                OrderInterface::STATE_FULFILLED
+            ]
+        ],
+        1 => [
+            'field' => self::PAYER_CIVILITY_FIELD,
+            'values' => [
+                CustomerInterface::MALE_GENDER,
+                CustomerInterface::FEMALE_GENDER,
+                CustomerInterface::UNKNOWN_GENDER
+            ]
+        ],
+        2 => [
+            'field' => self::RECIPIENT_CIVILITY_FIELD,
+            'values' => [
+                CustomerInterface::MALE_GENDER,
+                CustomerInterface::FEMALE_GENDER,
+                CustomerInterface::UNKNOWN_GENDER
+            ]
+        ],
+        3 => [
+            'field' => self::PAYER_EMAIL_OPT_IN_FIELD,
+            'values' => self::BOOLEANS_VALUES
+        ],
+        4 => [
+            'field' => self::RECIPIENT_EMAIL_OPT_IN_FIELD,
+            'values' => self::BOOLEANS_VALUES
+        ],
+        5 => [
+            'field' => self::OFFER_TYPE_FIELD,
+            'values' => [
+                self::ADL_OFFER_TYPE,
+                self::ADD_OFFER_TYPE,
+            ]
+        ]
     ];
 
 }

@@ -92,6 +92,7 @@ class RegistrationDrawingController extends ResourceController
                 'resource' => $newResource,
                 $this->metadata->getName() => $newResource,
                 'form' => $form->createView(),
+                'substituableFields' => Constants::SUBSTITUABLE_FIELDS,
             ])
             ->setTemplate($configuration->getTemplate(ResourceActions::CREATE . '.html'))
         ;
@@ -277,6 +278,7 @@ class RegistrationDrawingController extends ResourceController
                 'resource' => $resource,
                 $this->metadata->getName() => $resource,
                 'form' => $form->createView(),
+                'substituableFields' => Constants::SUBSTITUABLE_FIELDS,
             ])
             ->setTemplate($configuration->getTemplate(ResourceActions::UPDATE . '.html'))
         ;
@@ -397,15 +399,9 @@ class RegistrationDrawingController extends ResourceController
                     }
                 }
 
-                // Selection
-                if (!empty($fieldAssociation->getSelection())) {
-                    $data = $this->substitute($data, $fieldAssociation->getSelection());
-                }
-
-                if ($registrationDrawing->getFormat() === Constants::FIXED_LENGTH_FORMAT) {
-                    if (!empty($fieldAssociation->getLength())) {
-                        $data = $this->applyPad($data, $fieldAssociation->getLength());
-                    }
+                // Gestion des champs booléens
+                if (gettype($data) === "boolean") {
+                    $data = $data ? '1' : '0';
                 }
             } else {
                 // Gestion des champs de flux de retour
@@ -417,11 +413,6 @@ class RegistrationDrawingController extends ResourceController
                             $data = '';
                         }
                     }
-                }
-
-                // Gestion des champs booléens
-                if (gettype($data) === "boolean") {
-                    $data = $data ? '1' : '0';
                 }
 
                 // Gestion des champs avec data à construire
@@ -444,11 +435,16 @@ class RegistrationDrawingController extends ResourceController
                 if (($field->getName() === Constants::OFFER_AMOUNT_FIELD) && ($registrationDrawing->getCurrencyFormat() === Constants::CURRENCY_NUMBER_FORMAT)) {
                     $data = number_format((float)$data, 2, $registrationDrawing->getCurrencyDelimiter(), '');
                 }
+            }
 
-                if ($registrationDrawing->getFormat() === Constants::FIXED_LENGTH_FORMAT) {
-                    if (!empty($fieldAssociation->getLength())) {
-                        $data = $this->applyPad($data, $fieldAssociation->getLength());
-                    }
+            // Selection
+            if (!empty($fieldAssociation->getSelection())) {
+                $data = $this->substitute($data, $fieldAssociation->getSelection());
+            }
+
+            if ($registrationDrawing->getFormat() === Constants::FIXED_LENGTH_FORMAT) {
+                if (!empty($fieldAssociation->getLength())) {
+                    $data = $this->applyPad($data, $fieldAssociation->getLength());
                 }
             }
 
