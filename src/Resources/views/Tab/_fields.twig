@@ -1,6 +1,7 @@
 {{ render(url('sylius_admin_get_drawing_fields', {'id': form.vars.data.id})) }}
 
-<div class="js-subst-fields" data-subst-fields="{{ substituableFields|json_encode }}"></div>
+{% import "@RegistrationDrawingBundle/Resources/views/Field/_substituableFields.html.twig" %}
+<div class="js-subst-fields" data-subst-fields="{{ substituableFields }}"></div>
 
 <script>
     const addFieldsBtn = document.querySelector('#addFieldsBtn');
