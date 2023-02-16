@@ -91,7 +91,8 @@ class RegistrationDrawingController extends ResourceController
                 'metadata' => $this->metadata,
                 'resource' => $newResource,
                 $this->metadata->getName() => $newResource,
-                'form' => $form->createView()
+                'form' => $form->createView(),
+                'substituableFields' => Constants::SUBSTITUABLE_FIELDS
             ])
             ->setTemplate($configuration->getTemplate(ResourceActions::CREATE . '.html'))
         ;
@@ -276,7 +277,8 @@ class RegistrationDrawingController extends ResourceController
                 'metadata' => $this->metadata,
                 'resource' => $resource,
                 $this->metadata->getName() => $resource,
-                'form' => $form->createView()
+                'form' => $form->createView(),
+                'substituableFields' => Constants::SUBSTITUABLE_FIELDS
             ])
             ->setTemplate($configuration->getTemplate(ResourceActions::UPDATE . '.html'))
         ;
@@ -342,7 +344,6 @@ class RegistrationDrawingController extends ResourceController
         $header = [];
 
         $drawingFieldAssociationRepository = $this->container->get('sylius_registration_drawing.repository.drawing_field_association');
-        $drawingFieldRepository = $this->container->get('sylius_registration_drawing.repository.drawing_field');
 
         $fields = $drawingFieldAssociationRepository->getFields($registrationDrawing->getId());
 

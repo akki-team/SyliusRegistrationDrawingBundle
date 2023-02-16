@@ -43,7 +43,7 @@ final class RegistrationDrawingFormMenuBuilder
 
         $menu
             ->addChild('fields')
-            ->setAttribute('template', '@RegistrationDrawingBundle/Resources/views/Tab/_fields.twig')
+            ->setAttribute('template', '@RegistrationDrawingBundle/Resources/views/Tab/_fields.html.twig')
             ->setLabel('sylius_registration_drawing.admin.bloc_fields')
         ;
 
