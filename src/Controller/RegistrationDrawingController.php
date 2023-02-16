@@ -91,7 +91,8 @@ class RegistrationDrawingController extends ResourceController
                 'metadata' => $this->metadata,
                 'resource' => $newResource,
                 $this->metadata->getName() => $newResource,
-                'form' => $form->createView()
+                'form' => $form->createView(),
+                'substituableFields' => Constants::SUBSTITUABLE_FIELDS
             ])
             ->setTemplate($configuration->getTemplate(ResourceActions::CREATE . '.html'))
         ;
@@ -276,7 +277,8 @@ class RegistrationDrawingController extends ResourceController
                 'metadata' => $this->metadata,
                 'resource' => $resource,
                 $this->metadata->getName() => $resource,
-                'form' => $form->createView()
+                'form' => $form->createView(),
+                'substituableFields' => Constants::SUBSTITUABLE_FIELDS
             ])
             ->setTemplate($configuration->getTemplate(ResourceActions::UPDATE . '.html'))
         ;
