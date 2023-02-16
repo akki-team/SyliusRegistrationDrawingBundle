@@ -1,2 +1,4 @@
 {% set menu = knp_menu_get('sylius.admin.registration_drawing_form', [], {'registration_drawing': registration_drawing}) %}
 {{ knp_menu_render(menu, {'template': '@RegistrationDrawingBundle/Resources/views/_menu.html.twig', 'form': form, 'registration_drawing': registration_drawing}) }}
+
+<div class="js-subst-fields" data-subst-fields="{{ substituableFields|json_encode }}"></div>

@@ -1,7 +1,5 @@
 {{ render(url('sylius_admin_get_drawing_fields', {'id': form.vars.data.id})) }}
 
-<div class="js-subst-fields" data-subst-fields="{{ substituableFields }}"></div>
-
 <script>
     const addFieldsBtn = document.querySelector('#addFieldsBtn');
     const fieldsContainer = document.querySelector('#fieldsContainer');

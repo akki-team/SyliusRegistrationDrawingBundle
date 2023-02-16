@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Akki\SyliusRegistrationDrawingBundle\Controller;
 
 use Akki\SyliusRegistrationDrawingBundle\Form\Type\DrawingFieldChoiceType;
+use Akki\SyliusRegistrationDrawingBundle\Helpers\Constants;
 use Sylius\Bundle\ResourceBundle\Controller\ResourceController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,7 +26,8 @@ class DrawingFieldController extends ResourceController
 
         return $this->render($template, [
             'formFields' => $formFields->createView(),
-            'fieldAssociations' => $drawingFieldAssociations
+            'fieldAssociations' => $drawingFieldAssociations,
+            'substituableFields' => Constants::SUBSTITUABLE_FIELDS
         ]);
     }
 }
