@@ -11,16 +11,16 @@ class Constants
     public const FIXED_LENGTH_FORMAT = 'LONGUEUR FIXE';
 
     public const OUTPUT_FORMATS = [
-        self::CSV_FORMAT => self::CSV_FORMAT,
-        self::FIXED_LENGTH_FORMAT => self::FIXED_LENGTH_FORMAT
+        self::CSV_FORMAT => 'CSV',
+        self::FIXED_LENGTH_FORMAT => 'FIXED LENGTH'
     ];
 
     public const PERIODICITY_WEEKLY = 'HEBDOMADAIRE';
     public const PERIODICITY_MONTHLY = 'MENSUEL';
 
     public const PERIODICITY = [
-        self::PERIODICITY_WEEKLY => self::PERIODICITY_WEEKLY,
-        self::PERIODICITY_MONTHLY => self::PERIODICITY_MONTHLY
+        self::PERIODICITY_WEEKLY => 'WEEKLY',
+        self::PERIODICITY_MONTHLY => 'MONTHLY'
     ];
 
     public const DELIMITER_COMMA = ',';
@@ -40,13 +40,13 @@ class Constants
     public const SUNDAY = 'DIMANCHE';
 
     public const DAYS = [
-        self::MONDAY => self::MONDAY,
-        self::TUESDAY => self::TUESDAY,
-        self::WEDNESDAY => self::WEDNESDAY,
-        self::THURSDAY => self::THURSDAY,
-        self::FRIDAY => self::FRIDAY,
-        self::SATURDAY => self::SATURDAY,
-        self::SUNDAY => self::SUNDAY
+        self::MONDAY => 'MONDAY',
+        self::TUESDAY => 'TUESDAY',
+        self::WEDNESDAY => 'WEDNESDAY',
+        self::THURSDAY => 'THURSDAY',
+        self::FRIDAY => 'FRIDAY',
+        self::SATURDAY => 'SATURDAY',
+        self::SUNDAY => 'SUNDAY'
     ];
 
     public const SFTP_MODE = 'SFTP';
@@ -56,8 +56,6 @@ class Constants
         self::SFTP_MODE => self::SFTP_MODE,
         self::SSH_MODE => self::SSH_MODE
     ];
-
-    public const FIELDS_OPTIONS = ['order', 'position', 'length', 'format', 'selection'];
 
     public const RETURN_FLOW_FIELDS = [
         'N_client payeur_editeur',
@@ -90,8 +88,8 @@ class Constants
     public const CURRENCY_HUNDREDTH_FORMAT = 'CENTIEME';
 
     public const CURRENCY_FORMATS = [
-        self::CURRENCY_NUMBER_FORMAT => self::CURRENCY_NUMBER_FORMAT,
-        self::CURRENCY_HUNDREDTH_FORMAT => self::CURRENCY_HUNDREDTH_FORMAT
+        self::CURRENCY_NUMBER_FORMAT => 'NUMBER',
+        self::CURRENCY_HUNDREDTH_FORMAT => 'HUNDREDTH'
     ];
 
     public const CURRENCY_COMMA_DELIMITER = ',';
