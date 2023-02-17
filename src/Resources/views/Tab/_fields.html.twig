@@ -177,15 +177,11 @@
             }
         });
         const substFields = JSON.parse(document.querySelector('.js-subst-fields').dataset.substFields);
-        let substFieldsValues = [];
         const inputSelectionHelp = document.createElement('help');
-        if (substFields.includes(field.innerText)) {
-            for (const f of Object.entries(substFields)) {
-               if (f['field'] === field.innerText) {
-                   substFieldsValues = f['values'];
-               }
-            }
-            inputSelectionHelp.innerText = `Valeurs du champ: ${substFieldsValues}`;
+        for (const f of Object.entries(substFields)) {
+            if (f[1]['field'] === field.innerText) {
+                inputSelectionHelp.innerText = `Valeurs du champ: [${f[1]['values'].toString()}]`;
+           }
         }
 
         //button delete
@@ -203,10 +199,7 @@
         deleteButton.append(iDeleteButton);
         fieldDeleteButton.append(deleteButton);
 
-        fieldSelectionTag.append(inputSelectionLabel,inputSelection);
-        if (substFieldsValues !== []) {
-            fieldSelectionTag.append(inputSelectionHelp);
-        }
+        fieldSelectionTag.append(inputSelectionLabel,inputSelection, inputSelectionHelp);
         inputsContainer.append(fieldNameTag, fieldOrderTag,fieldPositionTag,fieldLengthTag,fieldFormatTag,fieldSelectionTag,fieldDeleteButton);
         fieldsContainer.append(divider,inputsContainer);
     }
