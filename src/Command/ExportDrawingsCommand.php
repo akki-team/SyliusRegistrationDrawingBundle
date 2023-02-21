@@ -46,6 +46,16 @@ class ExportDrawingsCommand extends Command
     private const DIRECTORY_EXPORT = '/exportsEditeur/';
     private const DIRECTORY_EXPORT_SFTP = '/exportsEditeurSynchroFTP/';
 
+    private const EN_DAYS = [
+        'LUNDI' => 'monday',
+        'MARDI' => 'tuesday',
+        'MERCREDI' => 'wednesday',
+        'JEUDI' => 'thursday',
+        'VENDREDI' => 'friday',
+        'SAMEDI' => 'saturday',
+        'DIMANCHE' => 'sunday'
+    ];
+
     /**
      * @param ObjectRepository $registrationDrawingRepository
      * @param OrderRepositoryInterface $orderRepository
@@ -109,6 +119,7 @@ class ExportDrawingsCommand extends Command
             /** @var RegistrationDrawing $registrationDrawing */
             foreach ($registrationDrawings as $drawing) {
                 $periodicity = $drawing->getPeriodicity();
+                $day = self::EN_DAYS[$drawing->getDay()];
 
                 if ($periodicity === Constants::PERIODICITY_MONTHLY) {
                     $timestampStartLastMonth = strtotime('first day of last month');
@@ -121,9 +132,9 @@ class ExportDrawingsCommand extends Command
                     $dateTimeStart = DateTime::createFromFormat ( 'Ymd', $startDateFormated);
                     $dateTimeEnd = DateTime::createFromFormat ( 'Ymd', $endDateFormated);
                 } else {
-                    $timestampStartLastWeek = strtotime('monday last week');
+                    $timestampStartLastWeek = strtotime($day.' last week');
                     $startDate = date('Y-m-d', $timestampStartLastWeek);
-                    $timestampEndLastWeek = strtotime('sunday last week');
+                    $timestampEndLastWeek = (new \DateTime())->setTimestamp($timestampStartLastWeek)->modify('+6 days')->getTimestamp();;
                     $endDate = date('Y-m-d', $timestampEndLastWeek);
 
                     $startDateFormated = date('Ymd', $timestampStartLastWeek);

@@ -47,7 +47,7 @@ class RegistrationDrawingController extends ResourceController
 
             if ($request->request->has('fields')) {
                 // Restructuration du tableau des champs avec l'Id et les options renseignées
-                $fields = $this->getFormFields($request->request->get('fields'));
+                $fields = $request->request->get('fields');
 
                 foreach($fields as $key => $field) {
                     $drawingFieldAssociationFactory = $this->get('sylius_registration_drawing.factory.drawing_field_association');
@@ -284,55 +284,6 @@ class RegistrationDrawingController extends ResourceController
         ;
 
         return $this->viewHandler->handle($configuration, $view);
-    }
-
-    /**
-     * @param array $formFields
-     * @return array
-     */
-    private function getFormFields(array $formFields): array
-    {
-        $fields = [];
-
-        foreach ($formFields as $key => $value) {
-            if (!is_null($value) && ($value !== "")) {
-                $fields[$this->getFieldId($key)][$this->getOptionFromFormFieldKey($key)] = $value;
-            }
-        }
-
-        return $fields;
-    }
-
-    /**
-     * @param string $fieldKey
-     * @return int
-     */
-    private function getFieldId(string $fieldKey): int
-    {
-        // Récupère le dernier nombre qui correspond à l'Id du champ
-        preg_match_all('/\d+/', $fieldKey, $numbers);
-        return (int)array_pop($numbers)[0];
-    }
-
-    /**
-     * @param string $fieldKey
-     * @return string|bool
-     */
-    private function getOptionFromFormFieldKey(string $fieldKey)
-    {
-        $options = Constants::FIELDS_OPTIONS;
-
-        // Découpe la chaine pour cibler l'option
-        $key = str_replace('_', ' ', $fieldKey);
-
-        // Récupère l'option du champ (ex: position)
-        foreach ($options as $option) {
-            if(strpos($key, $option) !== false){
-                return $option;
-            }
-        }
-
-        return false;
     }
 
     /**
