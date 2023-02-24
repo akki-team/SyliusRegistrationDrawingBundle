@@ -26,3 +26,7 @@ services:
     Akki\SyliusRegistrationDrawingBundle\Form\Extension\VendorTypeExtension:
         tags:
             - { name: form.type_extension, extended_type: Odiseo\SyliusVendorPlugin\Form\Type\VendorType }
+
+    Akki\SyliusRegistrationDrawingBundle\Form\Extension\TaxonTypeExtension:
+        tags:
+            - { name: form.type_extension, extended_type: Sylius\Bundle\TaxonomyBundle\Form\Type\TaxonType }
