@@ -16,6 +16,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpKernel\KernelInterface;
+use const PHP_EOL;
 
 class ExportDrawingsCommand extends Command
 {
@@ -167,6 +168,8 @@ class ExportDrawingsCommand extends Command
                     file_put_contents($fullFilelName, array_shift($export));
                     chmod($fullFilelName, 0777);
 
+                    $this->generateVarsFile($drawing, $filePathSynchroSFTPEditor);
+
                     $outputStyle->writeln("fin génération de l'export des commandes du $startDate au $endDate pour le dessin d'enregistrement {$drawing->getName()} déposé ici : $filePath");
                 }
             }
@@ -178,6 +181,29 @@ class ExportDrawingsCommand extends Command
         $this->release();
 
         return 0;
+    }
+
+    private function generateVarsFile(RegistrationDrawing $drawing, string $filePathSynchroSFTPEditor)
+    {
+        $fileName = $filePathSynchroSFTPEditor.'/drawing_conf.conf';
+        $sendMode = $drawing->getSendMode();
+        $depositAddress = $drawing->getDepositAddress();
+        $user = $drawing->getUser();
+        $password = $drawing->getPassword();
+        $host = $drawing->getHost();
+        $port = $drawing->getPort();
+
+        $data = [
+            "SEND_MODE=\"$sendMode\"",
+            "DEPOSIT_ADDRESS=\"$depositAddress\"",
+            "DRAWING_USER=\"$user\"",
+            "DRAWING_PASSWORD=\"$password\"",
+            "DRAWING_HOST=\"$host\"",
+            "DRAWING_PORT=\"$port\"",
+        ];
+
+        file_put_contents($fileName, implode(PHP_EOL, $data));
+        chmod($fileName, 0777);
     }
 
 }
