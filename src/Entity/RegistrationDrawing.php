@@ -112,6 +112,15 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     private $currencyDelimiter;
 
     /**
+     * @ORM\OneToMany(
+     *     targetEntity="App\Entity\Taxonomy\Taxon",
+     *     mappedBy="registrationDrawing",
+     *     orphanRemoval=true
+     * )
+     */
+    private $titles;
+
+    /**
      * @var DateTime
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime", nullable=false, name="created_at")
@@ -428,6 +437,22 @@ class RegistrationDrawing implements ResourceInterface, TimestampableInterface
     public function setCurrencyDelimiter(string $currencyDelimiter): void
     {
         $this->currencyDelimiter = $currencyDelimiter;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTitles()
+    {
+        return $this->titles;
+    }
+
+    /**
+     * @param mixed $titles
+     */
+    public function setTitles($titles): void
+    {
+        $this->titles = $titles;
     }
 
     /**

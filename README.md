@@ -38,6 +38,7 @@ sylius_registration_drawing:
 ```
 
 5. Add the RegistrationDrawingTrait to the Vendor entity
+
 ```php
 <?php
 // Entity/Vendor.php
@@ -48,6 +49,7 @@ class Vendor extends BaseVendor
 ```
 
 6. Add the OrderDrawingRepositoryTrait to the OrderRepository entity
+
 ```php
 <?php
 // Repository/OrderRepository.php
@@ -57,14 +59,34 @@ class OrderRepository extends BaseOrderRepository implements OrderRepositoryInte
     use OrderDrawingRepositoryTrait;
 ```
 
-7. Add the form field in your admin view to add registration drawings selection
+7. Add the RegistrationDrawingTaxonTrait to the Taxon entity
+
+```php
+<?php
+// Entity/Taxonomy/Taxon.php
+
+class Taxon extends BaseTaxon
+{
+    use RegistrationDrawingTaxonTrait;
+```
+
+8. Add the form field in your admin view to add Vendor registration drawings selection
+
 ```html
 // templates/bundles/OdiseoSyliusMarketplacePlugin/Admin/Vendor/Tab/_details.html.twig
 
 {{ form_row(form.registrationDrawing) }}
 ```
 
-8. Finish the installation updating the database schema and installing assets
+9. Add the form field in your admin view to add Taxon registration drawings selection
+
+```html
+// templates/bundles/SyliusAdminBundle/Taxon/Tab/_market_place.html.twig
+
+{{ form_row(form.registrationDrawing) }}
+```
+
+10. Finish the installation updating the database schema and installing assets
 
 ```
 php bin/console doctrine:migrations:migrate
@@ -72,7 +94,7 @@ php bin/console sylius:theme:assets:install
 php bin/console cache:clear
 ```
 
-9. This bundle provide a command to generate exported files.
+11. This bundle provide a command to generate exported files.
 
 ```
 php bin/console export-drawings:generate

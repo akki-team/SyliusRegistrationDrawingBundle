@@ -150,9 +150,9 @@ class ExportDrawingsCommand extends Command
                 if (!empty($orders)) {
                     $export = $this->registrationDrawingController->exportDrawing($drawing, $orders, $filePath);
 
-                    $drawingVendors = $drawing->getVendors()->toArray();
+                    $drawingFirstVendor = !empty($drawing->getVendors()) ? $drawing->getVendors()->toArray()[0] : null;
 
-                    $this->generatedFileService->addFile(array_shift($drawingVendors), $fileName, $filePath, $dateTimeStart, $dateTimeEnd, $export[1], $export[2], $drawing);
+                    $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $dateTimeStart, $dateTimeEnd, $export[1], $export[2], $drawing);
 
                     $filePathSynchroSFTPRoot = $this->kernelProjectDir.self::DIRECTORY_PUBLIC.self::DIRECTORY_EXPORT_SFTP;
                     $filePathSynchroSFTPEditor = $filePathSynchroSFTPRoot.$drawing->getId();

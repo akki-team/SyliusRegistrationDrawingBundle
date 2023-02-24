@@ -17,7 +17,7 @@ trait OrderDrawingRepositoryTrait
      */
     public function findAllTransmittedForDrawingExport(RegistrationDrawing $registrationDrawing, string $dateDebut, string $dateFin): ?array
     {
-        $query =  $this->createListByVendorsQueryBuilder($registrationDrawing->getVendors()) ;
+        $query =  $this->createListByVendorsOrTitlesQueryBuilder($registrationDrawing->getVendors(), $registrationDrawing->getTitles()) ;
         $query->andWhere('o.state != :state_new')
             ->andWhere('o.state != :state_cancelled')
             ->setParameter('state_new', OrderInterface::STATE_NEW)
@@ -48,17 +48,21 @@ trait OrderDrawingRepositoryTrait
      * @param $vendors
      * @return QueryBuilder
      */
-    public function createListByVendorsQueryBuilder($vendors): QueryBuilder
+    public function createListByVendorsOrTitlesQueryBuilder($vendors, $titles): QueryBuilder
     {
         return $this->createQueryBuilder('o')
-            ->innerJoin('o.channel', 'channel')
             ->innerJoin('o.items', 'items')
             ->innerJoin('items.variant', 'variant')
             ->innerJoin('variant.product', 'product')
             ->andWhere('product.vendor IN (:vendors)')
+            ->orWhere('product.mainTaxon IN (:titles)')
             ->andWhere('o.state != :state')
-            ->setParameter('vendors', $vendors)
-            ->setParameter('state', \Sylius\Component\Core\Model\OrderInterface::STATE_CART)
+            ->setParameters([
+                'vendors' => $vendors,
+                'titles' => $titles,
+                'state' => OrderInterface::STATE_CART
+            ])
+            ->distinct('o.id')
             ->groupBy('o.id')
         ;
     }
