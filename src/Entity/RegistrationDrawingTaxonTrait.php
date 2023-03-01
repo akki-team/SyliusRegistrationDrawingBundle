@@ -2,13 +2,15 @@
 
 namespace Akki\SyliusRegistrationDrawingBundle\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
+
 trait RegistrationDrawingTaxonTrait
 {
     /**
      * @ORM\ManyToOne(targetEntity="Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing", inversedBy="titles")
      * @ORM\JoinColumn(name="registration_drawing_id", referencedColumnName="id", nullable=true, onDelete="CASCADE")
      */
-    protected $registrationDrawing;
+    private $registrationDrawing;
 
     /**
      * @return RegistrationDrawing|null

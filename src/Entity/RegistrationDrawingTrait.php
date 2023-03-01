@@ -2,6 +2,8 @@
 
 namespace Akki\SyliusRegistrationDrawingBundle\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
+
 trait RegistrationDrawingTrait
 {
     /**
