@@ -113,7 +113,7 @@ class ExportDrawingsCommand extends Command
 
         $outputStyle->writeln('Debut génération des commandes éditeurs');
 
-        $registrationDrawings = $this->registrationDrawingRepository->findAll() ;
+        $registrationDrawings = $this->registrationDrawingRepository->findAll();
 
         if (!empty($registrationDrawings)) {
             /** @var RegistrationDrawing $registrationDrawing */

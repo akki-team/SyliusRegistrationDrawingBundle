@@ -11,17 +11,18 @@ trait RegistrationDrawingTrait
     protected $registrationDrawing;
 
     /**
-     * @return mixed
+     * @return RegistrationDrawing|null
      */
-    public function getRegistrationDrawing()
+    public function getRegistrationDrawing(): ?RegistrationDrawing
     {
         return $this->registrationDrawing;
     }
 
     /**
-     * @param mixed $registrationDrawing
+     * @param RegistrationDrawing|null $registrationDrawing
+     * @return void
      */
-    public function setRegistrationDrawing($registrationDrawing): void
+    public function setRegistrationDrawing(?RegistrationDrawing $registrationDrawing): void
     {
         $this->registrationDrawing = $registrationDrawing;
     }
