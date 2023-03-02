@@ -536,19 +536,18 @@ class RegistrationDrawingController extends ResourceController
      */
     private function applyPad($value, $zone): string
     {
-        $value = trim($value) ;
+        $value = trim((string)$value);
+        $length = mb_strlen($value);
 
-        $length = mb_strlen($value) ;
         if ($length > $zone){
-            $value = mb_substr($value, 0, $zone) ;
+            $value = mb_substr($value, 0, $zone);
         }
 
         if ($length < $zone){
-            $value = MbHelper::mb_str_pad($value, $zone) ;
+            $value = MbHelper::mb_str_pad($value, $zone);
         }
 
-        return $value ;
-
+        return $value;
     }
 
 }
