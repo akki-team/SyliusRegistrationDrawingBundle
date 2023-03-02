@@ -480,7 +480,7 @@ class RegistrationDrawingController extends ResourceController
                     continue;
                 }
 
-                $data = $this->prepareDrawingfieldsToExport($product->getVendor()->getRegistrationDrawing(), $item);
+                $data = $this->prepareDrawingfieldsToExport($registrationDrawing, $item);
 
                 if ($isRefunded) {
                     $totalCancellations++;

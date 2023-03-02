@@ -5,7 +5,7 @@ Registration drawings for Sylius. Manage and export to multiple formats (works w
 
 ## Installation
 
-1. Run `composer require akki/sylius-registration-drawing-bundle:@dev`
+1. Run `composer require akki/sylius-registration-drawing-bundle:@dev-master`
 
 2. Enable the plugin in bundles.php
 
