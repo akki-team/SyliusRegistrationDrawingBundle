@@ -341,7 +341,7 @@ class RegistrationDrawingController extends ResourceController
                     if (!empty($fieldAssociation->getFormat())) {
                         $data = $data->format($fieldAssociation->getFormat());
                     } else {
-                        $data = $data->format('d-m-Y H:i');
+                        $data = $data->format('dmY');
                     }
                 }
 
@@ -367,7 +367,7 @@ class RegistrationDrawingController extends ResourceController
                 }
 
                 if ($field->getName() === Constants::DATE_TRANSMISSION_FIELD) {
-                    $data = (new \DateTime('now'))->format('d-m-Y H:i');
+                    $data = (new \DateTime('now'))->format('dmY');
                 }
 
                 if ($field->getName() === Constants::BILLING_COUNTRY_FIELD) {
