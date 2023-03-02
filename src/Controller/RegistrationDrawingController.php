@@ -319,7 +319,7 @@ class RegistrationDrawingController extends ResourceController
             /** @var DrawingField $field */
             $field = $this->container->get('sylius_registration_drawing.repository.drawing_field')->find($fieldAssociation->getFieldId());
             $listAccessors = $field->getEquivalent();
-            $data = false;
+            $data = null;
 
             if (!is_null($listAccessors)) {
                 $accessors = explode('/', $listAccessors);
@@ -329,13 +329,13 @@ class RegistrationDrawingController extends ResourceController
                 foreach ($accessors as $accessor) {
                     $data = $this->getAccessor($accessor, $data);
 
-                    if ($data === false) {
+                    if (is_null($data)) {
                         break;
                     }
                 }
             }
 
-            if ($data !== false) {
+            if (!is_null($data)) {
                 // Formats dateTime
                 if ($data instanceof \DateTime) {
                     if (!empty($fieldAssociation->getFormat())) {
@@ -394,9 +394,7 @@ class RegistrationDrawingController extends ResourceController
                 }
             }
 
-            $data = $data ?? false;
-
-            $datas[] = $data === false ? '': $data;
+            $datas[] = is_null($data) ? '' : $data;
         }
 
         return $datas;
