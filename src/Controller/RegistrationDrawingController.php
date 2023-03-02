@@ -130,9 +130,8 @@ class RegistrationDrawingController extends ResourceController
                         /** @var DrawingFieldAssociation $drawingFieldAssociation */
                         $drawingFieldAssociation = array_shift($fieldExist);
                         // update
-                        if (!empty($value['name'])) {
-                            $drawingFieldAssociation->setName($value['name']);
-                        }
+                        $drawingFieldAssociation->setName($value['name']);
+
                         if (!empty($value['order'])) {
                             $drawingFieldAssociation->setOrder((int)$value['order']);
                         }
@@ -145,11 +144,9 @@ class RegistrationDrawingController extends ResourceController
                         if (!empty($value['format'])) {
                             $drawingFieldAssociation->setFormat($value['format']);
                         }
-                        if (!empty($value['selection'])) {
-                            $drawingFieldAssociation->setSelection($value['selection']);
-                        }
 
-                        $drawingFieldAssociationManager->persist($drawingFieldAssociation);
+                        $drawingFieldAssociation->setSelection($value['selection']);
+
                     } else {
                         // create
                         $drawingFieldAssociationFactory = $this->get('sylius_registration_drawing.factory.drawing_field_association');
@@ -159,9 +156,9 @@ class RegistrationDrawingController extends ResourceController
 
                         $drawingFieldAssociation->setDrawingId($resource->getId());
                         $drawingFieldAssociation->setFieldId($key);
-                        if (!empty($value['name'])) {
-                            $drawingFieldAssociation->setName($value['name']);
-                        }
+
+                        $drawingFieldAssociation->setName($value['name']);
+
                         if (!empty($value['order'])) {
                             $drawingFieldAssociation->setOrder((int)$value['order']);
                         }
@@ -174,9 +171,8 @@ class RegistrationDrawingController extends ResourceController
                         if (!empty($value['format'])) {
                             $drawingFieldAssociation->setFormat($value['format']);
                         }
-                        if (!empty($value['selection'])) {
-                            $drawingFieldAssociation->setSelection($value['selection']);
-                        }
+
+                        $drawingFieldAssociation->setSelection($value['selection']);
 
                         $drawingFieldAssociationManager->persist($drawingFieldAssociation);
                     }
