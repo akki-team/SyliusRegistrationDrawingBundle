@@ -411,11 +411,7 @@ class RegistrationDrawingController extends ResourceController
         /** @var DrawingFieldAssociationRepository $repository */
         $repository = $this->container->get('sylius_registration_drawing.repository.drawing_field_association');
 
-        if ($registrationDrawing->getFormat() === Constants::CSV_FORMAT) {
-            return $repository->getFields($registrationDrawing->getId());
-        } else {
-            return $repository->getFieldsByPosition($registrationDrawing->getId());
-        }
+        return $repository->getFields($registrationDrawing->getId());
     }
 
     /**
