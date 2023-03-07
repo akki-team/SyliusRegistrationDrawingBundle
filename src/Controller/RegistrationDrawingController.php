@@ -379,7 +379,7 @@ class RegistrationDrawingController extends ResourceController
                 }
 
                 if (($field->getName() === Constants::OFFER_AMOUNT_FIELD) && ($registrationDrawing->getCurrencyFormat() === Constants::CURRENCY_NUMBER_FORMAT)) {
-                    $data = number_format((float)$data, 2, $registrationDrawing->getCurrencyDelimiter(), '');
+                    $data = number_format((int)$data / 100, 2, $registrationDrawing->getCurrencyDelimiter(), '');
                 }
             }
 
