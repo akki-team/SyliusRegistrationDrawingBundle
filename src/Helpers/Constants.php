@@ -75,12 +75,12 @@ class Constants
     public const BILLING_COUNTRY_FIELD = 'Pays payeur';
     public const SHIPPING_COUNTRY_FIELD = 'Pays Destinataire';
     public const OFFER_AMOUNT_FIELD = 'Montant de l\'offre TTC';
-
     public const MOVEMENT_TYPE_FIELD = 'Type mouvement';
     public const PAYER_CIVILITY_FIELD = 'Civilité Payeur';
     public const RECIPIENT_CIVILITY_FIELD = 'Civilité Destinataire';
     public const PAYER_EMAIL_OPT_IN_FIELD = 'Opt-in Email payeur';
     public const RECIPIENT_EMAIL_OPT_IN_FIELD = 'Opt-in Email Destinataire : Optout par défaut';
+    public const KM_PURCHASE_ID_FIELD = 'Id achat KM';
 
     public const ADL_OFFER_TYPE = 'ADL';
     public const ADD_OFFER_TYPE = 'ADD';

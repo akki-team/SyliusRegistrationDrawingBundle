@@ -385,6 +385,11 @@ class RegistrationDrawingController extends ResourceController
                 $data = OrderPaymentTransitions::TRANSITION_REFUND;
             }
 
+            // Gestion du champ "Id achat KM" => On ne prend que les 6 derniers numéros
+            if ($field->getName() === Constants::KM_PURCHASE_ID_FIELD) {
+                $data = substr((string)$data, -6);
+            }
+
             // Champ avec prix à formatter
             if (($field->getName() === Constants::OFFER_AMOUNT_FIELD) && ($registrationDrawing->getCurrencyFormat() === Constants::CURRENCY_NUMBER_FORMAT)) {
                 $data = number_format((int)$data / 100, 2, $registrationDrawing->getCurrencyDelimiter(), '');
@@ -395,7 +400,7 @@ class RegistrationDrawingController extends ResourceController
                 $data = $this->substitute($data, $fieldAssociation->getSelection());
             }
 
-            if ($registrationDrawing->getFormat() === Constants::FIXED_LENGTH_FORMAT) {
+            if (($registrationDrawing->getFormat() === Constants::FIXED_LENGTH_FORMAT) && ($field->getName() !== Constants::KM_PURCHASE_ID_FIELD)) {
                 if (!empty($fieldAssociation->getLength())) {
                     $data = $this->applyPad($data, $fieldAssociation->getLength());
                 }
