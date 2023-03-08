@@ -2,6 +2,7 @@
 
 namespace Akki\SyliusRegistrationDrawingBundle\Helpers;
 
+use Sylius\Component\Core\OrderPaymentTransitions;
 use Sylius\Component\Customer\Model\CustomerInterface;
 use Sylius\Component\Order\Model\OrderInterface;
 
@@ -57,8 +58,6 @@ class Constants
         self::SSH_MODE => self::SSH_MODE
     ];
 
-    public const FIELDS_OPTIONS = ['order', 'position', 'length', 'format', 'selection'];
-
     public const RETURN_FLOW_FIELDS = [
         'N_client payeur_editeur',
         'N_client destinataire editeur',
@@ -111,7 +110,8 @@ class Constants
                 OrderInterface::STATE_CART,
                 OrderInterface::STATE_NEW,
                 OrderInterface::STATE_CANCELLED,
-                OrderInterface::STATE_FULFILLED
+                OrderInterface::STATE_FULFILLED,
+                OrderPaymentTransitions::TRANSITION_REFUND
             ]
         ],
         1 => [

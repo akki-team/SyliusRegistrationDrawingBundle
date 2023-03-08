@@ -16,6 +16,7 @@ use Sylius\Bundle\ResourceBundle\Event\ResourceControllerEvent;
 use Sylius\Component\Core\Model\Order;
 use Sylius\Component\Core\Model\OrderItem;
 use Sylius\Component\Core\OrderPaymentStates;
+use Sylius\Component\Core\OrderPaymentTransitions;
 use Sylius\Component\Resource\Exception\UpdateHandlingException;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Sylius\Component\Resource\ResourceActions;
@@ -377,6 +378,11 @@ class RegistrationDrawingController extends ResourceController
                 if ($field->getName() === Constants::SHIPPING_COUNTRY_FIELD) {
                     $data = Intl::getRegionBundle()->getCountryName($orderItem->getShippingAddress()->getCountryCode());
                 }
+            }
+
+            // Gestion du champ "Type mouvement" si paiement remboursé
+            if (($field->getName() === Constants::MOVEMENT_TYPE_FIELD) && ($orderItem->getOrder()->getPaymentState() === OrderPaymentStates::STATE_REFUNDED)) {
+                $data = OrderPaymentTransitions::TRANSITION_REFUND;
             }
 
             // Champ avec prix à formatter
