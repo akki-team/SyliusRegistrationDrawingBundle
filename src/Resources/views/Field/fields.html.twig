@@ -40,7 +40,7 @@
                 <div class="drawing-column three fields">
                     <div class="field">
                         <label for="{{ fieldNameSlugified }}-name-{{ fieldId }}">{{ 'sylius_registration_drawing.form.drawing_field.name'|trans }}</label>
-                        <input type="text" id="{{ fieldNameSlugified }}-name-{{ fieldId }}" name="fields[{{ fieldId }}][name]]" value="{{ fieldName }}">
+                        <input type="text" id="{{ fieldNameSlugified }}-name-{{ fieldId }}" name="fields[{{ fieldId }}][name]]" value="{{ field.name }}">
                     </div>
                     <div class="field">
                         <label for="{{ fieldNameSlugified }}-order-{{ fieldId }}">{{ 'sylius_registration_drawing.form.drawing_field.order'|trans }}</label>
