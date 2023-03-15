@@ -400,7 +400,7 @@ class RegistrationDrawingController extends ResourceController
                 $data = $this->substitute($data, $fieldAssociation->getSelection());
             }
 
-            if (($registrationDrawing->getFormat() === Constants::FIXED_LENGTH_FORMAT) && ($field->getName() !== Constants::KM_PURCHASE_ID_FIELD)) {
+            if ($registrationDrawing->getFormat() === Constants::FIXED_LENGTH_FORMAT) {
                 if (!empty($fieldAssociation->getLength())) {
                     $data = $this->applyPad($data, $fieldAssociation->getLength());
                 }
