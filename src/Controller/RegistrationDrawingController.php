@@ -385,8 +385,8 @@ class RegistrationDrawingController extends ResourceController
                 $data = OrderPaymentTransitions::TRANSITION_REFUND;
             }
 
-            // Gestion du champ "Id achat KM" => On ne prend que les 6 derniers numéros
-            if ($field->getName() === Constants::KM_PURCHASE_ID_FIELD) {
+            // Gestion du champ "Id achat KM" en longueur fixe => On ne prend que les 6 derniers numéros
+            if (($field->getName() === Constants::KM_PURCHASE_ID_FIELD) && ($registrationDrawing->getFormat() === Constants::FIXED_LENGTH_FORMAT)) {
                 $data = substr((string)$data, -6);
             }
 
