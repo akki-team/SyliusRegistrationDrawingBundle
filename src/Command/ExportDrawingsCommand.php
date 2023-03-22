@@ -5,6 +5,7 @@ namespace Akki\SyliusRegistrationDrawingBundle\Command;
 use Akki\SyliusRegistrationDrawingBundle\Controller\RegistrationDrawingController;
 use Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing;
 use Akki\SyliusRegistrationDrawingBundle\Helpers\Constants;
+use App\Entity\Taxonomy\Taxon;
 use App\Repository\OrderRepositoryInterface;
 use App\Service\ExportEditeur\GeneratedFileService;
 use DateTime;
@@ -143,7 +144,21 @@ class ExportDrawingsCommand extends Command
                     $dateTimeEnd = DateTime::createFromFormat ( 'Ymd', $endDateFormated);
                 }
 
-                $orders = $this->orderRepository->findAllTransmittedForDrawingExport($drawing, $startDate, $endDate);
+                $otherDrawings = array_filter($this->registrationDrawingRepository->findAll(), function ($dr) use ($drawing) {
+                    return $dr !== $drawing;
+                });
+
+                $otherTitles = [];
+
+                /** @var RegistrationDrawing $otherDrawing */
+                foreach ($otherDrawings as $otherDrawing) {
+                    /** @var Taxon $title */
+                    foreach ($otherDrawing->getTitles() as $title) {
+                        $otherTitles[] = $title->getName();
+                    }
+                }
+
+                $orders = $this->orderRepository->findAllTransmittedForDrawingExport($drawing, $startDate, $endDate, $otherTitles);
 
                 $fileName = $drawing->getFormat() === Constants::CSV_FORMAT ? "{$drawing->getName()}_{$startDate}_{$endDate}.csv" : "{$drawing->getName()}_{$startDate}_{$endDate}.txt";
                 $filePath = $this->kernelProjectDir.self::DIRECTORY_PUBLIC.self::DIRECTORY_EXPORT.$fileName;
