@@ -154,7 +154,7 @@ class ExportDrawingsCommand extends Command
                 foreach ($otherDrawings as $otherDrawing) {
                     /** @var Taxon $title */
                     foreach ($otherDrawing->getTitles() as $title) {
-                        $otherTitles[] = $title->getName();
+                        $otherTitles[] = $title;
                     }
                 }
 
