@@ -457,6 +457,8 @@ class RegistrationDrawingController extends ResourceController
     public function exportDrawing(RegistrationDrawing $registrationDrawing, array $orders, string $filePath): array
     {
         $headers = $this->prepareDrawingHeaderToCSVExport($registrationDrawing);
+        $registrationDrawingVendors = $registrationDrawing->getVendors()->toArray();
+        $registrationDrawingTitles = $registrationDrawing->getTitles()->toArray();
 
         $fields = [];
         $totalLines = 0;
@@ -468,7 +470,7 @@ class RegistrationDrawingController extends ResourceController
             $periodStart = $registrationDrawing->getPeriodicity() === Constants::PERIODICITY_WEEKLY ? '- 1 week' : '-1 month';
 
             // On ne prends pas en compte les commandes annulées dans la période précédente définie
-            if ($isRefunded && ($order->getCheckoutCompletedAt() > new \DateTime($periodStart))) {
+            if ($isRefunded && ($order->getCheckoutCompletedAt() < new \DateTime($periodStart))) {
                 continue;
             }
 
@@ -477,20 +479,27 @@ class RegistrationDrawingController extends ResourceController
             /** @var OrderItem $item */
             foreach ($items as $item) {
                 $product = $item->getProduct();
+                $isValidProduct = false;
 
-                if ($product->getVendor() === null) {
-                    continue;
-                }
-
-                $data = $this->prepareDrawingfieldsToExport($registrationDrawing, $item);
-
-                if ($isRefunded) {
-                    $totalCancellations++;
+                if (in_array($product->getMainTaxon(), $registrationDrawingTitles, true)) {
+                    $isValidProduct = true;
                 } else {
-                    $totalLines++;
+                    if (!is_null($product->getVendor()) && (in_array($product->getVendor(), $registrationDrawingVendors, true))) {
+                        $isValidProduct = true;
+                    }
                 }
 
-                $fields[] = $data;
+                if ($isValidProduct) {
+                    $data = $this->prepareDrawingfieldsToExport($registrationDrawing, $item);
+
+                    if ($isRefunded) {
+                        $totalCancellations++;
+                    } else {
+                        $totalLines++;
+                    }
+
+                    $fields[] = $data;
+                }
             }
         }
 
