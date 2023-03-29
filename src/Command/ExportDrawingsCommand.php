@@ -166,26 +166,28 @@ class ExportDrawingsCommand extends Command
                 if (!empty($orders)) {
                     $export = $this->registrationDrawingController->exportDrawing($drawing, $orders, $filePath, $otherTitles);
 
-                    $drawingFirstVendor = !empty($drawing->getVendors()) ? $drawing->getVendors()->toArray()[0] : null;
+                    if ($export[1] > 0) {
+                        $drawingFirstVendor = !empty($drawing->getVendors()) ? $drawing->getVendors()->toArray()[0] : null;
 
-                    $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $dateTimeStart, $dateTimeEnd, $export[1], $export[2], $drawing);
+                        $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $dateTimeStart, $dateTimeEnd, $export[1], $export[2], $drawing);
 
-                    $filePathSynchroSFTPRoot = $this->kernelProjectDir.self::DIRECTORY_PUBLIC.self::DIRECTORY_EXPORT_SFTP;
-                    $filePathSynchroSFTPEditor = $filePathSynchroSFTPRoot.$drawing->getId();
-                    $fullFilelName = $filePathSynchroSFTPEditor.'/'.$fileName;
-                    if (!is_dir($filePathSynchroSFTPEditor)) {
-                        if (!mkdir($filePathSynchroSFTPEditor, 0777, true) && !is_dir($filePathSynchroSFTPEditor)) {
-                            throw new \RuntimeException(sprintf('Directory "%s" was not created', $filePathSynchroSFTPEditor));
+                        $filePathSynchroSFTPRoot = $this->kernelProjectDir.self::DIRECTORY_PUBLIC.self::DIRECTORY_EXPORT_SFTP;
+                        $filePathSynchroSFTPEditor = $filePathSynchroSFTPRoot.$drawing->getId();
+                        $fullFilelName = $filePathSynchroSFTPEditor.'/'.$fileName;
+                        if (!is_dir($filePathSynchroSFTPEditor)) {
+                            if (!mkdir($filePathSynchroSFTPEditor, 0777, true) && !is_dir($filePathSynchroSFTPEditor)) {
+                                throw new \RuntimeException(sprintf('Directory "%s" was not created', $filePathSynchroSFTPEditor));
+                            }
                         }
+                        chmod($filePathSynchroSFTPRoot, 0777);
+                        chmod($filePathSynchroSFTPEditor, 0777);
+                        file_put_contents($fullFilelName, array_shift($export));
+                        chmod($fullFilelName, 0777);
+
+                        $this->generateVarsFile($drawing, $filePathSynchroSFTPEditor);
+
+                        $outputStyle->writeln("fin génération de l'export des commandes du $startDate au $endDate pour le dessin d'enregistrement {$drawing->getName()} déposé ici : $filePath");
                     }
-                    chmod($filePathSynchroSFTPRoot, 0777);
-                    chmod($filePathSynchroSFTPEditor, 0777);
-                    file_put_contents($fullFilelName, array_shift($export));
-                    chmod($fullFilelName, 0777);
-
-                    $this->generateVarsFile($drawing, $filePathSynchroSFTPEditor);
-
-                    $outputStyle->writeln("fin génération de l'export des commandes du $startDate au $endDate pour le dessin d'enregistrement {$drawing->getName()} déposé ici : $filePath");
                 }
             }
         } else {
