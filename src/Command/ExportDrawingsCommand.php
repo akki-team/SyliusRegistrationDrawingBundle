@@ -164,7 +164,7 @@ class ExportDrawingsCommand extends Command
                 $filePath = $this->kernelProjectDir.self::DIRECTORY_PUBLIC.self::DIRECTORY_EXPORT.$fileName;
 
                 if (!empty($orders)) {
-                    $export = $this->registrationDrawingController->exportDrawing($drawing, $orders, $filePath);
+                    $export = $this->registrationDrawingController->exportDrawing($drawing, $orders, $filePath, $otherTitles);
 
                     $drawingFirstVendor = !empty($drawing->getVendors()) ? $drawing->getVendors()->toArray()[0] : null;
 

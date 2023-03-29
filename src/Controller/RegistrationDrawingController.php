@@ -454,7 +454,7 @@ class RegistrationDrawingController extends ResourceController
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function exportDrawing(RegistrationDrawing $registrationDrawing, array $orders, string $filePath): array
+    public function exportDrawing(RegistrationDrawing $registrationDrawing, array $orders, string $filePath, $otherTitles): array
     {
         $headers = $this->prepareDrawingHeaderToCSVExport($registrationDrawing);
         $registrationDrawingVendors = $registrationDrawing->getVendors()->toArray();
@@ -484,7 +484,7 @@ class RegistrationDrawingController extends ResourceController
                 if (in_array($product->getMainTaxon(), $registrationDrawingTitles, true)) {
                     $isValidProduct = true;
                 } else {
-                    if (!is_null($product->getVendor()) && (in_array($product->getVendor(), $registrationDrawingVendors, true))) {
+                    if (!is_null($product->getVendor()) && (in_array($product->getVendor(), $registrationDrawingVendors, true)) && (!in_array($product->getMainTaxon(), $otherTitles, true))) {
                         $isValidProduct = true;
                     }
                 }
