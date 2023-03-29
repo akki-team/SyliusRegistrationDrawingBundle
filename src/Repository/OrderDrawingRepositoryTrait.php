@@ -54,9 +54,7 @@ trait OrderDrawingRepositoryTrait
             ->innerJoin('o.items', 'items')
             ->innerJoin('items.variant', 'variant')
             ->innerJoin('variant.product', 'product')
-            ->andWhere('product.vendor IN (:vendors) AND product.mainTaxon IN (:titles)')
-            ->orWhere('product.vendor IN (:vendors) AND product.mainTaxon NOT IN (:otherTitles)')
-            ->orWhere('product.mainTaxon IN (:titles)')
+            ->where('(product.vendor IN (:vendors)) OR (product.vendor IN (:vendors) AND product.mainTaxon NOT IN (:otherTitles)) OR (product.mainTaxon IN (:titles))')
             ->andWhere('o.state != :state')
             ->setParameters([
                 'vendors' => $vendors,
