@@ -15,9 +15,9 @@ trait OrderDrawingRepositoryTrait
      * @param string $dateFin
      * @return array|null
      */
-    public function findAllTransmittedForDrawingExport(RegistrationDrawing $registrationDrawing, string $dateDebut, string $dateFin): ?array
+    public function findAllTransmittedForDrawingExport(RegistrationDrawing $registrationDrawing, string $dateDebut, string $dateFin, array $otherTitles): ?array
     {
-        $query =  $this->createListByVendorsOrTitlesQueryBuilder($registrationDrawing->getVendors(), $registrationDrawing->getTitles()) ;
+        $query =  $this->createListByVendorsOrTitlesQueryBuilder($registrationDrawing->getVendors(), $registrationDrawing->getTitles(), $otherTitles) ;
         $query->andWhere('o.state != :state_new')
             ->andWhere('o.state != :state_cancelled')
             ->setParameter('state_new', OrderInterface::STATE_NEW)
@@ -48,18 +48,18 @@ trait OrderDrawingRepositoryTrait
      * @param $vendors
      * @return QueryBuilder
      */
-    public function createListByVendorsOrTitlesQueryBuilder($vendors, $titles): QueryBuilder
+    public function createListByVendorsOrTitlesQueryBuilder($vendors, $titles, $otherTitles): QueryBuilder
     {
         return $this->createQueryBuilder('o')
             ->innerJoin('o.items', 'items')
             ->innerJoin('items.variant', 'variant')
             ->innerJoin('variant.product', 'product')
-            ->andWhere('product.vendor IN (:vendors)')
-            ->orWhere('product.mainTaxon IN (:titles)')
+            ->where('(product.vendor IN (:vendors)) OR (product.vendor IN (:vendors) AND product.mainTaxon NOT IN (:otherTitles)) OR (product.mainTaxon IN (:titles))')
             ->andWhere('o.state != :state')
             ->setParameters([
                 'vendors' => $vendors,
                 'titles' => $titles,
+                'otherTitles' => $otherTitles,
                 'state' => OrderInterface::STATE_CART
             ])
             ->distinct('o.id')

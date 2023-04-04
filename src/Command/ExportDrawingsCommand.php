@@ -6,6 +6,7 @@ use Akki\SyliusRegistrationDrawingBundle\Controller\RegistrationDrawingControlle
 use Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing;
 use Akki\SyliusRegistrationDrawingBundle\Helpers\Constants;
 use App\Command\KMSendEditorExportCommand;
+use App\Entity\Taxonomy\Taxon;
 use App\Repository\OrderRepositoryInterface;
 use App\Service\ExportEditeur\GeneratedFileService;
 use DateTime;
@@ -153,17 +154,32 @@ class ExportDrawingsCommand extends Command
                 $dateTimeStart = DateTime::createFromFormat ( 'Ymd', $startDateFormated);
                 $dateTimeEnd = DateTime::createFromFormat ( 'Ymd', $endDateFormated);
 
-                $orders = $this->orderRepository->findAllTransmittedForDrawingExport($drawing, $startDate, $endDate);
+                $otherDrawings = array_filter($this->registrationDrawingRepository->findAll(), function ($dr) use ($drawing) {
+                    return $dr !== $drawing;
+                });
+
+                $otherTitles = [];
+
+                /** @var RegistrationDrawing $otherDrawing */
+                foreach ($otherDrawings as $otherDrawing) {
+                    /** @var Taxon $title */
+                    foreach ($otherDrawing->getTitles() as $title) {
+                        $otherTitles[] = $title;
+                    }
+                }
+
+                $orders = $this->orderRepository->findAllTransmittedForDrawingExport($drawing, $startDate, $endDate, $otherTitles);
 
                 $fileName = $drawing->getFormat() === Constants::CSV_FORMAT ? "{$drawing->getName()}_{$startDate}_$endDate.csv" : "{$drawing->getName()}_{$startDate}_$endDate.txt";
                 $filePath = $this->kernelProjectDir.self::DIRECTORY_PUBLIC.self::DIRECTORY_EXPORT.$fileName;
 
                 if (!empty($orders)) {
-                    $export = $this->registrationDrawingController->exportDrawing($drawing, $orders, $filePath);
+                    $export = $this->registrationDrawingController->exportDrawing($drawing, $orders, $filePath, $otherTitles);
                     $totalLines = $export[1];
                     $totalCancellations = $export[2];
 
-                    $drawingFirstVendor = !empty($drawing->getVendors()) ? $drawing->getVendors()->toArray()[0] : null;
+                    if ($export[1] > 0) {
+                        $drawingFirstVendor = !empty($drawing->getVendors()) ? $drawing->getVendors()->toArray()[0] : null;
 
                     $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $dateTimeStart, $dateTimeEnd, $totalLines, $totalCancellations, $drawing);
 
@@ -172,7 +188,8 @@ class ExportDrawingsCommand extends Command
                     $this->sendMail($fileName, $output);
                     $outputStyle->newLine();
 
-                    $outputStyle->writeln("fin génération de l'export des commandes du $startDate au $endDate pour le dessin d'enregistrement {$drawing->getName()} déposé ici : $filePath");
+                        $outputStyle->writeln("fin génération de l'export des commandes du $startDate au $endDate pour le dessin d'enregistrement {$drawing->getName()} déposé ici : $filePath");
+                    }
                 }
             }
         } else {

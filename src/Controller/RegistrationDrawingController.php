@@ -16,6 +16,7 @@ use Sylius\Bundle\ResourceBundle\Event\ResourceControllerEvent;
 use Sylius\Component\Core\Model\Order;
 use Sylius\Component\Core\Model\OrderItem;
 use Sylius\Component\Core\OrderPaymentStates;
+use Sylius\Component\Core\OrderPaymentTransitions;
 use Sylius\Component\Resource\Exception\UpdateHandlingException;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Sylius\Component\Resource\ResourceActions;
@@ -130,9 +131,8 @@ class RegistrationDrawingController extends ResourceController
                         /** @var DrawingFieldAssociation $drawingFieldAssociation */
                         $drawingFieldAssociation = array_shift($fieldExist);
                         // update
-                        if (!empty($value['name'])) {
-                            $drawingFieldAssociation->setName($value['name']);
-                        }
+                        $drawingFieldAssociation->setName($value['name']);
+
                         if (!empty($value['order'])) {
                             $drawingFieldAssociation->setOrder((int)$value['order']);
                         }
@@ -145,11 +145,9 @@ class RegistrationDrawingController extends ResourceController
                         if (!empty($value['format'])) {
                             $drawingFieldAssociation->setFormat($value['format']);
                         }
-                        if (!empty($value['selection'])) {
-                            $drawingFieldAssociation->setSelection($value['selection']);
-                        }
 
-                        $drawingFieldAssociationManager->persist($drawingFieldAssociation);
+                        $drawingFieldAssociation->setSelection($value['selection']);
+
                     } else {
                         // create
                         $drawingFieldAssociationFactory = $this->get('sylius_registration_drawing.factory.drawing_field_association');
@@ -159,9 +157,9 @@ class RegistrationDrawingController extends ResourceController
 
                         $drawingFieldAssociation->setDrawingId($resource->getId());
                         $drawingFieldAssociation->setFieldId($key);
-                        if (!empty($value['name'])) {
-                            $drawingFieldAssociation->setName($value['name']);
-                        }
+
+                        $drawingFieldAssociation->setName($value['name']);
+
                         if (!empty($value['order'])) {
                             $drawingFieldAssociation->setOrder((int)$value['order']);
                         }
@@ -174,9 +172,8 @@ class RegistrationDrawingController extends ResourceController
                         if (!empty($value['format'])) {
                             $drawingFieldAssociation->setFormat($value['format']);
                         }
-                        if (!empty($value['selection'])) {
-                            $drawingFieldAssociation->setSelection($value['selection']);
-                        }
+
+                        $drawingFieldAssociation->setSelection($value['selection']);
 
                         $drawingFieldAssociationManager->persist($drawingFieldAssociation);
                     }
@@ -323,7 +320,7 @@ class RegistrationDrawingController extends ResourceController
             /** @var DrawingField $field */
             $field = $this->container->get('sylius_registration_drawing.repository.drawing_field')->find($fieldAssociation->getFieldId());
             $listAccessors = $field->getEquivalent();
-            $data = false;
+            $data = null;
 
             if (!is_null($listAccessors)) {
                 $accessors = explode('/', $listAccessors);
@@ -333,19 +330,19 @@ class RegistrationDrawingController extends ResourceController
                 foreach ($accessors as $accessor) {
                     $data = $this->getAccessor($accessor, $data);
 
-                    if ($data === false) {
+                    if (is_null($data)) {
                         break;
                     }
                 }
             }
 
-            if ($data !== false) {
+            if (!is_null($data)) {
                 // Formats dateTime
                 if ($data instanceof \DateTime) {
                     if (!empty($fieldAssociation->getFormat())) {
                         $data = $data->format($fieldAssociation->getFormat());
                     } else {
-                        $data = $data->format('d-m-Y H:i');
+                        $data = $data->format('dmY');
                     }
                 }
 
@@ -371,7 +368,7 @@ class RegistrationDrawingController extends ResourceController
                 }
 
                 if ($field->getName() === Constants::DATE_TRANSMISSION_FIELD) {
-                    $data = (new \DateTime('now'))->format('d-m-Y H:i');
+                    $data = (new \DateTime('now'))->format('dmY');
                 }
 
                 if ($field->getName() === Constants::BILLING_COUNTRY_FIELD) {
@@ -381,10 +378,21 @@ class RegistrationDrawingController extends ResourceController
                 if ($field->getName() === Constants::SHIPPING_COUNTRY_FIELD) {
                     $data = Intl::getRegionBundle()->getCountryName($orderItem->getShippingAddress()->getCountryCode());
                 }
+            }
 
-                if (($field->getName() === Constants::OFFER_AMOUNT_FIELD) && ($registrationDrawing->getCurrencyFormat() === Constants::CURRENCY_NUMBER_FORMAT)) {
-                    $data = number_format((float)$data, 2, $registrationDrawing->getCurrencyDelimiter(), '');
-                }
+            // Gestion du champ "Type mouvement" si paiement remboursé
+            if (($field->getName() === Constants::MOVEMENT_TYPE_FIELD) && ($orderItem->getOrder()->getPaymentState() === OrderPaymentStates::STATE_REFUNDED)) {
+                $data = OrderPaymentTransitions::TRANSITION_REFUND;
+            }
+
+            // Gestion du champ "Id achat KM" en longueur fixe => On ne prend que les 6 derniers numéros
+            if (($field->getName() === Constants::KM_PURCHASE_ID_FIELD) && ($registrationDrawing->getFormat() === Constants::FIXED_LENGTH_FORMAT)) {
+                $data = substr((string)$data, -6);
+            }
+
+            // Champ avec prix à formatter
+            if (($field->getName() === Constants::OFFER_AMOUNT_FIELD) && ($registrationDrawing->getCurrencyFormat() === Constants::CURRENCY_NUMBER_FORMAT)) {
+                $data = number_format((int)$data / 100, 2, $registrationDrawing->getCurrencyDelimiter(), '');
             }
 
             // Selection
@@ -398,9 +406,7 @@ class RegistrationDrawingController extends ResourceController
                 }
             }
 
-            $data = $data ?? false;
-
-            $datas[] = $data === false ? '': $data;
+            $datas[] = is_null($data) ? '' : $data;
         }
 
         return $datas;
@@ -417,11 +423,7 @@ class RegistrationDrawingController extends ResourceController
         /** @var DrawingFieldAssociationRepository $repository */
         $repository = $this->container->get('sylius_registration_drawing.repository.drawing_field_association');
 
-        if ($registrationDrawing->getFormat() === Constants::CSV_FORMAT) {
-            return $repository->getFields($registrationDrawing->getId());
-        } else {
-            return $repository->getFieldsByPosition($registrationDrawing->getId());
-        }
+        return $repository->getFields($registrationDrawing->getId());
     }
 
     /**
@@ -452,9 +454,11 @@ class RegistrationDrawingController extends ResourceController
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function exportDrawing(RegistrationDrawing $registrationDrawing, array $orders, string $filePath): array
+    public function exportDrawing(RegistrationDrawing $registrationDrawing, array $orders, string $filePath, $otherTitles): array
     {
         $headers = $this->prepareDrawingHeaderToCSVExport($registrationDrawing);
+        $registrationDrawingVendors = $registrationDrawing->getVendors()->toArray();
+        $registrationDrawingTitles = $registrationDrawing->getTitles()->toArray();
 
         $fields = [];
         $totalLines = 0;
@@ -466,7 +470,7 @@ class RegistrationDrawingController extends ResourceController
             $periodStart = $registrationDrawing->getPeriodicity() === Constants::PERIODICITY_WEEKLY ? '- 1 week' : '-1 month';
 
             // On ne prends pas en compte les commandes annulées dans la période précédente définie
-            if ($isRefunded && ($order->getCheckoutCompletedAt() > new \DateTime($periodStart))) {
+            if ($isRefunded && ($order->getCheckoutCompletedAt() < new \DateTime($periodStart))) {
                 continue;
             }
 
@@ -475,20 +479,27 @@ class RegistrationDrawingController extends ResourceController
             /** @var OrderItem $item */
             foreach ($items as $item) {
                 $product = $item->getProduct();
+                $isValidProduct = false;
 
-                if ($product->getVendor() === null) {
-                    continue;
-                }
-
-                $data = $this->prepareDrawingfieldsToExport($product->getVendor()->getRegistrationDrawing(), $item);
-
-                if ($isRefunded) {
-                    $totalCancellations++;
+                if (in_array($product->getMainTaxon(), $registrationDrawingTitles, true)) {
+                    $isValidProduct = true;
                 } else {
-                    $totalLines++;
+                    if (!is_null($product->getVendor()) && (in_array($product->getVendor(), $registrationDrawingVendors, true)) && (!in_array($product->getMainTaxon(), $otherTitles, true))) {
+                        $isValidProduct = true;
+                    }
                 }
 
-                $fields[] = $data;
+                if ($isValidProduct) {
+                    $data = $this->prepareDrawingfieldsToExport($registrationDrawing, $item);
+
+                    if ($isRefunded) {
+                        $totalCancellations++;
+                    } else {
+                        $totalLines++;
+                    }
+
+                    $fields[] = $data;
+                }
             }
         }
 
@@ -540,19 +551,18 @@ class RegistrationDrawingController extends ResourceController
      */
     private function applyPad($value, $zone): string
     {
-        $value = trim($value) ;
+        $value = trim((string)$value);
+        $length = mb_strlen($value);
 
-        $length = mb_strlen($value) ;
         if ($length > $zone){
-            $value = mb_substr($value, 0, $zone) ;
+            $value = mb_substr($value, 0, $zone);
         }
 
         if ($length < $zone){
-            $value = MbHelper::mb_str_pad($value, $zone) ;
+            $value = MbHelper::mb_str_pad($value, $zone);
         }
 
-        return $value ;
-
+        return $value;
     }
 
 }
