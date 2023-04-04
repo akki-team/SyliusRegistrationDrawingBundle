@@ -28,7 +28,7 @@ class ExportDrawingsCommand extends Command
 {
     use LockableTrait;
 
-    protected static string $defaultName = 'export-drawings:generate';
+    protected static $defaultName = 'export-drawings:generate';
 
     /** @var ObjectRepository $registrationDrawingRepository */
     protected ObjectRepository $registrationDrawingRepository;
