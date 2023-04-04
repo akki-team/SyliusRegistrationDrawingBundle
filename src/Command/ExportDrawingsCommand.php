@@ -125,7 +125,11 @@ class ExportDrawingsCommand extends Command
                 $periodicity = $drawing->getPeriodicity();
                 $day = self::EN_DAYS[$drawing->getDay()];
 
-                if ($day === strtolower(date('l'))) {
+                if ($periodicity === Constants::PERIODICITY_WEEKLY && $day !== strtolower(date('l'))) {
+                    continue;
+                }
+
+                if ($periodicity === Constants::PERIODICITY_MONTHLY && date('j') !== '1') {
                     continue;
                 }
 
