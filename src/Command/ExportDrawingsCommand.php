@@ -22,6 +22,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
 
 class ExportDrawingsCommand extends Command
@@ -183,10 +184,12 @@ class ExportDrawingsCommand extends Command
 
                     $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $dateTimeStart, $dateTimeEnd, $totalLines, $totalCancellations, $drawing);
 
-                    $this->SendSalesReportToVendor($drawing, $filePath);
+                    $success = $this->sendSalesReportToVendor($drawing, $filePath, $outputStyle);
 
-                    $this->sendMail($fileName, $output);
-                    $outputStyle->newLine();
+                    if ($success) {
+                        $this->sendMail($fileName, $output);
+                        $outputStyle->newLine();
+                    }
 
                         $outputStyle->writeln("fin génération de l'export des commandes du $startDate au $endDate pour le dessin d'enregistrement {$drawing->getName()} déposé ici : $filePath");
                     }
@@ -205,13 +208,17 @@ class ExportDrawingsCommand extends Command
     /**
      * @param RegistrationDrawing $drawing
      * @param string $filePath
-     * @return void
+     * @param SymfonyStyle $outputStyle
+     * @return bool
      */
-    public function SendSalesReportToVendor(
+    public function sendSalesReportToVendor(
         RegistrationDrawing $drawing,
-        string $filePath
-    ): void
+        string $filePath,
+        SymfonyStyle $outputStyle
+    ): bool
     {
+        $success = false;
+
         $rsaSrc = "/home/www-data/.ssh/id_rsa";
         $sendMode = $drawing->getSendMode();
         $depositAddress = $drawing->getDepositAddress();
@@ -222,17 +229,29 @@ class ExportDrawingsCommand extends Command
 
         // si depose SFTP
         if ($sendMode === 'SSH') {
-            $command = "sftp -i $rsaSrc -P $port $user@$host:$depositAddress <<< $'put \"$filePath\"'";
-
+            $command = "sftp -o StrictHostKeyChecking=no -i $rsaSrc -P $port $user@$host:\"$depositAddress\" <<< $'put \"$filePath\"'";
         } else {
-            $command = "lftp ftp://$user:$password@$host:$port -e 'put -O \"$depositAddress\" \"$filePath\"; quit'";
+            $lftpOption = "set sftp:connect-program 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
+            $command = "lftp -c \"$lftpOption; connect sftp://$user:$password@$host:$port;put -O '$depositAddress' '$filePath'\"";
         }
 
+        $outputStyle->writeln($command);
         $process = Process::fromShellCommandline($command);
-        $process->run() ;
-        if (!$process->isSuccessful()) {
-            throw new ProcessFailedException($process);
+
+        try {
+            $process->run() ;
+        } catch (ProcessTimedOutException $pte) {
+            $outputStyle->writeln("Erreur pendant la depose SFTP : ".$pte->getMessage());
+        } finally {
+            if (!$process->isSuccessful()) {
+                $outputStyle->writeln("Erreur pendant la depose SFTP");
+            } else {
+                $success = true;
+                $outputStyle->writeln("Dépose SFTP avec succès");
+            }
         }
+
+        return $success;
     }
 
     /**
