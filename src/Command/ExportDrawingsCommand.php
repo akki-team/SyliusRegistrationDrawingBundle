@@ -5,19 +5,25 @@ namespace Akki\SyliusRegistrationDrawingBundle\Command;
 use Akki\SyliusRegistrationDrawingBundle\Controller\RegistrationDrawingController;
 use Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing;
 use Akki\SyliusRegistrationDrawingBundle\Helpers\Constants;
+use App\Command\KMSendEditorExportCommand;
 use App\Entity\Taxonomy\Taxon;
 use App\Repository\OrderRepositoryInterface;
 use App\Service\ExportEditeur\GeneratedFileService;
 use DateTime;
 use Doctrine\Persistence\ObjectRepository;
 use Odiseo\SyliusVendorPlugin\Repository\VendorRepositoryInterface;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpKernel\KernelInterface;
-use const PHP_EOL;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
+use Symfony\Component\Process\Process;
 
 class ExportDrawingsCommand extends Command
 {
@@ -45,7 +51,6 @@ class ExportDrawingsCommand extends Command
 
     private const DIRECTORY_PUBLIC = '/var';
     private const DIRECTORY_EXPORT = '/exportsEditeur/';
-    private const DIRECTORY_EXPORT_SFTP = '/exportsEditeurSynchroFTP/';
 
     private const EN_DAYS = [
         'LUNDI' => 'monday',
@@ -99,8 +104,8 @@ class ExportDrawingsCommand extends Command
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -122,6 +127,14 @@ class ExportDrawingsCommand extends Command
                 $periodicity = $drawing->getPeriodicity();
                 $day = self::EN_DAYS[$drawing->getDay()];
 
+                if ($periodicity === Constants::PERIODICITY_WEEKLY && $day !== strtolower(date('l'))) {
+                    continue;
+                }
+
+                if ($periodicity === Constants::PERIODICITY_MONTHLY && date('j') !== '1') {
+                    continue;
+                }
+
                 if ($periodicity === Constants::PERIODICITY_MONTHLY) {
                     $timestampStartLastMonth = strtotime('first day of last month midnight');
                     $startDate = date('Y-m-d', $timestampStartLastMonth);
@@ -130,8 +143,6 @@ class ExportDrawingsCommand extends Command
 
                     $startDateFormated = date('Ymd', $timestampStartLastMonth);
                     $endDateFormated = date('Ymd', $timestampEndLastMonth);
-                    $dateTimeStart = DateTime::createFromFormat ( 'Ymd', $startDateFormated);
-                    $dateTimeEnd = DateTime::createFromFormat ( 'Ymd', $endDateFormated);
                 } else {
                     $timestampStartLastWeek = strtotime($day.' last week midnight');
                     $startDate = date('Y-m-d', $timestampStartLastWeek);
@@ -140,9 +151,9 @@ class ExportDrawingsCommand extends Command
 
                     $startDateFormated = date('Ymd', $timestampStartLastWeek);
                     $endDateFormated = date('Ymd', $timestampEndLastWeek);
-                    $dateTimeStart = DateTime::createFromFormat ( 'Ymd', $startDateFormated);
-                    $dateTimeEnd = DateTime::createFromFormat ( 'Ymd', $endDateFormated);
                 }
+                $dateTimeStart = DateTime::createFromFormat ( 'Ymd', $startDateFormated);
+                $dateTimeEnd = DateTime::createFromFormat ( 'Ymd', $endDateFormated);
 
                 $otherDrawings = array_filter($this->registrationDrawingRepository->findAll(), function ($dr) use ($drawing) {
                     return $dr !== $drawing;
@@ -160,31 +171,25 @@ class ExportDrawingsCommand extends Command
 
                 $orders = $this->orderRepository->findAllTransmittedForDrawingExport($drawing, $startDate, $endDate, $otherTitles);
 
-                $fileName = $drawing->getFormat() === Constants::CSV_FORMAT ? "{$drawing->getName()}_{$startDate}_{$endDate}.csv" : "{$drawing->getName()}_{$startDate}_{$endDate}.txt";
+                $fileName = $drawing->getFormat() === Constants::CSV_FORMAT ? "{$drawing->getName()}_{$startDate}_$endDate.csv" : "{$drawing->getName()}_{$startDate}_$endDate.txt";
                 $filePath = $this->kernelProjectDir.self::DIRECTORY_PUBLIC.self::DIRECTORY_EXPORT.$fileName;
 
                 if (!empty($orders)) {
                     $export = $this->registrationDrawingController->exportDrawing($drawing, $orders, $filePath, $otherTitles);
+                    $totalLines = $export[1];
+                    $totalCancellations = $export[2];
 
                     if ($export[1] > 0) {
                         $drawingFirstVendor = !empty($drawing->getVendors()) ? $drawing->getVendors()->toArray()[0] : null;
 
-                        $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $dateTimeStart, $dateTimeEnd, $export[1], $export[2], $drawing);
+                    $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $dateTimeStart, $dateTimeEnd, $totalLines, $totalCancellations, $drawing);
 
-                        $filePathSynchroSFTPRoot = $this->kernelProjectDir.self::DIRECTORY_PUBLIC.self::DIRECTORY_EXPORT_SFTP;
-                        $filePathSynchroSFTPEditor = $filePathSynchroSFTPRoot.$drawing->getId();
-                        $fullFilelName = $filePathSynchroSFTPEditor.'/'.$fileName;
-                        if (!is_dir($filePathSynchroSFTPEditor)) {
-                            if (!mkdir($filePathSynchroSFTPEditor, 0777, true) && !is_dir($filePathSynchroSFTPEditor)) {
-                                throw new \RuntimeException(sprintf('Directory "%s" was not created', $filePathSynchroSFTPEditor));
-                            }
-                        }
-                        chmod($filePathSynchroSFTPRoot, 0777);
-                        chmod($filePathSynchroSFTPEditor, 0777);
-                        file_put_contents($fullFilelName, array_shift($export));
-                        chmod($fullFilelName, 0777);
+                    $success = $this->sendSalesReportToVendor($drawing, $filePath, $outputStyle);
 
-                        $this->generateVarsFile($drawing, $filePathSynchroSFTPEditor);
+                    if ($success) {
+                        $this->sendMail($fileName, $output);
+                        $outputStyle->newLine();
+                    }
 
                         $outputStyle->writeln("fin génération de l'export des commandes du $startDate au $endDate pour le dessin d'enregistrement {$drawing->getName()} déposé ici : $filePath");
                     }
@@ -200,9 +205,21 @@ class ExportDrawingsCommand extends Command
         return 0;
     }
 
-    private function generateVarsFile(RegistrationDrawing $drawing, string $filePathSynchroSFTPEditor)
+    /**
+     * @param RegistrationDrawing $drawing
+     * @param string $filePath
+     * @param SymfonyStyle $outputStyle
+     * @return bool
+     */
+    public function sendSalesReportToVendor(
+        RegistrationDrawing $drawing,
+        string $filePath,
+        SymfonyStyle $outputStyle
+    ): bool
     {
-        $fileName = $filePathSynchroSFTPEditor.'/drawing_conf.conf';
+        $success = false;
+
+        $rsaSrc = "/home/www-data/.ssh/id_rsa";
         $sendMode = $drawing->getSendMode();
         $depositAddress = $drawing->getDepositAddress();
         $user = $drawing->getUser();
@@ -210,17 +227,44 @@ class ExportDrawingsCommand extends Command
         $host = $drawing->getHost();
         $port = $drawing->getPort();
 
-        $data = [
-            "SEND_MODE=\"$sendMode\"",
-            "DEPOSIT_ADDRESS=\"$depositAddress\"",
-            "DRAWING_USER=\"$user\"",
-            "DRAWING_PASSWORD=\"$password\"",
-            "DRAWING_HOST=\"$host\"",
-            "DRAWING_PORT=\"$port\"",
-        ];
+        // si depose SFTP
+        if ($sendMode === 'SSH') {
+            $command = "echo -e 'put \"$filePath\"' | sftp -o StrictHostKeyChecking=no -i $rsaSrc -P $port $user@$host:\"$depositAddress\"";
+        } else {
+            $lftpOption = "set sftp:connect-program 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
+            $command = "lftp -c \"$lftpOption; connect sftp://$user:$password@$host:$port;put -O '$depositAddress' '$filePath'\"";
+        }
 
-        file_put_contents($fileName, implode(PHP_EOL, $data));
-        chmod($fileName, 0777);
+        $outputStyle->writeln($command);
+        $process = Process::fromShellCommandline($command);
+
+        try {
+            $process->run() ;
+        } catch (ProcessTimedOutException $pte) {
+            $outputStyle->writeln("Erreur pendant la depose SFTP : ".$pte->getMessage());
+        } finally {
+            if (!$process->isSuccessful()) {
+                $outputStyle->writeln("Erreur pendant la depose SFTP");
+            } else {
+                $success = true;
+                $outputStyle->writeln("Dépose SFTP avec succès");
+            }
+        }
+
+        return $success;
+    }
+
+    /**
+     * @param string $fileName
+     * @param OutputInterface $output
+     * @return void
+     */
+    private function sendMail(string $fileName, OutputInterface $output): void
+    {
+        $sendEditorExportCommand = KMSendEditorExportCommand::getDefaultName();
+        $command = $this->getApplication()->find($sendEditorExportCommand);
+        $sendEditorExportCommandInput = new ArrayInput(['fileName' => $fileName]);
+        $command->run($sendEditorExportCommandInput, $output);
     }
 
 }
