@@ -11,41 +11,36 @@ trait OrderDrawingRepositoryTrait
 {
     /**
      * @param RegistrationDrawing $registrationDrawing
-     * @param string $dateDebut
-     * @param string $dateFin
+     * @param \DateTime $dateDebut
+     * @param \DateTime $dateFin
+     * @param array $otherTitles
      * @return array|null
      */
-    public function findAllTransmittedForDrawingExport(RegistrationDrawing $registrationDrawing, string $dateDebut, string $dateFin, array $otherTitles): ?array
+    public function findAllTransmittedForDrawingExport(RegistrationDrawing $registrationDrawing, \DateTime $dateDebut, \DateTime $dateFin, array $otherTitles): ?array
     {
         $query =  $this->createListByVendorsOrTitlesQueryBuilder($registrationDrawing->getVendors(), $registrationDrawing->getTitles(), $otherTitles) ;
-        $query->andWhere('o.state != :state_new')
+
+        return $query->andWhere('o.state != :state_new')
             ->andWhere('o.state != :state_cancelled')
-            ->setParameter('state_new', OrderInterface::STATE_NEW)
-            ->setParameter('state_cancelled', OrderInterface::STATE_CANCELLED)
-
             ->join('o.payments', 'payments', 'WITH', 'payments.state IN (:paymentStates)')
-            ->setParameter('paymentStates', [PaymentInterface::STATE_COMPLETED, PaymentInterface::STATE_REFUNDED])
+            ->andWhere('payments.updatedAt >= :dateDebut')
+            ->andWhere('payments.updatedAt <= :dateFin')
+            ->setParameters([
+                'state_new' => OrderInterface::STATE_NEW,
+                'state_cancelled' => OrderInterface::STATE_CANCELLED,
+                'paymentStates' => [PaymentInterface::STATE_COMPLETED, PaymentInterface::STATE_REFUNDED],
+                'dateDebut' => $dateDebut,
+                'dateFin' => $dateFin
+            ])
+            ->getQuery()
+            ->getResult()
         ;
-
-        if ($dateDebut !== '') {
-            $dateDebut .= ' 00:00:00';
-            $query
-                ->andWhere(" payments.updatedAt >= STR_TO_DATE(:dateDebut,'%Y-%m-%d %H:%i:%s')")
-                ->setParameter('dateDebut', $dateDebut);
-        }
-
-        if ($dateFin !== '') {
-            $dateFin .= ' 23:59:59';
-            $query
-                ->andWhere(" payments.updatedAt <= STR_TO_DATE(:dateFin,'%Y-%m-%d %H:%i:%s')")
-                ->setParameter('dateFin', $dateFin);
-        }
-
-        return $query->getQuery()->getResult();
     }
 
     /**
      * @param $vendors
+     * @param $titles
+     * @param $otherTitles
      * @return QueryBuilder
      */
     public function createListByVendorsOrTitlesQueryBuilder($vendors, $titles, $otherTitles): QueryBuilder

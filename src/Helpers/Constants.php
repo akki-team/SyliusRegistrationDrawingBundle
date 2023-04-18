@@ -50,6 +50,16 @@ class Constants
         self::SUNDAY => self::SUNDAY
     ];
 
+    public const EN_DAYS = [
+        'LUNDI' => 'monday',
+        'MARDI' => 'tuesday',
+        'MERCREDI' => 'wednesday',
+        'JEUDI' => 'thursday',
+        'VENDREDI' => 'friday',
+        'SAMEDI' => 'saturday',
+        'DIMANCHE' => 'sunday'
+    ];
+
     public const SFTP_MODE = 'SFTP';
     public const SSH_MODE = 'SSH';
 

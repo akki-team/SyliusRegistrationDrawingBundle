@@ -52,16 +52,6 @@ class ExportDrawingsCommand extends Command
     private const DIRECTORY_PUBLIC = '/var';
     private const DIRECTORY_EXPORT = '/exportsEditeur/';
 
-    private const EN_DAYS = [
-        'LUNDI' => 'monday',
-        'MARDI' => 'tuesday',
-        'MERCREDI' => 'wednesday',
-        'JEUDI' => 'thursday',
-        'VENDREDI' => 'friday',
-        'SAMEDI' => 'saturday',
-        'DIMANCHE' => 'sunday'
-    ];
-
     /**
      * @param ObjectRepository $registrationDrawingRepository
      * @param OrderRepositoryInterface $orderRepository
@@ -125,7 +115,7 @@ class ExportDrawingsCommand extends Command
             /** @var RegistrationDrawing $registrationDrawing */
             foreach ($registrationDrawings as $drawing) {
                 $periodicity = $drawing->getPeriodicity();
-                $day = self::EN_DAYS[$drawing->getDay()];
+                $day = Constants::EN_DAYS[$drawing->getDay()];
 
                 if ($periodicity === Constants::PERIODICITY_WEEKLY && $day !== strtolower(date('l'))) {
                     continue;
@@ -136,24 +126,15 @@ class ExportDrawingsCommand extends Command
                 }
 
                 if ($periodicity === Constants::PERIODICITY_MONTHLY) {
-                    $timestampStartLastMonth = strtotime('first day of last month midnight');
-                    $startDate = date('Y-m-d', $timestampStartLastMonth);
-                    $timestampEndLastMonth = strtotime('first day of this month midnight -1 sec');
-                    $endDate = date('Y-m-d', $timestampEndLastMonth);
-
-                    $startDateFormated = date('Ymd', $timestampStartLastMonth);
-                    $endDateFormated = date('Ymd', $timestampEndLastMonth);
+                    $startDate = new DateTime('first day of last month midnight');
+                    $endDate = new DateTime('first day of this month midnight -1 sec');
                 } else {
-                    $timestampStartLastWeek = strtotime($day.' last week midnight');
-                    $startDate = date('Y-m-d', $timestampStartLastWeek);
-                    $timestampEndLastWeek = strtotime($day.' this week midnight -1 sec');
-                    $endDate = date('Y-m-d', $timestampEndLastWeek);
-
-                    $startDateFormated = date('Ymd', $timestampStartLastWeek);
-                    $endDateFormated = date('Ymd', $timestampEndLastWeek);
+                    $startDate = new DateTime($day.' last week midnight');
+                    $endDate = new DateTime($day.' this week midnight -1 sec');
                 }
-                $dateTimeStart = DateTime::createFromFormat ( 'Ymd', $startDateFormated);
-                $dateTimeEnd = DateTime::createFromFormat ( 'Ymd', $endDateFormated);
+
+                $startDateFormated = $startDate->format('Y-m-d');
+                $endDateFormated = $endDate->format('Y-m-d');
 
                 $otherDrawings = array_filter($this->registrationDrawingRepository->findAll(), function ($dr) use ($drawing) {
                     return $dr !== $drawing;
@@ -171,7 +152,7 @@ class ExportDrawingsCommand extends Command
 
                 $orders = $this->orderRepository->findAllTransmittedForDrawingExport($drawing, $startDate, $endDate, $otherTitles);
 
-                $fileName = $drawing->getFormat() === Constants::CSV_FORMAT ? "{$drawing->getName()}_{$startDate}_$endDate.csv" : "{$drawing->getName()}_{$startDate}_$endDate.txt";
+                $fileName = $drawing->getFormat() === Constants::CSV_FORMAT ? "{$drawing->getName()}_{$startDateFormated}_$endDateFormated.csv" : "{$drawing->getName()}_{$startDateFormated}_$endDateFormated.txt";
                 $filePath = $this->kernelProjectDir.self::DIRECTORY_PUBLIC.self::DIRECTORY_EXPORT.$fileName;
 
                 if (!empty($orders)) {
@@ -179,19 +160,19 @@ class ExportDrawingsCommand extends Command
                     $totalLines = $export[1];
                     $totalCancellations = $export[2];
 
-                    if ($export[1] > 0) {
+                    if ($export[1] > 0 || $export[2] > 0) {
                         $drawingFirstVendor = !empty($drawing->getVendors()) ? $drawing->getVendors()->toArray()[0] : null;
 
-                    $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $dateTimeStart, $dateTimeEnd, $totalLines, $totalCancellations, $drawing);
+                        $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $startDate, $endDate, $totalLines, $totalCancellations, $drawing);
 
-                    $success = $this->sendSalesReportToVendor($drawing, $filePath, $outputStyle);
+                        $success = $this->sendSalesReportToVendor($drawing, $filePath, $outputStyle);
 
-                    if ($success) {
-                        $this->sendMail($fileName, $output);
-                        $outputStyle->newLine();
-                    }
+                        if ($success) {
+                            $this->sendMail($fileName, $output);
+                            $outputStyle->newLine();
+                        }
 
-                        $outputStyle->writeln("fin génération de l'export des commandes du $startDate au $endDate pour le dessin d'enregistrement {$drawing->getName()} déposé ici : $filePath");
+                        $outputStyle->writeln("fin génération de l'export des commandes du $startDateFormated au $endDateFormated pour le dessin d'enregistrement {$drawing->getName()} déposé ici : $filePath");
                     }
                 }
             }

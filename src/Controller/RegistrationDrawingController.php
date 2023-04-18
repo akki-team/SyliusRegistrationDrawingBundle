@@ -467,7 +467,7 @@ class RegistrationDrawingController extends ResourceController
         /** @var Order $order */
         foreach ($orders as $order) {
             $isRefunded = $order->getPaymentState() === OrderPaymentStates::STATE_REFUNDED;
-            $periodStart = $registrationDrawing->getPeriodicity() === Constants::PERIODICITY_WEEKLY ? 'monday last week midnight' : 'first day of last month midnight';
+            $periodStart = $registrationDrawing->getPeriodicity() === Constants::PERIODICITY_WEEKLY ? Constants::EN_DAYS[$registrationDrawing->getDay()].' last week midnight' : 'first day of last month midnight';
 
             // On ne prends pas en compte les commandes annulées dans la période précédente définie
             if ($isRefunded && ($order->getCheckoutCompletedAt() > new \DateTime($periodStart))) {
