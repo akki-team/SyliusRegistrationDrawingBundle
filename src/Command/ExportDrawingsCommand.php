@@ -123,9 +123,9 @@ class ExportDrawingsCommand extends Command
                 $day = self::EN_DAYS[$drawing->getDay()];
 
                 if ($periodicity === Constants::PERIODICITY_MONTHLY) {
-                    $timestampStartLastMonth = strtotime('first day of last month');
+                    $timestampStartLastMonth = strtotime('first day of last month midnight');
                     $startDate = date('Y-m-d', $timestampStartLastMonth);
-                    $timestampEndLastMonth = strtotime('last day of last month');
+                    $timestampEndLastMonth = strtotime('first day of this month midnight -1 sec');
                     $endDate = date('Y-m-d', $timestampEndLastMonth);
 
                     $startDateFormated = date('Ymd', $timestampStartLastMonth);
@@ -133,9 +133,9 @@ class ExportDrawingsCommand extends Command
                     $dateTimeStart = DateTime::createFromFormat ( 'Ymd', $startDateFormated);
                     $dateTimeEnd = DateTime::createFromFormat ( 'Ymd', $endDateFormated);
                 } else {
-                    $timestampStartLastWeek = strtotime($day.' last week');
+                    $timestampStartLastWeek = strtotime($day.' last week midnight');
                     $startDate = date('Y-m-d', $timestampStartLastWeek);
-                    $timestampEndLastWeek = (new \DateTime())->setTimestamp($timestampStartLastWeek)->modify('+6 days')->getTimestamp();;
+                    $timestampEndLastWeek = strtotime($day.' this week midnight -1 sec');
                     $endDate = date('Y-m-d', $timestampEndLastWeek);
 
                     $startDateFormated = date('Ymd', $timestampStartLastWeek);
