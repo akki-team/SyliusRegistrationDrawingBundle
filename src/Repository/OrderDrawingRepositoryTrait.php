@@ -25,13 +25,11 @@ trait OrderDrawingRepositoryTrait
             ->join('o.payments', 'payments', 'WITH', 'payments.state IN (:paymentStates)')
             ->andWhere('payments.updatedAt >= :dateDebut')
             ->andWhere('payments.updatedAt <= :dateFin')
-            ->setParameters([
-                'state_new' => OrderInterface::STATE_NEW,
-                'state_cancelled' => OrderInterface::STATE_CANCELLED,
-                'paymentStates' => [PaymentInterface::STATE_COMPLETED, PaymentInterface::STATE_REFUNDED],
-                'dateDebut' => $dateDebut,
-                'dateFin' => $dateFin
-            ])
+            ->setParameter('state_new', OrderInterface::STATE_NEW)
+            ->setParameter('state_cancelled', OrderInterface::STATE_CANCELLED)
+            ->setParameter('paymentStates', [PaymentInterface::STATE_COMPLETED, PaymentInterface::STATE_REFUNDED])
+            ->setParameter('dateDebut', $dateDebut)
+            ->setParameter('dateFin', $dateFin)
             ->getQuery()
             ->getResult()
         ;
