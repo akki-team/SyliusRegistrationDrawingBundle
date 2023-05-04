@@ -200,7 +200,7 @@ class ExportDrawingsCommand extends Command
     {
         $success = false;
 
-        $rsaSrc = "/home/www-data/.ssh/id_rsa";
+        $rsaSrc = "~www-data/.ssh/id_rsa";
         $sendMode = $drawing->getSendMode();
         $depositAddress = $drawing->getDepositAddress();
         $user = $drawing->getUser();
