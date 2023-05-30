@@ -23,3 +23,12 @@ services:
             - '@App\Service\ExportEditeur\GeneratedFileService'
             - '@kernel'
         tags: [ 'console.command' ]
+
+    Akki\SyliusRegistrationDrawingBundle\Command\ExportDrawingsFromPeriodCommand:
+        arguments:
+            - '@sylius_registration_drawing.repository.registration_drawing'
+            - '@sylius.repository.order'
+            - '@sylius_registration_drawing.controller.registration_drawing'
+            - '@App\Service\ExportEditeur\GeneratedFileService'
+            - '@kernel'
+        tags: [ 'console.command' ]
