@@ -87,6 +87,10 @@ class ExportDrawingsCommand extends Command
             ->setName(self::$defaultName)
             ->setDescription('Transmission des abonnements/ventes à l\'éditeur partenaire')
             ->setHelp('Cette commande permets de générer un export CSV ou longueur fixe contenant les abonnements et vente d\'un éditeur partenaire')
+            ->addArgument('registration_drawing', InputArgument::OPTIONAL, 'Dessin d\'enregistrement')
+            ->addArgument('start_date', InputArgument::OPTIONAL, 'Date de début')
+            ->addArgument('end_date', InputArgument::OPTIONAL, 'Date de fin')
+            ->addArgument('send', InputArgument::OPTIONAL, 'Envoi d\'email et dépose SFTP', 1)
         ;
     }
 
@@ -109,28 +113,43 @@ class ExportDrawingsCommand extends Command
 
         $outputStyle->writeln('Debut génération des commandes éditeurs');
 
-        $registrationDrawings = $this->registrationDrawingRepository->findAll();
+        $inputDrawing = $input->getArgument('registration_drawing');
+        $inputStartDate = $input->getArgument('start_date');
+        $inputEndDate = $input->getArgument('end_date');
+        $inputSend = $input->getArgument('send');
+
+        if ($inputDrawing) {
+            $registrationDrawings = $this->registrationDrawingRepository->findByName($inputDrawing);
+        }
+        else {
+            $registrationDrawings = $this->registrationDrawingRepository->findAll();
+        }
 
         if (!empty($registrationDrawings)) {
             /** @var RegistrationDrawing $registrationDrawing */
             foreach ($registrationDrawings as $drawing) {
-                $periodicity = $drawing->getPeriodicity();
-                $day = Constants::EN_DAYS[$drawing->getDay()];
-
-                if ($periodicity === Constants::PERIODICITY_WEEKLY && $day !== strtolower(date('l'))) {
-                    continue;
-                }
-
-                if ($periodicity === Constants::PERIODICITY_MONTHLY && date('j') !== '1') {
-                    continue;
-                }
-
-                if ($periodicity === Constants::PERIODICITY_MONTHLY) {
-                    $startDate = new DateTime('first day of last month midnight');
-                    $endDate = new DateTime('first day of this month midnight -1 sec');
+                if ($inputStartDate && $inputEndDate) {
+                    $startDate = (new DateTime($input->getArgument('start_date')))->setTime(0,0, 0);;
+                    $endDate = (new DateTime($input->getArgument('end_date')))->setTime(23,59, 59);;
                 } else {
-                    $startDate = new DateTime($day.' last week midnight');
-                    $endDate = new DateTime($day.' this week midnight -1 sec');
+                    $periodicity = $drawing->getPeriodicity();
+                    $day = Constants::EN_DAYS[$drawing->getDay()];
+
+                    if ($periodicity === Constants::PERIODICITY_WEEKLY && $day !== strtolower(date('l'))) {
+                        continue;
+                    }
+
+                    if ($periodicity === Constants::PERIODICITY_MONTHLY && date('j') !== '1') {
+                        continue;
+                    }
+
+                    if ($periodicity === Constants::PERIODICITY_MONTHLY) {
+                        $startDate = new DateTime('first day of last month midnight');
+                        $endDate = new DateTime('first day of this month midnight -1 sec');
+                    } else {
+                        $startDate = new DateTime($day.' last week midnight');
+                        $endDate = new DateTime($day.' this week midnight -1 sec');
+                    }
                 }
 
                 $startDateFormated = $startDate->format('Y-m-d');
@@ -165,11 +184,13 @@ class ExportDrawingsCommand extends Command
 
                         $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $startDate, $endDate, $totalLines, $totalCancellations, $drawing);
 
-                        $success = $this->sendSalesReportToVendor($drawing, $filePath, $outputStyle);
+                        if ($inputSend === 1) {
+                            $success = $this->sendSalesReportToVendor($drawing, $filePath, $outputStyle);
 
-                        if ($success) {
-                            $this->sendMail($fileName, $output);
-                            $outputStyle->newLine();
+                            if ($success) {
+                                $this->sendMail($fileName, $output);
+                                $outputStyle->newLine();
+                            }
                         }
 
                         $outputStyle->writeln("fin génération de l'export des commandes du $startDateFormated au $endDateFormated pour le dessin d'enregistrement {$drawing->getName()} déposé ici : $filePath");
