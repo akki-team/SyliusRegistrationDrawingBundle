@@ -180,31 +180,33 @@ class ExportDrawingsCommand extends Command
                     $totalLines = $export[1];
                     $totalCancellations = $export[2];
 
-                    if (null === $export[0]) {
-                        $outputStyle->writeln("Erreur pendant la génération du fichier");
-                        $this->sendErrorMail($fileName, 'Erreur pendant la génération du fichier', $output);
-                    }
-
-                    $drawingFirstVendor = !empty($drawing->getVendors()) ? $drawing->getVendors()->toArray()[0] : null;
-
-                    $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $startDate, $endDate, $totalLines, $totalCancellations, $drawing);
-
-                    if ($inputSend === 1) {
-                        $success = $this->sendSalesReportToVendor($drawing, $filePath, $outputStyle, $output);
-
-                        if ($success) {
-                            try {
-                                $this->sendMail($fileName, $output);
-                            } catch (\Exception $e) {
-                                $outputStyle->writeln("Erreur pendant l'envoi du mail : ".$e->getMessage());
-                                $this->sendErrorMail($fileName, $e->getMessage(), $output);
-                            }
-
-                            $outputStyle->newLine();
+                    if ($export[1] > 0 || $export[2] > 0) {
+                        if (null === $export[0]) {
+                            $outputStyle->writeln("Erreur pendant la génération du fichier");
+                            $this->sendErrorMail($fileName, 'Erreur pendant la génération du fichier', $output);
                         }
-                    }
 
-                    $outputStyle->writeln("fin génération de l'export des commandes du $startDateFormated au $endDateFormated pour le dessin d'enregistrement {$drawing->getName()} déposé ici : $filePath");
+                        $drawingFirstVendor = !empty($drawing->getVendors()) ? $drawing->getVendors()->toArray()[0] : null;
+
+                        $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $startDate, $endDate, $totalLines, $totalCancellations, $drawing);
+
+                        if ($inputSend === 1) {
+                            $success = $this->sendSalesReportToVendor($drawing, $filePath, $outputStyle, $output);
+
+                            if ($success) {
+                                try {
+                                    $this->sendMail($fileName, $output);
+                                } catch (\Exception $e) {
+                                    $outputStyle->writeln("Erreur pendant l'envoi du mail : ".$e->getMessage());
+                                    $this->sendErrorMail($fileName, $e->getMessage(), $output);
+                                }
+
+                                $outputStyle->newLine();
+                            }
+                        }
+
+                        $outputStyle->writeln("fin génération de l'export des commandes du $startDateFormated au $endDateFormated pour le dessin d'enregistrement {$drawing->getName()} déposé ici : $filePath");
+                    }
                 }
             }
         } else {
