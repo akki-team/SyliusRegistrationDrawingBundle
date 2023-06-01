@@ -22,4 +22,5 @@ services:
             - '@sylius_registration_drawing.controller.registration_drawing'
             - '@App\Service\ExportEditeur\GeneratedFileService'
             - '@kernel'
+            - '@km.email_sender'
         tags: [ 'console.command' ]

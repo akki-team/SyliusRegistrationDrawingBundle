@@ -5,9 +5,8 @@ namespace Akki\SyliusRegistrationDrawingBundle\Command;
 use Akki\SyliusRegistrationDrawingBundle\Controller\RegistrationDrawingController;
 use Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing;
 use Akki\SyliusRegistrationDrawingBundle\Helpers\Constants;
-use App\Command\KMSendEditorExportCommand;
-use App\Command\KMSendEditorExportErrorCommand;
 use App\Entity\Taxonomy\Taxon;
+use App\Mailer\Sender\KMSenderInterface;
 use App\Repository\OrderRepositoryInterface;
 use App\Service\ExportEditeur\GeneratedFileService;
 use DateTime;
@@ -47,11 +46,17 @@ class ExportDrawingsCommand extends Command
     /** @var GeneratedFileService $generatedFileService */
     private GeneratedFileService $generatedFileService;
 
+    /** @var KMSenderInterface $emailSender */
+    private KMSenderInterface $emailSender;
+
     /** @var string $kernelProjectDir */
     protected string $kernelProjectDir;
 
     private const DIRECTORY_PUBLIC = '/var';
     private const DIRECTORY_EXPORT = '/exportsEditeur/';
+    private const SUCCESS_MAIL_CODE = 'editor_registration_drawing';
+    private const ERROR_MAIL_CODE = 'editor_registration_drawing_error';
+    private const ERROR_MAIL_RECIPIENTS = ['support@akki.fr', 'market-place@reworldmedia.com'];
 
     /**
      * @param ObjectRepository $registrationDrawingRepository
@@ -60,6 +65,7 @@ class ExportDrawingsCommand extends Command
      * @param RegistrationDrawingController $registrationDrawingController
      * @param GeneratedFileService $generatedFileService
      * @param KernelInterface $kernel
+     * @param KMSenderInterface $emailSender
      */
     public function __construct(
         ObjectRepository $registrationDrawingRepository,
@@ -67,7 +73,8 @@ class ExportDrawingsCommand extends Command
         VendorRepositoryInterface $vendorRepository,
         RegistrationDrawingController $registrationDrawingController,
         GeneratedFileService $generatedFileService,
-        KernelInterface $kernel
+        KernelInterface $kernel,
+        KMSenderInterface $emailSender
     )
     {
         parent::__construct();
@@ -77,6 +84,7 @@ class ExportDrawingsCommand extends Command
         $this->registrationDrawingController = $registrationDrawingController;
         $this->generatedFileService = $generatedFileService;
         $this->kernelProjectDir = $kernel->getProjectDir();
+        $this->emailSender = $emailSender;
     }
 
     /**
@@ -127,7 +135,7 @@ class ExportDrawingsCommand extends Command
         }
 
         if (!empty($registrationDrawings)) {
-            /** @var RegistrationDrawing $registrationDrawing */
+            /** @var RegistrationDrawing $drawing */
             foreach ($registrationDrawings as $drawing) {
                 if ($inputStartDate && $inputEndDate) {
                     $startDate = (new DateTime($input->getArgument('start_date')))->setTime(0,0, 0);;
@@ -183,7 +191,12 @@ class ExportDrawingsCommand extends Command
                     if ($export[1] > 0 || $export[2] > 0) {
                         if (null === $export[0]) {
                             $outputStyle->writeln("Erreur pendant la génération du fichier");
-                            $this->sendErrorMail($fileName, 'Erreur pendant la génération du fichier', $output);
+
+                            $this->sendMail(
+                                self::ERROR_MAIL_CODE,
+                                self::ERROR_MAIL_RECIPIENTS,
+                                ['fileName' => $fileName, 'error' => 'Erreur pendant la génération du fichier']
+                            );
                         }
 
                         $drawingFirstVendor = !empty($drawing->getVendors()) ? $drawing->getVendors()->toArray()[0] : null;
@@ -195,10 +208,19 @@ class ExportDrawingsCommand extends Command
 
                             if ($success) {
                                 try {
-                                    $this->sendMail($fileName, $output);
+                                    $this->sendMail(
+                                        self::SUCCESS_MAIL_CODE,
+                                        explode(';', $drawing->getRecipients()),
+                                        ['fileName' => $fileName, 'totalLines' => $totalLines, 'totalCancelled' => $totalCancellations]
+                                    );
                                 } catch (\Exception $e) {
                                     $outputStyle->writeln("Erreur pendant l'envoi du mail : ".$e->getMessage());
-                                    $this->sendErrorMail($fileName, $e->getMessage(), $output);
+
+                                    $this->sendMail(
+                                        self::ERROR_MAIL_CODE,
+                                        self::ERROR_MAIL_RECIPIENTS,
+                                        ['fileName' => $fileName, 'error' => $e->getMessage()]
+                                    );
                                 }
 
                                 $outputStyle->newLine();
@@ -258,7 +280,12 @@ class ExportDrawingsCommand extends Command
             $process->run() ;
         } catch (\Exception $e) {
             $outputStyle->writeln("Erreur pendant la depose SFTP : ".$e->getMessage());
-            $this->sendErrorMail(basename($filePath), $e->getMessage(), $output);
+
+            $this->sendMail(
+                self::ERROR_MAIL_CODE,
+                self::ERROR_MAIL_RECIPIENTS,
+                ['fileName' => basename($filePath), 'error' => $e->getMessage()]
+            );
         } finally {
             if (!$process->isSuccessful()) {
                 $outputStyle->writeln("Erreur pendant la depose SFTP");
@@ -272,30 +299,14 @@ class ExportDrawingsCommand extends Command
     }
 
     /**
-     * @param string $fileName
-     * @param OutputInterface $output
+     * @param string $mailCode
+     * @param array $to
+     * @param array $datas
      * @return void
      */
-    private function sendMail(string $fileName, OutputInterface $output): void
+    private function sendMail(string $mailCode, array $to, array $datas): void
     {
-        $sendEditorExportCommand = KMSendEditorExportCommand::getDefaultName();
-        $command = $this->getApplication()->find($sendEditorExportCommand);
-        $sendEditorExportCommandInput = new ArrayInput(['fileName' => $fileName]);
-        $command->run($sendEditorExportCommandInput, $output);
-    }
-
-    /**
-     * @param string $fileName
-     * @param string $error
-     * @param OutputInterface $output
-     * @return void
-     */
-    private function sendErrorMail(string $fileName, string $error, OutputInterface $output): void
-    {
-        $sendEditorExportCommand = KMSendEditorExportErrorCommand::getDefaultName();
-        $command = $this->getApplication()->find($sendEditorExportCommand);
-        $sendEditorExportCommandInput = new ArrayInput(['fileName' => $fileName, 'error' => $error]);
-        $command->run($sendEditorExportCommandInput, $output);
+        $this->emailSender->send($mailCode, $to, $datas, [], [], [], []);
     }
 
 }
