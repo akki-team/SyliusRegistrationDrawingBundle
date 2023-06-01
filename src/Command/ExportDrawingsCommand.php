@@ -6,6 +6,7 @@ use Akki\SyliusRegistrationDrawingBundle\Controller\RegistrationDrawingControlle
 use Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing;
 use Akki\SyliusRegistrationDrawingBundle\Helpers\Constants;
 use App\Command\KMSendEditorExportCommand;
+use App\Command\KMSendEditorExportErrorCommand;
 use App\Entity\Taxonomy\Taxon;
 use App\Repository\OrderRepositoryInterface;
 use App\Service\ExportEditeur\GeneratedFileService;
@@ -23,7 +24,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
 
 class ExportDrawingsCommand extends Command
@@ -180,22 +180,31 @@ class ExportDrawingsCommand extends Command
                     $totalLines = $export[1];
                     $totalCancellations = $export[2];
 
-                    if ($export[1] > 0 || $export[2] > 0) {
-                        $drawingFirstVendor = !empty($drawing->getVendors()) ? $drawing->getVendors()->toArray()[0] : null;
-
-                        $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $startDate, $endDate, $totalLines, $totalCancellations, $drawing);
-
-                        if ($inputSend === 1) {
-                            $success = $this->sendSalesReportToVendor($drawing, $filePath, $outputStyle);
-
-                            if ($success) {
-                                $this->sendMail($fileName, $output);
-                                $outputStyle->newLine();
-                            }
-                        }
-
-                        $outputStyle->writeln("fin génération de l'export des commandes du $startDateFormated au $endDateFormated pour le dessin d'enregistrement {$drawing->getName()} déposé ici : $filePath");
+                    if (null === $export[0]) {
+                        $outputStyle->writeln("Erreur pendant la génération du fichier");
+                        $this->sendErrorMail($fileName, 'Erreur pendant la génération du fichier', $output);
                     }
+
+                    $drawingFirstVendor = !empty($drawing->getVendors()) ? $drawing->getVendors()->toArray()[0] : null;
+
+                    $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $startDate, $endDate, $totalLines, $totalCancellations, $drawing);
+
+                    if ($inputSend === 1) {
+                        $success = $this->sendSalesReportToVendor($drawing, $filePath, $outputStyle, $output);
+
+                        if ($success) {
+                            try {
+                                $this->sendMail($fileName, $output);
+                            } catch (\Exception $e) {
+                                $outputStyle->writeln("Erreur pendant l'envoi du mail : ".$e->getMessage());
+                                $this->sendErrorMail($fileName, $e->getMessage(), $output);
+                            }
+
+                            $outputStyle->newLine();
+                        }
+                    }
+
+                    $outputStyle->writeln("fin génération de l'export des commandes du $startDateFormated au $endDateFormated pour le dessin d'enregistrement {$drawing->getName()} déposé ici : $filePath");
                 }
             }
         } else {
@@ -212,12 +221,14 @@ class ExportDrawingsCommand extends Command
      * @param RegistrationDrawing $drawing
      * @param string $filePath
      * @param SymfonyStyle $outputStyle
+     * @param OutputInterface $output
      * @return bool
      */
     public function sendSalesReportToVendor(
         RegistrationDrawing $drawing,
         string $filePath,
-        SymfonyStyle $outputStyle
+        SymfonyStyle $outputStyle,
+        OutputInterface $output
     ): bool
     {
         $success = false;
@@ -243,8 +254,9 @@ class ExportDrawingsCommand extends Command
 
         try {
             $process->run() ;
-        } catch (ProcessTimedOutException $pte) {
-            $outputStyle->writeln("Erreur pendant la depose SFTP : ".$pte->getMessage());
+        } catch (\Exception $e) {
+            $outputStyle->writeln("Erreur pendant la depose SFTP : ".$e->getMessage());
+            $this->sendErrorMail($drawing->getName(), $e->getMessage(), $output);
         } finally {
             if (!$process->isSuccessful()) {
                 $outputStyle->writeln("Erreur pendant la depose SFTP");
@@ -267,6 +279,20 @@ class ExportDrawingsCommand extends Command
         $sendEditorExportCommand = KMSendEditorExportCommand::getDefaultName();
         $command = $this->getApplication()->find($sendEditorExportCommand);
         $sendEditorExportCommandInput = new ArrayInput(['fileName' => $fileName]);
+        $command->run($sendEditorExportCommandInput, $output);
+    }
+
+    /**
+     * @param string $fileName
+     * @param string $error
+     * @param OutputInterface $output
+     * @return void
+     */
+    private function sendErrorMail(string $fileName, string $error, OutputInterface $output): void
+    {
+        $sendEditorExportCommand = KMSendEditorExportErrorCommand::getDefaultName();
+        $command = $this->getApplication()->find($sendEditorExportCommand);
+        $sendEditorExportCommandInput = new ArrayInput(['fileName' => $fileName, 'error' => $error]);
         $command->run($sendEditorExportCommandInput, $output);
     }
 
