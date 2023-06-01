@@ -258,7 +258,7 @@ class ExportDrawingsCommand extends Command
             $process->run() ;
         } catch (\Exception $e) {
             $outputStyle->writeln("Erreur pendant la depose SFTP : ".$e->getMessage());
-            $this->sendErrorMail($drawing->getName(), $e->getMessage(), $output);
+            $this->sendErrorMail(basename($filePath), $e->getMessage(), $output);
         } finally {
             if (!$process->isSuccessful()) {
                 $outputStyle->writeln("Erreur pendant la depose SFTP");
