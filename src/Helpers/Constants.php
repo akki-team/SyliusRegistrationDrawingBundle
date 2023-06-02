@@ -8,6 +8,12 @@ use Sylius\Component\Order\Model\OrderInterface;
 
 class Constants
 {
+    public const DIRECTORY_PUBLIC = '/var';
+    public const DIRECTORY_EXPORT = '/exportsEditeur/';
+    public const SUCCESS_MAIL_CODE = 'editor_registration_drawing';
+    public const ERROR_MAIL_CODE = 'editor_registration_drawing_error';
+    public const ERROR_MAIL_RECIPIENTS = ['support@akki.fr', 'market-place@reworldmedia.com'];
+
     public const CSV_FORMAT = 'CSV';
     public const FIXED_LENGTH_FORMAT = 'LONGUEUR FIXE';
 

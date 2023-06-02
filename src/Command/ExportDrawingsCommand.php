@@ -5,8 +5,8 @@ namespace Akki\SyliusRegistrationDrawingBundle\Command;
 use Akki\SyliusRegistrationDrawingBundle\Controller\RegistrationDrawingController;
 use Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing;
 use Akki\SyliusRegistrationDrawingBundle\Helpers\Constants;
+use Akki\SyliusRegistrationDrawingBundle\Service\ExportService;
 use App\Entity\Taxonomy\Taxon;
-use App\Mailer\Sender\KMSenderInterface;
 use App\Repository\OrderRepositoryInterface;
 use App\Service\ExportEditeur\GeneratedFileService;
 use DateTime;
@@ -46,17 +46,11 @@ class ExportDrawingsCommand extends Command
     /** @var GeneratedFileService $generatedFileService */
     private GeneratedFileService $generatedFileService;
 
-    /** @var KMSenderInterface $emailSender */
-    private KMSenderInterface $emailSender;
-
     /** @var string $kernelProjectDir */
     protected string $kernelProjectDir;
 
-    private const DIRECTORY_PUBLIC = '/var';
-    private const DIRECTORY_EXPORT = '/exportsEditeur/';
-    private const SUCCESS_MAIL_CODE = 'editor_registration_drawing';
-    private const ERROR_MAIL_CODE = 'editor_registration_drawing_error';
-    private const ERROR_MAIL_RECIPIENTS = ['support@akki.fr', 'market-place@reworldmedia.com'];
+    /** @var ExportService $exportService */
+    private ExportService $exportService;
 
     /**
      * @param ObjectRepository $registrationDrawingRepository
@@ -66,6 +60,7 @@ class ExportDrawingsCommand extends Command
      * @param GeneratedFileService $generatedFileService
      * @param KernelInterface $kernel
      * @param KMSenderInterface $emailSender
+     * @param ExportService $exportService
      */
     public function __construct(
         ObjectRepository $registrationDrawingRepository,
@@ -74,7 +69,8 @@ class ExportDrawingsCommand extends Command
         RegistrationDrawingController $registrationDrawingController,
         GeneratedFileService $generatedFileService,
         KernelInterface $kernel,
-        KMSenderInterface $emailSender
+        KMSenderInterface $emailSender,
+        ExportService $exportService
     )
     {
         parent::__construct();
@@ -85,6 +81,7 @@ class ExportDrawingsCommand extends Command
         $this->generatedFileService = $generatedFileService;
         $this->kernelProjectDir = $kernel->getProjectDir();
         $this->emailSender = $emailSender;
+        $this->exportService = $exportService;
     }
 
     /**
@@ -181,7 +178,7 @@ class ExportDrawingsCommand extends Command
                 $orders = $this->orderRepository->findAllTransmittedForDrawingExport($drawing, $startDate, $endDate, $otherTitles);
 
                 $fileName = $drawing->getFormat() === Constants::CSV_FORMAT ? "{$drawing->getName()}_{$startDateFormated}_$endDateFormated.csv" : "{$drawing->getName()}_{$startDateFormated}_$endDateFormated.txt";
-                $filePath = $this->kernelProjectDir.self::DIRECTORY_PUBLIC.self::DIRECTORY_EXPORT.$fileName;
+                $filePath = $this->kernelProjectDir.Constants::DIRECTORY_PUBLIC.Constants::DIRECTORY_EXPORT.$fileName;
 
                 if (!empty($orders)) {
                     $export = $this->registrationDrawingController->exportDrawing($drawing, $orders, $filePath, $otherTitles);
@@ -192,9 +189,9 @@ class ExportDrawingsCommand extends Command
                         if (null === $export[0]) {
                             $outputStyle->writeln("Erreur pendant la génération du fichier");
 
-                            $this->sendMail(
-                                self::ERROR_MAIL_CODE,
-                                self::ERROR_MAIL_RECIPIENTS,
+                            $this->exportService->sendMail(
+                                Constants::ERROR_MAIL_CODE,
+                                Constants::ERROR_MAIL_RECIPIENTS,
                                 ['fileName' => $fileName, 'error' => 'Erreur pendant la génération du fichier']
                             );
                         }
@@ -204,21 +201,21 @@ class ExportDrawingsCommand extends Command
                         $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $startDate, $endDate, $totalLines, $totalCancellations, $drawing);
 
                         if ($inputSend === 1) {
-                            $success = $this->sendSalesReportToVendor($drawing, $filePath, $outputStyle, $output);
+                            $success = $this->exportService->sendSalesReportToVendor($drawing, $filePath, $outputStyle, $output);
 
                             if ($success) {
                                 try {
-                                    $this->sendMail(
-                                        self::SUCCESS_MAIL_CODE,
+                                    $this->exportService->sendMail(
+                                        Constants::SUCCESS_MAIL_CODE,
                                         explode(';', $drawing->getRecipients()),
                                         ['fileName' => $fileName, 'totalLines' => $totalLines, 'totalCancelled' => $totalCancellations]
                                     );
                                 } catch (\Exception $e) {
                                     $outputStyle->writeln("Erreur pendant l'envoi du mail : ".$e->getMessage());
 
-                                    $this->sendMail(
-                                        self::ERROR_MAIL_CODE,
-                                        self::ERROR_MAIL_RECIPIENTS,
+                                    $this->exportService->sendMail(
+                                        Constants::ERROR_MAIL_CODE,
+                                        Constants::ERROR_MAIL_RECIPIENTS,
                                         ['fileName' => $fileName, 'error' => $e->getMessage()]
                                     );
                                 }
@@ -239,74 +236,6 @@ class ExportDrawingsCommand extends Command
         $this->release();
 
         return 0;
-    }
-
-    /**
-     * @param RegistrationDrawing $drawing
-     * @param string $filePath
-     * @param SymfonyStyle $outputStyle
-     * @param OutputInterface $output
-     * @return bool
-     */
-    public function sendSalesReportToVendor(
-        RegistrationDrawing $drawing,
-        string $filePath,
-        SymfonyStyle $outputStyle,
-        OutputInterface $output
-    ): bool
-    {
-        $success = false;
-
-        $rsaSrc = "~www-data/.ssh/id_rsa";
-        $sendMode = $drawing->getSendMode();
-        $depositAddress = $drawing->getDepositAddress();
-        $user = $drawing->getUser();
-        $password = $drawing->getPassword();
-        $host = $drawing->getHost();
-        $port = $drawing->getPort();
-
-        // si depose SFTP
-        if ($sendMode === 'SSH') {
-            $command = "echo -e 'put \"$filePath\"' | sftp -o StrictHostKeyChecking=no -i $rsaSrc -P $port $user@$host:\"$depositAddress\"";
-        } else {
-            $lftpOption = "set sftp:connect-program 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
-            $command = "lftp -c \"$lftpOption; connect sftp://$user:$password@$host:$port;put -O '$depositAddress' '$filePath'\"";
-        }
-
-        $outputStyle->writeln($command);
-        $process = Process::fromShellCommandline($command);
-
-        try {
-            $process->run() ;
-        } catch (\Exception $e) {
-            $outputStyle->writeln("Erreur pendant la depose SFTP : ".$e->getMessage());
-
-            $this->sendMail(
-                self::ERROR_MAIL_CODE,
-                self::ERROR_MAIL_RECIPIENTS,
-                ['fileName' => basename($filePath), 'error' => $e->getMessage()]
-            );
-        } finally {
-            if (!$process->isSuccessful()) {
-                $outputStyle->writeln("Erreur pendant la depose SFTP");
-            } else {
-                $success = true;
-                $outputStyle->writeln("Dépose SFTP avec succès");
-            }
-        }
-
-        return $success;
-    }
-
-    /**
-     * @param string $mailCode
-     * @param array $to
-     * @param array $datas
-     * @return void
-     */
-    private function sendMail(string $mailCode, array $to, array $datas): void
-    {
-        $this->emailSender->send($mailCode, $to, $datas, [], [], [], []);
     }
 
 }
