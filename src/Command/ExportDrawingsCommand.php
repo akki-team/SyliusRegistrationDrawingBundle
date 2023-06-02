@@ -59,7 +59,6 @@ class ExportDrawingsCommand extends Command
      * @param RegistrationDrawingController $registrationDrawingController
      * @param GeneratedFileService $generatedFileService
      * @param KernelInterface $kernel
-     * @param KMSenderInterface $emailSender
      * @param ExportService $exportService
      */
     public function __construct(
@@ -69,7 +68,6 @@ class ExportDrawingsCommand extends Command
         RegistrationDrawingController $registrationDrawingController,
         GeneratedFileService $generatedFileService,
         KernelInterface $kernel,
-        KMSenderInterface $emailSender,
         ExportService $exportService
     )
     {
@@ -80,7 +78,6 @@ class ExportDrawingsCommand extends Command
         $this->registrationDrawingController = $registrationDrawingController;
         $this->generatedFileService = $generatedFileService;
         $this->kernelProjectDir = $kernel->getProjectDir();
-        $this->emailSender = $emailSender;
         $this->exportService = $exportService;
     }
 

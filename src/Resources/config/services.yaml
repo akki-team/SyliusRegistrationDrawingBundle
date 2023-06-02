@@ -22,5 +22,5 @@ services:
             - '@sylius_registration_drawing.controller.registration_drawing'
             - '@App\Service\ExportEditeur\GeneratedFileService'
             - '@kernel'
-            - 'Akki\SyliusRegistrationDrawingBundle\Service\ExportService'
+            - '@Akki\SyliusRegistrationDrawingBundle\Service\ExportService'
         tags: [ 'console.command' ]
