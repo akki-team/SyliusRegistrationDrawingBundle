@@ -63,15 +63,15 @@ class ExportService
     /**
      * @param RegistrationDrawing $drawing
      * @param string $filePath
-     * @param SymfonyStyle $outputStyle
-     * @param OutputInterface $output
+     * @param SymfonyStyle|null $outputStyle
+     * @param OutputInterface|null $output
      * @return bool
      */
     public function sendSalesReportToVendor(
         RegistrationDrawing $drawing,
         string $filePath,
-        SymfonyStyle $outputStyle,
-        OutputInterface $output
+        SymfonyStyle $outputStyle = null,
+        OutputInterface $output = null
     ): bool
     {
         $success = false;
@@ -92,13 +92,17 @@ class ExportService
             $command = "lftp -c \"$lftpOption; connect sftp://$user:$password@$host:$port;put -O '$depositAddress' '$filePath'\"";
         }
 
-        $outputStyle->writeln($command);
+        if (!is_null($outputStyle)) {
+            $outputStyle->writeln($command);
+        }
         $process = Process::fromShellCommandline($command);
 
         try {
             $process->run() ;
         } catch (\Exception $e) {
-            $outputStyle->writeln("Erreur pendant la depose SFTP : ".$e->getMessage());
+            if (!is_null($outputStyle)) {
+                $outputStyle->writeln("Erreur pendant la depose SFTP : ".$e->getMessage());
+            }
 
             $this->sendMail(
                 Constants::ERROR_MAIL_CODE,
@@ -107,10 +111,14 @@ class ExportService
             );
         } finally {
             if (!$process->isSuccessful()) {
-                $outputStyle->writeln("Erreur pendant la depose SFTP");
+                if (!is_null($outputStyle)) {
+                    $outputStyle->writeln("Erreur pendant la depose SFTP");
+                }
             } else {
                 $success = true;
-                $outputStyle->writeln("Dépose SFTP avec succès");
+                if (!is_null($outputStyle)) {
+                    $outputStyle->writeln("Dépose SFTP avec succès");
+                }
             }
         }
 
