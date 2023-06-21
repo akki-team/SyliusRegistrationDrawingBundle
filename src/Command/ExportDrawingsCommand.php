@@ -204,7 +204,7 @@ class ExportDrawingsCommand extends Command
                                 try {
                                     $this->exportService->sendMail(
                                         Constants::SUCCESS_MAIL_CODE,
-                                        explode(';', $drawing->getRecipients()),
+                                        explode(';', str_replace(' ', '', $drawing->getRecipients())),
                                         ['fileName' => $fileName, 'totalLines' => $totalLines, 'totalCancelled' => $totalCancellations]
                                     );
                                 } catch (\Exception $e) {
