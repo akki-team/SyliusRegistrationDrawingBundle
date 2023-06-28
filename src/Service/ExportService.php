@@ -14,6 +14,7 @@ use App\Service\ExportEditeur\GeneratedFileService;
 use Doctrine\Persistence\ObjectRepository;
 use League\Csv\ByteSequence;
 use League\Csv\Writer;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -43,7 +44,7 @@ class ExportService
      * @param ObjectRepository $registrationDrawingRepository
      * @param OrderRepositoryInterface $orderRepository
      * @param RegistrationDrawingController $registrationDrawingController
-     * @param string $kernelProjectDir
+     * @param KernelInterface $kernel
      * @param GeneratedFileService $generatedFileService
      * @param KMSenderInterface $emailSender
      */
@@ -52,14 +53,14 @@ class ExportService
         ObjectRepository $registrationDrawingRepository,
         OrderRepositoryInterface $orderRepository,
         RegistrationDrawingController $registrationDrawingController,
-        string $kernelProjectDir,
+        KernelInterface $kernel,
         GeneratedFileService $generatedFileService,
         KMSenderInterface $emailSender
     ) {
         $this->registrationDrawingRepository = $registrationDrawingRepository;
         $this->orderRepository = $orderRepository;
         $this->registrationDrawingController = $registrationDrawingController;
-        $this->kernelProjectDir = $kernelProjectDir;
+        $this->kernelProjectDir = $kernel->getProjectDir();
         $this->generatedFileService = $generatedFileService;
         $this->emailSender = $emailSender;
     }
