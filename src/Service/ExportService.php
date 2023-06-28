@@ -4,9 +4,14 @@ declare(strict_types=1);
 
 namespace Akki\SyliusRegistrationDrawingBundle\Service;
 
+use Akki\SyliusRegistrationDrawingBundle\Controller\RegistrationDrawingController;
 use Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing;
 use Akki\SyliusRegistrationDrawingBundle\Helpers\Constants;
+use App\Entity\Taxonomy\Taxon;
 use App\Mailer\Sender\KMSenderInterface;
+use App\Repository\OrderRepositoryInterface;
+use App\Service\ExportEditeur\GeneratedFileService;
+use Doctrine\Persistence\ObjectRepository;
 use League\Csv\ByteSequence;
 use League\Csv\Writer;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -16,14 +21,116 @@ use Symfony\Component\Process\Process;
 
 class ExportService
 {
+    /** @var ObjectRepository $registrationDrawingRepository */
+    private ObjectRepository $registrationDrawingRepository;
+
+    /** @var OrderRepositoryInterface $orderRepository */
+    private OrderRepositoryInterface $orderRepository;
+
+    /** @var RegistrationDrawingController $registrationDrawingController */
+    protected RegistrationDrawingController $registrationDrawingController ;
+
+    /** @var string $kernelProjectDir */
+    protected string $kernelProjectDir;
+
+    /** @var GeneratedFileService $generatedFileService */
+    private GeneratedFileService $generatedFileService;
+
     /** @var KMSenderInterface $emailSender */
     private KMSenderInterface $emailSender;
 
     /**
+     * @param ObjectRepository $registrationDrawingRepository
+     * @param OrderRepositoryInterface $orderRepository
+     * @param RegistrationDrawingController $registrationDrawingController
+     * @param string $kernelProjectDir
+     * @param GeneratedFileService $generatedFileService
      * @param KMSenderInterface $emailSender
      */
-    public function __construct(KMSenderInterface $emailSender) {
+    public function __construct
+    (
+        ObjectRepository $registrationDrawingRepository,
+        OrderRepositoryInterface $orderRepository,
+        RegistrationDrawingController $registrationDrawingController,
+        string $kernelProjectDir,
+        GeneratedFileService $generatedFileService,
+        KMSenderInterface $emailSender
+    ) {
+        $this->registrationDrawingRepository = $registrationDrawingRepository;
+        $this->orderRepository = $orderRepository;
+        $this->registrationDrawingController = $registrationDrawingController;
+        $this->kernelProjectDir = $kernelProjectDir;
+        $this->generatedFileService = $generatedFileService;
         $this->emailSender = $emailSender;
+    }
+
+    /**
+     * @param RegistrationDrawing $drawing
+     * @param \DateTime $startDate
+     * @param \DateTime $endDate
+     * @param int|null $drop
+     * @return void
+     */
+    public function exportDrawing(RegistrationDrawing $drawing, \DateTime $startDate, \DateTime $endDate, ?int $drop)
+    {
+        $otherDrawings = array_filter($this->registrationDrawingRepository->findAll(), function ($dr) use ($drawing) {
+            return $dr !== $drawing;
+        });
+
+        $otherTitles = [];
+
+        /** @var RegistrationDrawing $otherDrawing */
+        foreach ($otherDrawings as $otherDrawing) {
+            /** @var Taxon $title */
+            foreach ($otherDrawing->getTitles() as $title) {
+                $otherTitles[] = $title;
+            }
+        }
+
+        $orders = $this->orderRepository->findAllTransmittedForDrawingExport($drawing, $startDate, $endDate, $otherTitles);
+
+        $fileName = $drawing->getFormat() === Constants::CSV_FORMAT ? "{$drawing->getName()}_{$startDate->format('d-m-Y')}_{$endDate->format('d-m-Y')}.csv" : "{$drawing->getName()}_{$startDate->format('d-m-Y')}_{$endDate->format('d-m-Y')}.txt";
+        $filePath = $this->kernelProjectDir.Constants::DIRECTORY_PUBLIC.Constants::DIRECTORY_EXPORT.$fileName;
+
+        if (!empty($orders)) {
+            $export = $this->registrationDrawingController->exportDrawing($drawing, $orders, $filePath, $otherTitles);
+            $totalLines = $export[1];
+            $totalCancellations = $export[2];
+
+            if ($export[1] > 0 || $export[2] > 0) {
+                if (null === $export[0]) {
+                    $this->sendMail(
+                        Constants::ERROR_MAIL_CODE,
+                        Constants::ERROR_MAIL_RECIPIENTS,
+                        ['fileName' => $fileName, 'error' => 'Erreur pendant la génération du fichier']
+                    );
+                }
+
+                $drawingFirstVendor = !empty($drawing->getVendors()) ? $drawing->getVendors()->toArray()[0] : null;
+
+                $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $startDate, $endDate, $totalLines, $totalCancellations, $drawing);
+
+                if ($drop === 1) {
+                    $success = $this->sendSalesReportToVendor($drawing, $filePath);
+
+                    if ($success) {
+                        try {
+                            $this->sendMail(
+                                Constants::SUCCESS_MAIL_CODE,
+                                explode(';', str_replace(' ', '', $drawing->getRecipients())),
+                                ['fileName' => $fileName, 'totalLines' => $totalLines, 'totalCancelled' => $totalCancellations]
+                            );
+                        } catch (\Exception $e) {
+                            $this->sendMail(
+                                Constants::ERROR_MAIL_CODE,
+                                Constants::ERROR_MAIL_RECIPIENTS,
+                                ['fileName' => $fileName, 'error' => $e->getMessage()]
+                            );
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
