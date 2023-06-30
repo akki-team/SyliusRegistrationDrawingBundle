@@ -131,6 +131,8 @@ class ExportService
                     }
                 }
             }
+        } else {
+            throw new \Exception('Aucune commande trouvée sur cette période');
         }
     }
 
