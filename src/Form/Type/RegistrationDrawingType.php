@@ -36,7 +36,7 @@ final class RegistrationDrawingType extends AbstractResourceType
             ])
 
             ->add('delimiter', ChoiceType::class, [
-                'required' => false,
+                'required' => true,
                 'label' => 'sylius_registration_drawing.form.registration_drawing.delimiter',
                 'choices' => Constants::DELIMITERS,
                 'expanded' => false,
