@@ -521,9 +521,9 @@ class RegistrationDrawingController extends ResourceController
     /**
      * @param $data
      * @param string $selections
-     * @return string
+     * @return string|null
      */
-    private function substitute($data, string $selections): string
+    private function substitute($data, string $selections): ?string
     {
         $returnedData = $data;
         $couples = explode(';', $selections);
