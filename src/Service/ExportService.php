@@ -90,7 +90,7 @@ class ExportService
 
         $orders = $this->orderRepository->findAllTransmittedForDrawingExport($drawing, $startDate, $endDate, $otherTitles);
 
-        $fileName = $drawing->getFormat() === Constants::CSV_FORMAT ? "{$drawing->getName()}_{$startDate->format('d-m-Y')}_{$endDate->format('d-m-Y')}.csv" : "{$drawing->getName()}_{$startDate->format('d-m-Y')}_{$endDate->format('d-m-Y')}.txt";
+        $fileName = $drawing->getFormat() === Constants::CSV_FORMAT ? "{$drawing->getName()}_{$startDate->format('Ymd')}_{$endDate->format('Ymd')}.csv" : "{$drawing->getName()}_{$startDate->format('Ymd')}_{$endDate->format('Ymd')}.txt";
         $filePath = $this->kernelProjectDir.Constants::DIRECTORY_PUBLIC.Constants::DIRECTORY_EXPORT.$fileName;
 
         if (!empty($orders)) {
