@@ -155,8 +155,8 @@ class ExportDrawingsCommand extends Command
                     }
                 }
 
-                $startDateFormated = $startDate->format('Y-m-d');
-                $endDateFormated = $endDate->format('Y-m-d');
+                $startDateFormated = $startDate->format('Ymd');
+                $endDateFormated = $endDate->format('Ymd');
 
                 $otherDrawings = array_filter($this->registrationDrawingRepository->findAll(), function ($dr) use ($drawing) {
                     return $dr !== $drawing;
