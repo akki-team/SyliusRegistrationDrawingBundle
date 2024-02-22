@@ -1,0 +1,14 @@
+<container xmlns="http://symfony.com/schema/dic/services">
+    <services>
+        <service class="Akki\SyliusRegistrationDrawingBundle\Command\ExportDrawingsCommand"
+                 id="akki_sylius_registration_drawing.command.export_drawings_command">
+            <argument type="service" id="akki.repository.registration_drawing"/>
+            <argument type="service" id="sylius.repository.order"/>
+            <argument type="service" id="akki_sylius_registration_drawing.service.export_drawing"/>
+            <argument type="service" id="akki_sylius_registration_drawing.service.generated_file_service"/>
+            <argument type="service" id="akki_sylius_registration_drawing.service.export_service"/>
+            <argument>%kernel.project_dir%</argument>
+            <tag name="console.command"/>
+        </service>
+    </services>
+</container>

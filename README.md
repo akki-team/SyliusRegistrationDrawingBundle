@@ -5,7 +5,7 @@ Registration drawings for Sylius. Manage and export to multiple formats (works w
 
 ## Installation
 
-1. Run `composer require akki/sylius-registration-drawing-bundle:dev-master`
+1. Run `composer require akki/sylius-registration-drawing-bundle`
 
 2. Enable the plugin in bundles.php
 
@@ -15,7 +15,7 @@ Registration drawings for Sylius. Manage and export to multiple formats (works w
 
 return [
     // ...
-    Akki\SyliusRegistrationDrawingBundle\RegistrationDrawingBundle::class => ['all' => true],
+    Akki\SyliusRegistrationDrawingBundle\AkkiSyliusRegistrationDrawingPlugin::class => ['all' => true],
 ];
 ```
 
@@ -25,38 +25,46 @@ return [
 # config/packages/_sylius.yaml
 imports:
     // ...
-    - { resource: "@RegistrationDrawingBundle/Resources/config/config.yaml" }
+    - { resource: "@AkkiSyliusRegistrationDrawingPlugin/Resources/config/config.yaml" }
 ```
 
 4. Add the admin routes
 
 ```yml
 # config/routes.yaml
-sylius_registration_drawing:
+akki_sylius_registration_drawing_plugin:
     prefix: /admin
-    resource: "@RegistrationDrawingBundle/Resources/config/routing.yaml"
+    resource: "@AkkiSyliusRegistrationDrawingPlugin/Resources/config/routing.yaml"
 ```
 
-5. Add the RegistrationDrawingTrait to the Vendor entity
+5. Add the OrderDrawingRepositoryTrait to the OrderRepository entity
+
+```php
+<?php
+namespace App\Repository;
+
+use Akki\SyliusRegistrationDrawingBundle\Repository\OrderDrawingRepositoryTrait;
+use Akki\SyliusRegistrationDrawingBundle\Repository\OrderRepositoryInterface;
+
+
+class OrderRepository extends BaseOrderRepository implements OrderRepositoryInterface
+{
+    use OrderDrawingRepositoryTrait;
+```
+
+6. Add the RegistrationDrawingTrait to the Vendor entity
 
 ```php
 <?php
 // Entity/Vendor.php
 
-class Vendor extends BaseVendor
+class Vendor extends BaseVendor implements RegistrationDrawingAwareInterface
 {
     use RegistrationDrawingTrait;
-```
 
-6. Add the OrderDrawingRepositoryTrait to the OrderRepository entity
-
-```php
-<?php
-// Repository/OrderRepository.php
-
-class OrderRepository extends BaseOrderRepository implements OrderRepositoryInterface
-{
-    use OrderDrawingRepositoryTrait;
+    #[ORM\ManyToOne(targetEntity: RegistrationDrawingInterface::class, inversedBy: 'vendors')]
+    #[ORM\JoinColumn(name: 'registration_drawing_id', referencedColumnName: 'id', nullable: true, onDelete: 'CASCADE')]
+    protected RegistrationDrawingInterface|null $registrationDrawing = null;
 ```
 
 7. Add the RegistrationDrawingTaxonTrait to the Taxon entity
@@ -65,9 +73,14 @@ class OrderRepository extends BaseOrderRepository implements OrderRepositoryInte
 <?php
 // Entity/Taxonomy/Taxon.php
 
-class Taxon extends BaseTaxon
+class Taxon extends BaseTaxon implements RegistrationDrawingAwareInterface
 {
-    use RegistrationDrawingTaxonTrait;
+    use RegistrationDrawingTrait;
+    
+    #[ORM\ManyToOne(targetEntity: RegistrationDrawingInterface::class, inversedBy: 'titles')]
+    #[ORM\JoinColumn(name: 'registration_drawing_id', referencedColumnName: 'id', nullable: true, onDelete: 'CASCADE')]
+    protected RegistrationDrawingInterface|null $registrationDrawing = null;
+
 ```
 
 8. Add the form field in your admin view to add Vendor registration drawings selection

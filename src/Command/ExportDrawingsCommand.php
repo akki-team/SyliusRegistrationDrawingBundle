@@ -2,28 +2,23 @@
 
 namespace Akki\SyliusRegistrationDrawingBundle\Command;
 
-use Akki\SyliusRegistrationDrawingBundle\Controller\RegistrationDrawingController;
 use Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing;
 use Akki\SyliusRegistrationDrawingBundle\Helpers\Constants;
-use Akki\SyliusRegistrationDrawingBundle\Service\ExportService;
-use App\Entity\Taxonomy\Taxon;
-use App\Repository\OrderRepositoryInterface;
-use App\Service\ExportEditeur\GeneratedFileService;
+use Akki\SyliusRegistrationDrawingBundle\Repository\OrderRepositoryInterface;
+use Akki\SyliusRegistrationDrawingBundle\Service\ExportDrawingInterface;
+use Akki\SyliusRegistrationDrawingBundle\Service\ExportServiceInterface;
+use Akki\SyliusRegistrationDrawingBundle\Service\GeneratedFileServiceInterface;
 use DateTime;
-use Doctrine\Persistence\ObjectRepository;
-use Odiseo\SyliusVendorPlugin\Repository\VendorRepositoryInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Sylius\Component\Core\Model\TaxonInterface;
+use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
 
 class ExportDrawingsCommand extends Command
 {
@@ -31,70 +26,27 @@ class ExportDrawingsCommand extends Command
 
     protected static $defaultName = 'export-drawings:generate';
 
-    /** @var ObjectRepository $registrationDrawingRepository */
-    protected ObjectRepository $registrationDrawingRepository;
-
-    /** @var OrderRepositoryInterface $orderRepository */
-    protected OrderRepositoryInterface $orderRepository;
-
-    /** @var VendorRepositoryInterface $vendorRepository */
-    protected VendorRepositoryInterface $vendorRepository ;
-
-    /** @var RegistrationDrawingController $registrationDrawingController */
-    protected RegistrationDrawingController $registrationDrawingController ;
-
-    /** @var GeneratedFileService $generatedFileService */
-    private GeneratedFileService $generatedFileService;
-
-    /** @var string $kernelProjectDir */
-    protected string $kernelProjectDir;
-
-    /** @var ExportService $exportService */
-    private ExportService $exportService;
-
-    /**
-     * @param ObjectRepository $registrationDrawingRepository
-     * @param OrderRepositoryInterface $orderRepository
-     * @param VendorRepositoryInterface $vendorRepository
-     * @param RegistrationDrawingController $registrationDrawingController
-     * @param GeneratedFileService $generatedFileService
-     * @param KernelInterface $kernel
-     * @param ExportService $exportService
-     */
     public function __construct(
-        ObjectRepository $registrationDrawingRepository,
-        OrderRepositoryInterface $orderRepository,
-        VendorRepositoryInterface $vendorRepository,
-        RegistrationDrawingController $registrationDrawingController,
-        GeneratedFileService $generatedFileService,
-        KernelInterface $kernel,
-        ExportService $exportService
+        private readonly RepositoryInterface           $registrationDrawingRepository,
+        private readonly OrderRepositoryInterface      $orderRepository,
+        private readonly ExportDrawingInterface        $exportDrawing,
+        private readonly GeneratedFileServiceInterface $generatedFileService,
+        private readonly ExportServiceInterface        $exportService,
+        private readonly string                        $kernelProjectDir,
     )
     {
         parent::__construct();
-        $this->registrationDrawingRepository = $registrationDrawingRepository;
-        $this->orderRepository = $orderRepository;
-        $this->vendorRepository = $vendorRepository;
-        $this->registrationDrawingController = $registrationDrawingController;
-        $this->generatedFileService = $generatedFileService;
-        $this->kernelProjectDir = $kernel->getProjectDir();
-        $this->exportService = $exportService;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function configure(): void
     {
         $this
-            ->setName(self::$defaultName)
             ->setDescription('Transmission des abonnements/ventes à l\'éditeur partenaire')
             ->setHelp('Cette commande permets de générer un export CSV ou longueur fixe contenant les abonnements et vente d\'un éditeur partenaire')
             ->addArgument('registration_drawing', InputArgument::OPTIONAL, 'Dessin d\'enregistrement')
             ->addArgument('start_date', InputArgument::OPTIONAL, 'Date de début')
             ->addArgument('end_date', InputArgument::OPTIONAL, 'Date de fin')
-            ->addArgument('send', InputArgument::OPTIONAL, 'Envoi d\'email et dépose SFTP', 1)
-        ;
+            ->addArgument('send', InputArgument::OPTIONAL, 'Envoi d\'email et dépose SFTP', 1);
     }
 
     /**
@@ -109,7 +61,7 @@ class ExportDrawingsCommand extends Command
         if (!$this->lock()) {
             $output->writeln('Cette commande est déjà en cours d\'execution. Veuillez attendre la fin de celle-ci');
 
-            return 1;
+            return Command::FAILURE;
         }
 
         $outputStyle = new SymfonyStyle($input, $output);
@@ -123,8 +75,7 @@ class ExportDrawingsCommand extends Command
 
         if ($inputDrawing) {
             $registrationDrawings = $this->registrationDrawingRepository->findByName($inputDrawing);
-        }
-        else {
+        } else {
             $registrationDrawings = $this->registrationDrawingRepository->findAll();
         }
 
@@ -132,8 +83,8 @@ class ExportDrawingsCommand extends Command
             /** @var RegistrationDrawing $drawing */
             foreach ($registrationDrawings as $drawing) {
                 if ($inputStartDate && $inputEndDate) {
-                    $startDate = (new DateTime($input->getArgument('start_date')))->setTime(0,0, 0);;
-                    $endDate = (new DateTime($input->getArgument('end_date')))->setTime(23,59, 59);;
+                    $startDate = (new DateTime($input->getArgument('start_date')))->setTime(0, 0, 0);;
+                    $endDate = (new DateTime($input->getArgument('end_date')))->setTime(23, 59, 59);;
                 } else {
                     $periodicity = $drawing->getPeriodicity();
                     $day = Constants::EN_DAYS[$drawing->getDay()];
@@ -150,8 +101,8 @@ class ExportDrawingsCommand extends Command
                         $startDate = new DateTime('first day of last month midnight');
                         $endDate = new DateTime('first day of this month midnight -1 sec');
                     } else {
-                        $startDate = new DateTime($day.' last week midnight');
-                        $endDate = new DateTime($day.' this week midnight -1 sec');
+                        $startDate = new DateTime($day . ' last week midnight');
+                        $endDate = new DateTime($day . ' this week midnight -1 sec');
                     }
                 }
 
@@ -166,7 +117,7 @@ class ExportDrawingsCommand extends Command
 
                 /** @var RegistrationDrawing $otherDrawing */
                 foreach ($otherDrawings as $otherDrawing) {
-                    /** @var Taxon $title */
+                    /** @var TaxonInterface $title */
                     foreach ($otherDrawing->getTitles() as $title) {
                         $otherTitles[] = $title;
                     }
@@ -175,10 +126,10 @@ class ExportDrawingsCommand extends Command
                 $orders = $this->orderRepository->findAllTransmittedForDrawingExport($drawing, $startDate, $endDate, $otherTitles);
 
                 $fileName = $drawing->getFormat() === Constants::CSV_FORMAT ? "{$drawing->getName()}_{$startDateFormated}_$endDateFormated.csv" : "{$drawing->getName()}_{$startDateFormated}_$endDateFormated.txt";
-                $filePath = $this->kernelProjectDir.Constants::DIRECTORY_PUBLIC.Constants::DIRECTORY_EXPORT.$fileName;
+                $filePath = $this->kernelProjectDir . Constants::DIRECTORY_PUBLIC . Constants::DIRECTORY_EXPORT . $fileName;
 
                 if (!empty($orders)) {
-                    $export = $this->registrationDrawingController->exportDrawing($drawing, $orders, $filePath, $otherTitles);
+                    $export = $this->exportDrawing->exportDrawing($drawing, $orders, $filePath, $otherTitles);
                     $totalLines = $export[1];
                     $totalCancellations = $export[2];
 
@@ -198,7 +149,7 @@ class ExportDrawingsCommand extends Command
                         $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $startDate, $endDate, $totalLines, $totalCancellations, $drawing);
 
                         if ($inputSend === 1) {
-                            $success = $this->exportService->sendSalesReportToVendor($drawing, $filePath, $outputStyle, $output);
+                            $success = $this->exportService->sendSalesReportToVendor($drawing, $filePath, $outputStyle);
 
                             if ($success) {
                                 try {
@@ -208,7 +159,7 @@ class ExportDrawingsCommand extends Command
                                         ['fileName' => $fileName, 'totalLines' => $totalLines, 'totalCancelled' => $totalCancellations]
                                     );
                                 } catch (\Exception $e) {
-                                    $outputStyle->writeln("Erreur pendant l'envoi du mail : ".$e->getMessage());
+                                    $outputStyle->writeln("Erreur pendant l'envoi du mail : " . $e->getMessage());
 
                                     $this->exportService->sendMail(
                                         Constants::ERROR_MAIL_CODE,
@@ -232,7 +183,7 @@ class ExportDrawingsCommand extends Command
         $outputStyle->writeln('Fin génération des commandes éditeurs.');
         $this->release();
 
-        return 0;
+        return Command::SUCCESS;
     }
 
 }

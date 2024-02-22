@@ -22,10 +22,8 @@ class VendorTypeExtension extends AbstractTypeExtension
             ]);
     }
 
-    /**
-     */
-    public function getExtendedTypes(): iterable
+    public static function getExtendedTypes(): iterable
     {
-        return [VendorType::class];
+        yield VendorType::class;
     }
 }

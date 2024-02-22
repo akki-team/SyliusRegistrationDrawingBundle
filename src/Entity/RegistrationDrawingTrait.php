@@ -10,21 +10,14 @@ trait RegistrationDrawingTrait
      * @ORM\ManyToOne(targetEntity="Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing", inversedBy="vendors")
      * @ORM\JoinColumn(name="registration_drawing_id", referencedColumnName="id", nullable=true, onDelete="CASCADE")
      */
-    protected $registrationDrawing;
+    protected RegistrationDrawingInterface|null $registrationDrawing = null;
 
-    /**
-     * @return RegistrationDrawing|null
-     */
-    public function getRegistrationDrawing(): ?RegistrationDrawing
+    public function getRegistrationDrawing(): RegistrationDrawingInterface|null
     {
         return $this->registrationDrawing;
     }
 
-    /**
-     * @param RegistrationDrawing|null $registrationDrawing
-     * @return void
-     */
-    public function setRegistrationDrawing(?RegistrationDrawing $registrationDrawing): void
+    public function setRegistrationDrawing(RegistrationDrawingInterface|null $registrationDrawing): void
     {
         $this->registrationDrawing = $registrationDrawing;
     }

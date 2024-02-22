@@ -12,14 +12,13 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class DrawingFieldChoiceType extends AbstractType
+final class DrawingFieldChoiceType extends AbstractType
 {
-    /** @var RepositoryInterface */
-    protected $fieldRepository;
 
-    public function __construct(RepositoryInterface $fieldRepository)
+    public function __construct(
+        private readonly RepositoryInterface $drawingFieldRepository
+    )
     {
-        $this->fieldRepository = $fieldRepository;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -34,12 +33,11 @@ class DrawingFieldChoiceType extends AbstractType
         $resolver
             ->setDefaults([
                 'choices' => function (Options $options) {
-                    return $this->fieldRepository->findAll();
+                    return $this->drawingFieldRepository->findAll();
                 },
                 'choice_label' => 'name',
                 'choice_value' => 'id',
-            ])
-        ;
+            ]);
     }
 
     public function getParent(): string

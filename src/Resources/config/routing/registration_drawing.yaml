@@ -1,87 +1,17 @@
 sylius_registration_drawing:
   resource: |
-    alias: sylius_registration_drawing.registration_drawing
+    alias: akki.registration_drawing
     templates: "@SyliusAdmin\\Crud"
-    except: ['show', 'index']
+    except: ['show']
     redirect: index
-    grid: sylius_admin_registration_drawing
+    grid: akki_admin_registration_drawing
     section: admin
     permission: true
     vars:
       all:
         subheader: sylius_registration_drawing.ui.manage_your_registration_drawings
         templates:
-          form: "@RegistrationDrawingBundle/Resources/views/_form.html.twig"
+          form: "@AkkiSyliusRegistrationDrawingPlugin/_form.html.twig"
       index:
         icon: file alternate
   type: sylius.resource
-
-sylius_registration_drawing_admin_registration_drawing_index:
-  path: /registration_drawings/
-  methods: [GET]
-  defaults:
-    _controller: sylius_registration_drawing.controller.registration_drawing:indexAction
-    _sylius:
-      section: admin
-      permission: true
-      grid: sylius_admin_registration_drawing
-      template: "@SyliusAdmin/Crud/index.html.twig"
-      vars:
-        subheader: sylius_registration_drawing.ui.manage_your_registration_drawings
-        icon: file alternate
-
-sylius_admin_registration_drawing_bulk_delete:
-  path: /registration_drawings/bulk-delete
-  methods: [DELETE]
-  defaults:
-    _controller: sylius_registration_drawing.controller.registration_drawing:bulkDeleteAction
-    _sylius:
-      section: admin
-      redirect: sylius_registration_drawing_admin_registration_drawing_index
-      permission: true
-      repository:
-        method: findById
-        arguments: [$ids]
-
-sylius_admin_registration_drawing_delete:
-  path: /registration_drawings/{id}
-  methods: [DELETE]
-  defaults:
-    _controller: sylius_registration_drawing.controller.registration_drawing:deleteAction
-    _sylius:
-      section: admin
-      redirect: sylius_registration_drawing_admin_registration_drawing_index
-      permission: true
-
-sylius_registration_drawing_admin_registration_drawing_update:
-  path: /registration_drawings/{id}/edit
-  methods: [GET, PUT, PATCH]
-  defaults:
-    _controller: sylius_registration_drawing.controller.registration_drawing:updateDrawing
-    _sylius:
-      section: admin
-      permission: true
-      redirect: sylius_registration_drawing_admin_registration_drawing_index
-      template: "@SyliusAdmin/Crud/update.html.twig"
-      vars:
-        subheader: sylius_registration_drawing.ui.manage_your_registration_drawings
-        icon: file
-        templates:
-          form: "@RegistrationDrawingBundle/Resources/views/_form.html.twig"
-
-sylius_registration_drawing_admin_registration_drawing_create:
-  path: /registration_drawings/new
-  methods: [GET, POST]
-  defaults:
-    _controller: sylius_registration_drawing.controller.registration_drawing:createDrawing
-    _sylius:
-      section: admin
-      permission: true
-      template: "@SyliusAdmin/Crud/create.html.twig"
-      redirect: referer
-      vars:
-        subheader: sylius_registration_drawing.ui.manage_your_registration_drawings
-        templates:
-          form: "@RegistrationDrawingBundle/Resources/views/_form.html.twig"
-        route:
-          name: sylius_registration_drawing_admin_registration_drawing_create
