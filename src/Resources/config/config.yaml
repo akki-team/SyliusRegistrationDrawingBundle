@@ -10,6 +10,8 @@ sylius_grid:
   templates:
     action:
       create_drawing_field: "@AkkiSyliusRegistrationDrawingPlugin/Field/create.html.twig"
+      download_generated_file: "@AkkiSyliusRegistrationDrawingPlugin/GeneratedFiles/Grid/Action/downloadGeneratedFile.html.twig"
+      replay_sending_generated_file: "@AkkiSyliusRegistrationDrawingPlugin/GeneratedFiles/Grid/Action/replaySending.html.twig"
   grids:
     akki_admin_drawing_field:
       driver:
@@ -120,7 +122,112 @@ sylius_grid:
             options:
               link:
                 route: akki_admin_registration_drawing_bulk_delete
-
+    akki_admin_generated_file:
+      driver:
+        name: doctrine/orm
+        options:
+          class: "%akki.model.generated_file.class%"
+      sorting:
+        name: asc
+      fields:
+        registrationDrawing:
+          type: twig
+          label: akki.ui.generated_file.registrationDrawing
+          path: .
+          sortable: true
+          options:
+            template: "@AkkiSyliusRegistrationDrawingPlugin/GeneratedFiles/Grid/Field/registrationDrawing.html.twig"
+        vendor:
+          type: twig
+          label: odiseo_sylius_marketplace_plugin.ui.vendor
+          path: vendor
+          sortable: true
+          options:
+            template: "@AkkiSyliusRegistrationDrawingPlugin/GeneratedFiles/Grid/Field/vendor.html.twig"
+        name:
+          type: string
+          label: sylius.ui.name
+          sortable: true
+        startDate:
+          type: twig
+          label: sylius.ui.filter.start_at
+          path: .
+          sortable: true
+          options:
+            template: "@AkkiSyliusRegistrationDrawingPlugin/GeneratedFiles/Grid/Field/startDate.html.twig"
+        endDate:
+          type: twig
+          label: sylius.ui.filter.end_at
+          path: .
+          sortable: true
+          options:
+            template: "@AkkiSyliusRegistrationDrawingPlugin/GeneratedFiles/Grid/Field/endDate.html.twig"
+        totalLines:
+          type: twig
+          label: sylius.admin.ee_generated_file.totalLines
+          path: .
+          sortable: true
+          options:
+            template: "@AkkiSyliusRegistrationDrawingPlugin/GeneratedFiles/Grid/Field/totalLines.html.twig"
+        totalCancellations:
+          type: twig
+          label: sylius.admin.ee_generated_file.totalCancellations
+          path: .
+          sortable: true
+          options:
+            template: "@AkkiSyliusRegistrationDrawingPlugin/GeneratedFiles/Grid/Field/totalCancellations.html.twig"
+      filters:
+        vendor:
+          type: entity
+          label: odiseo_sylius_marketplace_plugin.ui.vendor
+          form_options:
+            class: "%odiseo_sylius_vendor_plugin.model.vendor.class%"
+        registrationDrawing:
+          type: entity
+          label: sylius.admin.ee_generated_file.registrationDrawing
+          form_options:
+            class: "%akki.model.registration_drawing.class%"
+        startDate:
+          type: date
+          label: sylius.ui.filter.start_at
+          options:
+            field: startDate
+            inclusive_to: true
+        endDate:
+          type: date
+          label: sylius.ui.filter.end_at
+          options:
+            field: endDate
+            inclusive_to: true
+      actions:
+        item:
+          download:
+            type: download_generated_file
+            label: bitbag_sylius_cms_plugin.ui.download
+            icon: download
+            options:
+              link:
+                route: akki_admin_generated_file_download
+                parameters:
+                  generatedFileId: resource.id
+          replay_sending:
+            type: replay_sending_generated_file
+            label: sylius_registration_drawing.ui.replay
+            icon: redo
+            options:
+              link:
+                route: akki_admin_generated_file_replay_sending
+                parameters:
+                  generatedFileId: resource.id
+                  name: resource.name
+          delete:
+            type: delete
+        bulk:
+          delete:
+            type: delete
+            options:
+              link:
+                route: app_admin_ee_generated_file_bulk_delete
 sylius_resource:
   resources:
     akki.registration_drawing:
@@ -153,12 +260,21 @@ sylius_resource:
         model: Akki\SyliusRegistrationDrawingBundle\Entity\GeneratedFile
         repository: Akki\SyliusRegistrationDrawingBundle\Repository\GeneratedFileRepository
         interface: Akki\SyliusRegistrationDrawingBundle\Entity\GeneratedFileInterface
+        controller: Akki\SyliusRegistrationDrawingBundle\Controller\GeneratedFileController
     akki.output_formats:
         driver: doctrine/orm
         classes:
             model: Akki\SyliusRegistrationDrawingBundle\Entity\OutputFormats
             repository: Akki\SyliusRegistrationDrawingBundle\Repository\OutputFormatsRepository
             interface: Akki\SyliusRegistrationDrawingBundle\Entity\OutputFormatsInterface
+
+sylius_ui:
+  events:
+    sylius.grid.body:
+      blocks:
+        akki_generated_file:
+          template: "@AkkiSyliusRegistrationDrawingPlugin/GeneratedFiles/Grid/_generateFile.html.twig"
+          priority: 100
 
 knp_gaufrette:
   adapters:

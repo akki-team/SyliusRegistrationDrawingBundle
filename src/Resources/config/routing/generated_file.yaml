@@ -1,0 +1,52 @@
+app_admin_ee_generated_file_bulk_delete:
+  path: /ee_generated_file/bulk-delete
+  methods: [DELETE]
+  defaults:
+    _controller: akki.controller.generated_file::bulkDeleteAction
+    _sylius:
+      section: admin
+      redirect: referer
+      permission: true
+      repository:
+        method: findById
+        arguments: [$ids]
+
+akki_admin_generated_file_download:
+  path: /generated-files/{generatedFileId}/download
+  methods: [ GET ]
+  defaults:
+    _controller: akki.controller.generated_file::downloadAction
+    _sylius:
+      section: admin
+      redirect: referer
+      permission: true
+
+akki_admin_generated_file_replay_sending:
+  path: /generated-files/{generatedFileId}/replay_sending
+  methods: [ POST ]
+  defaults:
+    _controller: akki.controller.generated_file::replaySendingGeneratedFileAction
+    _sylius:
+      section: admin
+      redirect: referer
+      permission: true
+
+akki_admin_generated_file_generate:
+  path: /generated-files/generate
+  methods: [ GET, POST ]
+  defaults:
+    _controller: akki.controller.generated_file::generateFileAction
+
+akki_admin_generated_file:
+  resource: |
+    alias: akki.generated_file
+    templates: "@SyliusAdmin\\Crud"
+    grid: akki_admin_generated_file
+    section: admin
+    permission: true
+    vars:
+      all:
+        subheader: akki.ui.manage_your_generated_file
+      index:
+        icon: file
+  type: sylius.resource

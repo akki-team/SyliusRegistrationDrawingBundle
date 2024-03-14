@@ -2,11 +2,14 @@ sylius_registration_drawing:
     ui:
         registration_drawings: "Dessins d'enregistrement"
         registration_drawing: "Dessin d'enregistrement"
+        generated_files: "Fichiers Transmissions"
         manage_your_registration_drawings: "Gérez vos dessins d'enregistrement"
+        manage_your_generated_file:  "Gérez vos Fichiers Transmissions"
         new_registration_drawing: "Nouveau dessin d'enregistrement"
         manage_fields_of_your_drawings: "Gérez les champs de vos dessins"
         edit_registration_drawing: "Modification d'un dessin d'enregistrement"
         send_registration_drawing: "Envoyer"
+        replay: "Rejouer le depôt"
     form:
         registration_drawing:
             name: "Nom"
@@ -39,3 +42,9 @@ sylius_registration_drawing:
         bloc_general: "Général"
         bloc_fields: "Champs"
         add_fields: "Ajouter des champs"
+akki:
+    ui:
+        generated_files: Fichiers Transmissions
+        manage_your_generated_file: "Gérez vos Fichiers Transmissions"
+        generated_file:
+            registrationDrawing: "Dessin d'enregistrement"

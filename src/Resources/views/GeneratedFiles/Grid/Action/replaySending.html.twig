@@ -1,0 +1,9 @@
+{% set path = path(options.link.route, options.link.parameters|default({})) %}
+
+<form action="{{ path }}" method="post">
+    <button class="ui yellow icon button" type="submit" data-requires-confirmation>
+        <i class="icon redo alternate"></i> {{ action.label|trans }}
+    </button>
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token(options.link.parameters.generatedFileId) }}" />
+</form>
+

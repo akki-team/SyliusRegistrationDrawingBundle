@@ -16,7 +16,7 @@ final class GeneratedFileType extends AbstractResourceType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('drawing', EntityType::class, array(
+            ->add('registrationDrawing', EntityType::class, array(
                 'required' => true,
                 'label' => 'sylius.admin.ee_generated_file.form.registration_drawing',
                 'class' => RegistrationDrawing::class,
@@ -36,6 +36,7 @@ final class GeneratedFileType extends AbstractResourceType
             ->add('drop', CheckboxType::class, [
                 'label' => 'sylius.admin.ee_generated_file.form.drop',
                 'required' => false,
+                'mapped' => false
             ])
         ;
     }
