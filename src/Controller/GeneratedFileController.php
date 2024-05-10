@@ -47,11 +47,12 @@ final class GeneratedFileController extends ResourceController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $drop = (int) $request->get('akki_generated_files')['drop'];
+            $data = $request->get('akki_generated_files');
+            $drop = true === array_key_exists('drop', $data) && $data['drop'];
 
             /** @var GeneratedFile $generatedFile */
             $generatedFile = $form->getData();
-            
+
             try {
                 $exportService->exportDrawing(
                     $generatedFile->getRegistrationDrawing(),

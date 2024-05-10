@@ -10,7 +10,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 interface ExportServiceInterface
 {
-    public function exportDrawing(RegistrationDrawingInterface $registrationDrawing, DateTimeInterface $startDate, DateTimeInterface $endDate, int|null $drop): void;
+    public function exportDrawing(RegistrationDrawingInterface $registrationDrawing, DateTimeInterface $startDate, DateTimeInterface $endDate, bool $drop = false): void;
 
     public function sendSalesReportToVendor(RegistrationDrawingInterface $registrationDrawing, string $filePath, SymfonyStyle|null $outputStyle = null): bool;
 

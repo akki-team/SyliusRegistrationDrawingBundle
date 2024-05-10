@@ -28,7 +28,7 @@ final readonly class ExportService implements ExportServiceInterface
     {
     }
 
-    public function exportDrawing(RegistrationDrawingInterface $registrationDrawing, DateTimeInterface $startDate, DateTimeInterface $endDate, int|null $drop): void
+    public function exportDrawing(RegistrationDrawingInterface $registrationDrawing, DateTimeInterface $startDate, DateTimeInterface $endDate, bool $drop = false): void
     {
         /** @var RegistrationDrawingInterface[] $otherDrawings */
         $otherDrawings = array_filter($this->registrationDrawingRepository->findAll(), function ($dr) use ($registrationDrawing) {
@@ -68,7 +68,7 @@ final readonly class ExportService implements ExportServiceInterface
 
                 $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $startDate, $endDate, $totalLines, $totalCancellations, $registrationDrawing);
 
-                if ($drop === 1) {
+                if (true === $drop) {
                     $success = $this->sendSalesReportToVendor($registrationDrawing, $filePath);
 
                     if ($success) {
