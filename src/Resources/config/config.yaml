@@ -127,8 +127,6 @@ sylius_grid:
         name: doctrine/orm
         options:
           class: "%akki.model.generated_file.class%"
-      sorting:
-        name: asc
       fields:
         registrationDrawing:
           type: twig
