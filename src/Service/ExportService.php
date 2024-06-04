@@ -109,7 +109,7 @@ final readonly class ExportService implements ExportServiceInterface
         if ($sendMode === 'SSH') {
             $command = "echo 'put \"$filePath\"' | sftp -o StrictHostKeyChecking=no -i $rsaSrc -P $port $user@$host:\"$depositAddress\"";
         } else {
-            $lftpOption = "set sftp:connect-program 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
+            $lftpOption = "set sftp:connect-program 'ssh -o UserKnownHostsFile=/dev/null -o HostKeyAlgorithms=ssh-rsa -o StrictHostKeyChecking=no'";
             $command = "lftp -c \"$lftpOption; connect sftp://$user:$password@$host:$port;put -O '$depositAddress' '$filePath'\"";
         }
 
