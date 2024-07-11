@@ -117,6 +117,14 @@ class Constants
         self::CURRENCY_POINT_DELIMITER => self::CURRENCY_POINT_DELIMITER
     ];
 
+    public const ENCODING_UTF8 = 10;
+    public const ENCODING_ANSI = 20;
+
+    public const ENCODINGS = [
+        'UTF8' => self::ENCODING_UTF8,
+        'ANSI' => self::ENCODING_ANSI,
+    ];
+
     public const BOOLEANS_VALUES = ['0', '1'];
 
     public const SUBSTITUABLE_FIELDS = [

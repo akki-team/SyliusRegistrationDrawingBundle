@@ -41,6 +41,8 @@
 
         <field name="currencyDelimiter" column="currency_delimiter" type="string" nullable="true"/>
 
+        <field name="encoding" type="integer"/>
+
         <field name="createdAt" column="created_at" type="datetime">
             <gedmo:timestampable on="create"/>
         </field>

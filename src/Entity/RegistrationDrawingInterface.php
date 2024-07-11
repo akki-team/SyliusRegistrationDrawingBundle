@@ -78,4 +78,8 @@ interface RegistrationDrawingInterface extends ResourceInterface, TimestampableI
     public function getCurrencyDelimiter(): string|null;
 
     public function setCurrencyDelimiter(string|null $currencyDelimiter): void;
+
+    public function getEncoding(): int;
+
+    public function setEncoding(int $encoding): void;
 }
