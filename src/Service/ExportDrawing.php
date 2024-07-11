@@ -78,7 +78,12 @@ final readonly class ExportDrawing implements ExportDrawingInterface
         }
 
         if ($registrationDrawing->getFormat() === Constants::CSV_FORMAT) {
-            $writer = $this->exportCsv->exportCSV($headers, $fields, $registrationDrawing->getDelimiter());
+            $writer = $this->exportCsv->exportCSV(
+                $headers,
+                $fields,
+                $registrationDrawing->getDelimiter(),
+                $registrationDrawing->getEncoding() === Constants::ENCODING_UTF8
+            );
 
             $filesystem = new Filesystem();
 
@@ -86,16 +91,18 @@ final readonly class ExportDrawing implements ExportDrawingInterface
                 $filesystem->mkdir(dirname($filePath));
             }
 
-            file_put_contents($filePath, $writer->getContent());
-
-            return [$writer->getContent(), $totalLines, $totalCancellations];
+            $fileContent = $writer->getContent();
         } else {
-            $text = $this->exportCsv->exportFixedLength($fields);
-
-            file_put_contents($filePath, $text);
-
-            return [$text, $totalLines, $totalCancellations];
+            $fileContent = $this->exportCsv->exportFixedLength($fields);
         }
+
+        if ($registrationDrawing->getEncoding() === Constants::ENCODING_ANSI) {
+            $fileContent = iconv("UTF-8", "Windows-1252", $fileContent);
+        }
+
+        file_put_contents($filePath, $fileContent);
+
+        return [$fileContent, $totalLines, $totalCancellations];
     }
 
     private function prepareDrawingfieldsToExport(RegistrationDrawing $registrationDrawing, OrderItem $orderItem): array

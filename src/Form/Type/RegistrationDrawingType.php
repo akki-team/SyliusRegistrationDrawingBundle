@@ -20,6 +20,13 @@ final class RegistrationDrawingType extends AbstractResourceType
                 'required' => true,
                 'label' => 'sylius_registration_drawing.form.registration_drawing.name',
             ])
+            ->add('encoding', ChoiceType::class, [
+                'required' => true,
+                'label' => 'sylius_registration_drawing.form.registration_drawing.encoding',
+                'choices' => Constants::ENCODINGS,
+                'expanded' => false,
+                'multiple' => false,
+            ])
             ->add('format', ChoiceType::class, [
                 'required' => true,
                 'label' => 'sylius_registration_drawing.form.registration_drawing.format',

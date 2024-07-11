@@ -2,6 +2,7 @@
 
 namespace Akki\SyliusRegistrationDrawingBundle\Entity;
 
+use Akki\SyliusRegistrationDrawingBundle\Helpers\Constants;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Sylius\Component\Resource\Model\TimestampableTrait;
@@ -46,11 +47,14 @@ class RegistrationDrawing implements RegistrationDrawingInterface
 
     protected Collection|ArrayCollection $titles;
 
+    protected int $encoding;
+
     public function __construct()
     {
         $this->vendors = new ArrayCollection();
         $this->generatedFiles = new ArrayCollection();
         $this->titles = new ArrayCollection();
+        $this->encoding = Constants::ENCODING_UTF8;
     }
 
     public function getId(): int|null
@@ -228,9 +232,24 @@ class RegistrationDrawing implements RegistrationDrawingInterface
         $this->titles = $titles;
     }
 
+    /**
+     * @return int
+     */
+    public function getEncoding(): int
+    {
+        return $this->encoding;
+    }
+
+    /**
+     * @param int $encoding
+     */
+    public function setEncoding(int $encoding): void
+    {
+        $this->encoding = $encoding;
+    }
+
     public function __toString(): string
     {
         return $this->getName();
     }
-
 }
