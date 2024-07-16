@@ -25,7 +25,8 @@
             } %}
             {% for field in fieldAssociations %}
                 {% set fieldId = field.fieldId %}
-                {% set fieldName = (formFields.vars.choices|filter(choice => choice.value is same as (fieldId|string))|first).label %}
+                {% set fieldName = 'aaa' %}
+                {#{% set fieldName = (formFields.vars.choices|filter(choice => choice.value is same as (fieldId|string))|first).label %}#}
                 {% set fieldNameSlugified = fieldName|replace({"'": "-", " ": "-"})|lower %}
                 {% set isSubstituableField = false %}
                 {% set fieldOutput = [] %}

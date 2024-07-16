@@ -7,17 +7,27 @@
         {
             "name": "Akki",
             "email": "support@akki.fr"
+        },
+        {
+            "name": "Amadou Kane",
+            "email": "amadou@akki.fr"
         }
     ],
     "require": {
-        "php": "^7.4",
-        "sylius/sylius": "~1.8.0",
-        "odiseoteam/sylius-marketplace-plugin": "1.5.1",
+        "php": "^8.2",
+        "sylius/sylius": "^1.12",
+        "odiseoteam/sylius-marketplace-plugin": "^2.0",
         "league/csv": "^9.4"
     },
     "autoload": {
         "psr-4": {
             "Akki\\SyliusRegistrationDrawingBundle\\": "src/"
+        }
+    },
+    "repositories": {
+        "odiseoPrivatePackagist": {
+            "type": "composer",
+            "url": "https://odiseo.repo.packagist.com/reworld-media/"
         }
     }
 }

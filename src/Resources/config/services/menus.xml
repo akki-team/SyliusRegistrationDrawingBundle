@@ -1,0 +1,12 @@
+<container xmlns="http://symfony.com/schema/dic/services">
+    <services>
+
+        <service class="Akki\SyliusRegistrationDrawingBundle\Menu\RegistrationDrawingFormMenuBuilder"
+                 id="akki_sylius_registration_drawing.menu.registration_drawing_form_menu_builder">
+            <argument type="service" id="knp_menu.factory"/>
+            <argument type="service" id="event_dispatcher"/>
+            <tag name="knp_menu.menu_builder" method="createMenu" alias="sylius.admin.registration_drawing_form"/>
+        </service>
+
+    </services>
+</container>

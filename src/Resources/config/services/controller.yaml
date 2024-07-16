@@ -1,6 +1,0 @@
-services:
-  Akki\SyliusRegistrationDrawingBundle\Controller\DrawingFieldController:
-    autowire: false
-
-  Akki\SyliusRegistrationDrawingBundle\Controller\RegistrationDrawingController:
-    autowire: false

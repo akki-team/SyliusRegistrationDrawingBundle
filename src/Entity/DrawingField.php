@@ -2,153 +2,52 @@
 
 namespace Akki\SyliusRegistrationDrawingBundle\Entity;
 
-use DateTime;
-use DateTimeInterface;
-use Doctrine\ORM\Mapping as ORM;
-use Gedmo\Mapping\Annotation as Gedmo;
-use Sylius\Component\Resource\Model\ResourceInterface;
-use Sylius\Component\Resource\Model\TimestampableInterface;
+use Sylius\Component\Resource\Model\TimestampableTrait;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="registration_drawing_field")
- */
-class DrawingField implements ResourceInterface, TimestampableInterface
+class DrawingField implements DrawingFieldInterface
 {
-    /**
-     * @var int
-     * @ORM\Id
-     * @ORM\Column(type="integer", name="id")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    private $id;
+    use TimestampableTrait;
 
-    /**
-     * @ORM\Column(type="string", nullable=false, name="name")
-     */
-    private $name;
+    protected int|null $id = null;
 
-    /**
-     * @ORM\Column(type="string", nullable=true, name="equivalent")
-     */
-    private $equivalent;
+    protected string $name;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Akki\SyliusRegistrationDrawingBundle\Entity\OutputFormats", inversedBy="fields")
-     * @ORM\JoinColumn(name="type_id", referencedColumnName="id", nullable=false, onDelete="CASCADE")
-     */
-    private $type;
+    protected string|null $equivalent = null;
 
-    /**
-     * @var DateTime
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(type="datetime", nullable=false, name="created_at")
-     */
-    private $createdAt;
+    protected OutputFormatsInterface $type;
 
-    /**
-     * @var DateTime
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(type="datetime", nullable=false, name="updated_at")
-     */
-    private $updatedAt;
-
-    /**
-     * @return int
-     */
-    public function getId(): int
+    public function getId(): int|null
     {
         return $this->id;
     }
 
-    /**
-     * @param int $id
-     */
-    public function setId(int $id): void
-    {
-        $this->id = $id;
-    }
-
-    /**
-     * @return string
-     */
     public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @param string $name
-     */
-    public function setName($name): void
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getEquivalent(): ?string
+    public function getEquivalent(): string|null
     {
         return $this->equivalent;
     }
 
-    /**
-     * @param string $equivalent
-     */
-    public function setEquivalent($equivalent): void
+    public function setEquivalent(string|null $equivalent): void
     {
         $this->equivalent = $equivalent;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getType()
+    public function getType(): OutputFormatsInterface
     {
         return $this->type;
     }
 
-    /**
-     * @param mixed $type
-     */
-    public function setType($type): void
+    public function setType(OutputFormatsInterface $type): void
     {
         $this->type = $type;
     }
-
-
-
-    /**
-     * @return DateTimeInterface|null
-     */
-    public function getCreatedAt(): ?DateTimeInterface
-    {
-        return $this->createdAt;
-    }
-
-    /**
-     * @param DateTimeInterface|null $createdAt
-     */
-    public function setCreatedAt(?DateTimeInterface $createdAt): void
-    {
-        $this->createdAt = $createdAt;
-    }
-
-    /**
-     * @return DateTimeInterface|null
-     */
-    public function getUpdatedAt(): ?DateTimeInterface
-    {
-        return $this->updatedAt;
-    }
-
-    /**
-     * @param DateTimeInterface|null $updatedAt
-     */
-    public function setUpdatedAt(?DateTimeInterface $updatedAt): void
-    {
-        $this->updatedAt = $updatedAt;
-    }
-
 }

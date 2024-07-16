@@ -1,5 +1,8 @@
-sylius_admin_registration_drawing:
+akki_admin_registration_drawing:
     resource: "routing/registration_drawing.yaml"
 
-sylius_admin_drawing_field:
+akki_admin_drawing_field:
     resource: "routing/drawing_field.yaml"
+
+akki_admin_generated_file:
+    resource: "routing/generated_file.yaml"

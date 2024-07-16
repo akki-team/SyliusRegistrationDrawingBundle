@@ -2,23 +2,18 @@
 
 namespace Akki\SyliusRegistrationDrawingBundle\Repository;
 
-use Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing;
+use Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawingInterface;
+use DateTimeInterface;
 use Doctrine\ORM\QueryBuilder;
-use Sylius\Component\Core\Model\OrderInterface;
+use Sylius\Component\Order\Model\OrderInterface;
 use Sylius\Component\Payment\Model\PaymentInterface;
 
 trait OrderDrawingRepositoryTrait
 {
-    /**
-     * @param RegistrationDrawing $registrationDrawing
-     * @param \DateTime $dateDebut
-     * @param \DateTime $dateFin
-     * @param array $otherTitles
-     * @return array|null
-     */
-    public function findAllTransmittedForDrawingExport(RegistrationDrawing $registrationDrawing, \DateTime $dateDebut, \DateTime $dateFin, array $otherTitles): ?array
+
+    public function findAllTransmittedForDrawingExport(RegistrationDrawingInterface $registrationDrawing, DateTimeInterface $dateDebut, DateTimeInterface $dateFin, array $otherTitles): array
     {
-        $query =  $this->createListByVendorsOrTitlesQueryBuilder($registrationDrawing->getVendors(), $registrationDrawing->getTitles(), $otherTitles) ;
+        $query = $this->createListByVendorsOrTitlesQueryBuilder($registrationDrawing->getVendors()->toArray(), $registrationDrawing->getTitles()->toArray(), $otherTitles);
 
         return $query->andWhere('o.state != :state_new')
             ->andWhere('o.state != :state_cancelled')
@@ -31,17 +26,10 @@ trait OrderDrawingRepositoryTrait
             ->setParameter('dateDebut', $dateDebut)
             ->setParameter('dateFin', $dateFin)
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
     }
 
-    /**
-     * @param $vendors
-     * @param $titles
-     * @param $otherTitles
-     * @return QueryBuilder
-     */
-    public function createListByVendorsOrTitlesQueryBuilder($vendors, $titles, $otherTitles): QueryBuilder
+    public function createListByVendorsOrTitlesQueryBuilder(array $vendors, array $titles, array $otherTitles): QueryBuilder
     {
         return $this->createQueryBuilder('o')
             ->innerJoin('o.items', 'items')
@@ -56,7 +44,6 @@ trait OrderDrawingRepositoryTrait
                 'state' => OrderInterface::STATE_CART
             ])
             ->distinct('o.id')
-            ->groupBy('o.id')
-        ;
+            ->groupBy('o.id');
     }
 }

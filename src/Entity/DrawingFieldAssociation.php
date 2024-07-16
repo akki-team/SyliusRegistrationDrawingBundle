@@ -2,253 +2,111 @@
 
 namespace Akki\SyliusRegistrationDrawingBundle\Entity;
 
-use DateTime;
-use DateTimeInterface;
-use Doctrine\ORM\Mapping as ORM;
-use Gedmo\Mapping\Annotation as Gedmo;
-use Sylius\Component\Resource\Model\ResourceInterface;
-use Sylius\Component\Resource\Model\TimestampableInterface;
+use Sylius\Component\Resource\Model\TimestampableTrait;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="registration_drawing_field_association")
- */
-class DrawingFieldAssociation implements ResourceInterface, TimestampableInterface
+class DrawingFieldAssociation implements DrawingFieldAssociationInterface
 {
-    /**
-     * @var int
-     * @ORM\Id
-     * @ORM\Column(type="integer", name="id")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    private $id;
+    use TimestampableTrait;
 
-    /**
-     * @ORM\Column(type="integer", nullable=false, name="drawing_id")
-     */
-    private $drawingId;
+    protected int|null $id = null;
 
-    /**
-     * @ORM\Column(type="integer", nullable=false, name="field_id")
-     */
-    private $fieldId;
+    protected int $drawingId;
 
-    /**
-     * @ORM\Column(type="integer", nullable=true, name="ordre")
-     */
-    private $order;
+    protected int $fieldId;
 
-    /**
-     * @ORM\Column(type="integer", nullable=true, name="position")
-     */
-    private $position;
+    protected int|null $order = null;
 
-    /**
-     * @ORM\Column(type="integer", nullable=true, name="length")
-     */
-    private $length;
+    protected int|null $position = null;
 
-    /**
-     * @ORM\Column(type="string", nullable=true, name="format")
-     */
-    private $format;
+    protected int|null $length = null;
 
-    /**
-     * @ORM\Column(type="string", nullable=true, name="selection")
-     */
-    private $selection;
+    protected string|null $format = null;
 
-    /**
-     * @ORM\Column(type="string", nullable=true, name="name")
-     */
-    private $name;
+    protected string|null $selection = null;
 
-    /**
-     * @var DateTime
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(type="datetime", nullable=false, name="created_at")
-     */
-    private $createdAt;
+    protected string|null $name = null;
 
-    /**
-     * @var DateTime
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(type="datetime", nullable=false, name="updated_at")
-     */
-    private $updatedAt;
-
-    /**
-     * @return int|null
-     */
-    public function getId(): ?int
+    public function getId(): int|null
     {
         return $this->id;
     }
 
-    /**
-     * @param int|null $id
-     */
-    public function setId(?int $id): void
-    {
-        $this->id = $id;
-    }
-
-    /**
-     * @return int
-     */
     public function getDrawingId(): int
     {
         return $this->drawingId;
     }
 
-    /**
-     * @param int $drawingId
-     */
     public function setDrawingId(int $drawingId): void
     {
         $this->drawingId = $drawingId;
     }
 
-    /**
-     * @return int
-     */
     public function getFieldId(): int
     {
         return $this->fieldId;
     }
 
-    /**
-     * @param int $fieldId
-     */
     public function setFieldId(int $fieldId): void
     {
         $this->fieldId = $fieldId;
     }
 
-    /**
-     * @return int|null
-     */
-    public function getOrder(): ?int
+    public function getOrder(): int|null
     {
         return $this->order;
     }
 
-    /**
-     * @param int|null $order
-     */
-    public function setOrder(?int $order): void
+    public function setOrder(int|null $order): void
     {
         $this->order = $order;
     }
 
-    /**
-     * @return int|null
-     */
-    public function getPosition(): ?int
+    public function getPosition(): int|null
     {
         return $this->position;
     }
 
-    /**
-     * @param int|null $position
-     */
-    public function setPosition(?int $position): void
+    public function setPosition(int|null $position): void
     {
         $this->position = $position;
     }
 
-    /**
-     * @return int|null
-     */
-    public function getLength(): ?int
+    public function getLength(): int|null
     {
         return $this->length;
     }
 
-    /**
-     * @param int|null $length
-     */
-    public function setLength(?int $length): void
+    public function setLength(int|null $length): void
     {
         $this->length = $length;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getFormat(): ?string
+    public function getFormat(): string|null
     {
         return $this->format;
     }
 
-    /**
-     * @param string|null $format
-     */
-    public function setFormat(?string $format): void
+    public function setFormat(string|null $format): void
     {
         $this->format = $format;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getSelection(): ?string
+    public function getSelection(): string|null
     {
         return $this->selection;
     }
 
-    /**
-     * @param string|null $selection
-     */
-    public function setSelection(?string $selection): void
+    public function setSelection(string|null $selection): void
     {
         $this->selection = $selection;
     }
 
-    /**
-     * @return DateTimeInterface|null
-     */
-    public function getCreatedAt(): ?DateTimeInterface
-    {
-        return $this->createdAt;
-    }
-
-    /**
-     * @param DateTimeInterface|null $createdAt
-     */
-    public function setCreatedAt(?DateTimeInterface $createdAt): void
-    {
-        $this->createdAt = $createdAt;
-    }
-
-    /**
-     * @return DateTimeInterface|null
-     */
-    public function getUpdatedAt(): ?DateTimeInterface
-    {
-        return $this->updatedAt;
-    }
-
-    /**
-     * @param DateTimeInterface|null $updatedAt
-     */
-    public function setUpdatedAt(?DateTimeInterface $updatedAt): void
-    {
-        $this->updatedAt = $updatedAt;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getName(): ?string
+    public function getName(): string|null
     {
         return $this->name;
     }
 
-    /**
-     * @param string $name
-     */
-    public function setName(string $name): void
+    public function setName(string|null $name): void
     {
         $this->name = $name;
     }

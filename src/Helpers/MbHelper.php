@@ -2,7 +2,7 @@
 
 namespace Akki\SyliusRegistrationDrawingBundle\Helpers;
 
-use http\Exception\InvalidArgumentException;
+use InvalidArgumentException;
 
 class MbHelper
 {

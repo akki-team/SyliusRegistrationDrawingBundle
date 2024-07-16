@@ -1,0 +1,42 @@
+<div class="ui styled fluid accordion">
+    <div class="title">
+        <i class="dropdown icon"></i>
+        <i class="file icon"></i>
+        {{ 'sylius.admin.ee_generated_file.form.generate_file'|trans }}
+    </div>
+    <div class="content">
+        {{ form_start(form, {'action': path('akki_admin_generated_file_generate'), 'attr': {'class': 'ui form'}}) }}
+        <div class="sylius-filters">
+            <div class="sylius-filters__field">
+                <div class="field">
+                    {{ form_label(form.registrationDrawing) }}
+                    {{ form_widget(form.registrationDrawing) }}
+                </div>
+            </div>
+            <div class="sylius-filters__field">
+                <div class="field">
+                    {{ form_label(form.startDate) }}
+                    {{ form_widget(form.startDate) }}
+                </div>
+            </div>
+            <div class="sylius-filters__field">
+                <div class="field">
+                    {{ form_label(form.endDate) }}
+                    {{ form_widget(form.endDate) }}
+                </div>
+            </div>
+            <div class="sylius-filters__field">
+                <div class="field">
+                    {{ form_label(form.drop) }}
+                    {{ form_widget(form.drop) }}
+                </div>
+            </div>
+        </div>
+        <button class="ui primary icon button" type="submit">
+            <i class="icon plus alternate"></i> {{ 'sylius.admin.ee_generated_file.form.generate'|trans }}
+        </button>
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<div class="ui hidden divider"></div>

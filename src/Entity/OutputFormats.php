@@ -2,156 +2,54 @@
 
 namespace Akki\SyliusRegistrationDrawingBundle\Entity;
 
-use DateTime;
-use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
-use Gedmo\Mapping\Annotation as Gedmo;
-use Sylius\Component\Resource\Model\ResourceInterface;
-use Sylius\Component\Resource\Model\TimestampableInterface;
+use Sylius\Component\Resource\Model\TimestampableTrait;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="registration_drawing_output_formats")
- */
-class OutputFormats implements ResourceInterface, TimestampableInterface
+class OutputFormats implements OutputFormatsInterface
 {
-    /**
-     * @var int
-     * @ORM\Id
-     * @ORM\Column(type="integer", name="id")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    private $id;
+    use TimestampableTrait;
 
-    /**
-     * @ORM\Column(type="string", nullable=false, name="type")
-     */
-    private $type;
+    protected int|null $id = null;
 
-    /**
-     * @ORM\Column(type="string", nullable=true, name="format")
-     */
-    private $format;
+    protected string $type;
 
-    /**
-     * @ORM\OneToMany(
-     *     targetEntity="Akki\SyliusRegistrationDrawingBundle\Entity\DrawingField",
-     *     mappedBy="type",
-     *     orphanRemoval=true,
-     *     cascade={"all"}
-     * )
-     */
-    private $fields;
+    protected string|null $format = null;
 
-    /**
-     * @var DateTime
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(type="datetime", nullable=false, name="created_at")
-     */
-    private $createdAt;
+    protected Collection|ArrayCollection $fields;
 
-    /**
-     * @var DateTime
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(type="datetime", nullable=false, name="updated_at")
-     */
-    private $updatedAt;
-
-    /**
-     * @return int|null
-     */
-    public function getId(): ?int
+    public function getId(): int|null
     {
         return $this->id;
     }
 
-    /**
-     * @param int|null $id
-     */
-    public function setId(?int $id): void
-    {
-        $this->id = $id;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
 
-    /**
-     * @param mixed $type
-     */
-    public function setType($type): void
+    public function setType(string $type): void
     {
         $this->type = $type;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getFormat(): ?string
+    public function getFormat(): string|null
     {
         return $this->format;
     }
 
-    /**
-     * @param string|null $format
-     */
-    public function setFormat(?string $format): void
+    public function setFormat(string|null $format): void
     {
         $this->format = $format;
     }
 
-    /**
-     * @return Collection
-     */
-    public function getFields() :Collection
+    public function getFields(): Collection|ArrayCollection
     {
         return $this->fields;
     }
 
-    /**
-     * @param mixed $fields
-     */
-    public function setFields($fields): void
+    public function setFields(Collection|ArrayCollection $fields): void
     {
         $this->fields = $fields;
     }
-
-    /**
-     * @return DateTimeInterface|null
-     */
-    public function getCreatedAt(): ?DateTimeInterface
-    {
-        return $this->createdAt;
-    }
-
-    /**
-     * @param DateTimeInterface|null $createdAt
-     */
-    public function setCreatedAt(?DateTimeInterface $createdAt): void
-    {
-        $this->createdAt = $createdAt;
-    }
-
-    /**
-     * @return DateTimeInterface|null
-     */
-    public function getUpdatedAt(): ?DateTimeInterface
-    {
-        return $this->updatedAt;
-    }
-
-    /**
-     * @param DateTimeInterface|null $updatedAt
-     */
-    public function setUpdatedAt(?DateTimeInterface $updatedAt): void
-    {
-        $this->updatedAt = $updatedAt;
-    }
-
 }

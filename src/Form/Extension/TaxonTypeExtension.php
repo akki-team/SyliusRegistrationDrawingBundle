@@ -22,10 +22,8 @@ class TaxonTypeExtension extends AbstractTypeExtension
             ]);
     }
 
-    /**
-     */
-    public function getExtendedTypes(): iterable
+    public static function getExtendedTypes(): iterable
     {
-        return [TaxonType::class];
+        yield TaxonType::class;
     }
 }

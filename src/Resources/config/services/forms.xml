@@ -1,0 +1,42 @@
+<container xmlns="http://symfony.com/schema/dic/services">
+    <services>
+
+        <service class="Akki\SyliusRegistrationDrawingBundle\Form\Type\RegistrationDrawingType"
+                 id="akki_sylius_registration_drawing.form_type.registration_drawing_type">
+            <argument>%akki.model.registration_drawing.class%</argument>
+            <argument>%akki.form.type.registration_drawing.validation_groups%</argument>
+            <tag name="form.type" alias="akki_registration_drawing"/>
+        </service>
+
+        <service class="Akki\SyliusRegistrationDrawingBundle\Form\Type\DrawingFieldType"
+                 id="akki_sylius_registration_drawing.form_type.drawing_field_type">
+            <argument>%akki.model.drawing_field.class%</argument>
+            <argument>%akki.form.type.drawing_field.validation_groups%</argument>
+            <tag name="form.type" alias="akki_drawing_field"/>
+        </service>
+
+        <service class="Akki\SyliusRegistrationDrawingBundle\Form\Type\DrawingFieldChoiceType"
+                 id="akki_sylius_registration_drawing.form_type.drawing_field_choice_type">
+            <argument type="service" id="akki.repository.drawing_field"/>
+            <tag name="form.type" alias="akki_drawing_field_choice"/>
+        </service>
+
+        <service class="Akki\SyliusRegistrationDrawingBundle\Form\Type\GeneratedFileType"
+                 id="akki_sylius_registration_drawing.form_type.generated_file_type">
+            <argument>%akki.model.generated_file.class%</argument>
+            <argument>%akki.form.type.generated_file.validation_groups%</argument>
+            <tag name="form.type" alias="akki_generated_file"/>
+        </service>
+
+        <service class="Akki\SyliusRegistrationDrawingBundle\Form\Extension\VendorTypeExtension"
+                 id="akki_sylius_registration_drawing.form_extension.vendor_type_extension">
+            <tag name="form.type_extension" extended_type="Odiseo\SyliusVendorPlugin\Form\Type\VendorType"/>
+        </service>
+
+        <service class="Akki\SyliusRegistrationDrawingBundle\Form\Extension\TaxonTypeExtension"
+                 id="akki_sylius_registration_drawing.form_extension.taxon_type_extension">
+            <tag name="form.type_extension" extended_type="Sylius\Bundle\TaxonomyBundle\Form\Type\TaxonType"/>
+        </service>
+
+    </services>
+</container>

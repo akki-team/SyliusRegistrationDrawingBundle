@@ -4,97 +4,54 @@ declare(strict_types=1);
 
 namespace Akki\SyliusRegistrationDrawingBundle\Service;
 
-use Akki\SyliusRegistrationDrawingBundle\Controller\RegistrationDrawingController;
-use Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing;
+use Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawingInterface;
 use Akki\SyliusRegistrationDrawingBundle\Helpers\Constants;
-use App\Entity\Taxonomy\Taxon;
-use App\Mailer\Sender\KMSenderInterface;
-use App\Repository\OrderRepositoryInterface;
-use App\Service\ExportEditeur\GeneratedFileService;
-use Doctrine\Persistence\ObjectRepository;
-use League\Csv\ByteSequence;
-use League\Csv\Writer;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Console\Output\OutputInterface;
+use Akki\SyliusRegistrationDrawingBundle\Repository\OrderRepositoryInterface;
+use DateTimeInterface;
+use Sylius\Component\Core\Model\TaxonInterface;
+use Sylius\Component\Mailer\Sender\SenderInterface;
+use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
-class ExportService
+final readonly class ExportService implements ExportServiceInterface
 {
-    /** @var ObjectRepository $registrationDrawingRepository */
-    private ObjectRepository $registrationDrawingRepository;
-
-    /** @var OrderRepositoryInterface $orderRepository */
-    private OrderRepositoryInterface $orderRepository;
-
-    /** @var RegistrationDrawingController $registrationDrawingController */
-    protected RegistrationDrawingController $registrationDrawingController ;
-
-    /** @var string $kernelProjectDir */
-    protected string $kernelProjectDir;
-
-    /** @var GeneratedFileService $generatedFileService */
-    private GeneratedFileService $generatedFileService;
-
-    /** @var KMSenderInterface $emailSender */
-    private KMSenderInterface $emailSender;
-
-    /**
-     * @param ObjectRepository $registrationDrawingRepository
-     * @param OrderRepositoryInterface $orderRepository
-     * @param RegistrationDrawingController $registrationDrawingController
-     * @param KernelInterface $kernel
-     * @param GeneratedFileService $generatedFileService
-     * @param KMSenderInterface $emailSender
-     */
     public function __construct
     (
-        ObjectRepository $registrationDrawingRepository,
-        OrderRepositoryInterface $orderRepository,
-        RegistrationDrawingController $registrationDrawingController,
-        KernelInterface $kernel,
-        GeneratedFileService $generatedFileService,
-        KMSenderInterface $emailSender
-    ) {
-        $this->registrationDrawingRepository = $registrationDrawingRepository;
-        $this->orderRepository = $orderRepository;
-        $this->registrationDrawingController = $registrationDrawingController;
-        $this->kernelProjectDir = $kernel->getProjectDir();
-        $this->generatedFileService = $generatedFileService;
-        $this->emailSender = $emailSender;
+        private RepositoryInterface           $registrationDrawingRepository,
+        private OrderRepositoryInterface      $orderRepository,
+        private ExportDrawingInterface        $exportDrawing,
+        private GeneratedFileServiceInterface $generatedFileService,
+        private SenderInterface               $emailSender,
+        private string                        $kernelProjectDir,
+    )
+    {
     }
 
-    /**
-     * @param RegistrationDrawing $drawing
-     * @param \DateTime $startDate
-     * @param \DateTime $endDate
-     * @param int|null $drop
-     * @return void
-     */
-    public function exportDrawing(RegistrationDrawing $drawing, \DateTime $startDate, \DateTime $endDate, ?int $drop)
+    public function exportDrawing(RegistrationDrawingInterface $registrationDrawing, DateTimeInterface $startDate, DateTimeInterface $endDate, bool $drop = false): void
     {
-        $otherDrawings = array_filter($this->registrationDrawingRepository->findAll(), function ($dr) use ($drawing) {
-            return $dr !== $drawing;
+        /** @var RegistrationDrawingInterface[] $otherDrawings */
+        $otherDrawings = array_filter($this->registrationDrawingRepository->findAll(), function ($dr) use ($registrationDrawing) {
+            return $dr !== $registrationDrawing;
         });
 
         $otherTitles = [];
 
-        /** @var RegistrationDrawing $otherDrawing */
         foreach ($otherDrawings as $otherDrawing) {
-            /** @var Taxon $title */
+
+            /** @var TaxonInterface $title */
             foreach ($otherDrawing->getTitles() as $title) {
                 $otherTitles[] = $title;
             }
         }
 
-        $orders = $this->orderRepository->findAllTransmittedForDrawingExport($drawing, $startDate, $endDate, $otherTitles);
+        $orders = $this->orderRepository->findAllTransmittedForDrawingExport($registrationDrawing, $startDate, $endDate, $otherTitles);
 
-        $fileName = $drawing->getFormat() === Constants::CSV_FORMAT ? "{$drawing->getName()}_{$startDate->format('Ymd')}_{$endDate->format('Ymd')}.csv" : "{$drawing->getName()}_{$startDate->format('Ymd')}_{$endDate->format('Ymd')}.txt";
-        $filePath = $this->kernelProjectDir.Constants::DIRECTORY_PUBLIC.Constants::DIRECTORY_EXPORT.$fileName;
+        $fileName = $registrationDrawing->getFormat() === Constants::CSV_FORMAT ? "{$registrationDrawing->getName()}_{$startDate->format('Ymd')}_{$endDate->format('Ymd')}.csv" : "{$registrationDrawing->getName()}_{$startDate->format('Ymd')}_{$endDate->format('Ymd')}.txt";
+        $filePath = $this->kernelProjectDir . Constants::DIRECTORY_PUBLIC . Constants::DIRECTORY_EXPORT . $fileName;
 
         if (!empty($orders)) {
-            $export = $this->registrationDrawingController->exportDrawing($drawing, $orders, $filePath, $otherTitles);
+            $export = $this->exportDrawing->exportDrawing($registrationDrawing, $orders, $filePath, $otherTitles);
             $totalLines = $export[1];
             $totalCancellations = $export[2];
 
@@ -107,18 +64,18 @@ class ExportService
                     );
                 }
 
-                $drawingFirstVendor = !empty($drawing->getVendors()) ? $drawing->getVendors()->toArray()[0] : null;
+                $drawingFirstVendor = !empty($registrationDrawing->getVendors()) ? $registrationDrawing->getVendors()->toArray()[0] : null;
 
-                $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $startDate, $endDate, $totalLines, $totalCancellations, $drawing);
+                $this->generatedFileService->addFile($drawingFirstVendor, $fileName, $filePath, $startDate, $endDate, $totalLines, $totalCancellations, $registrationDrawing);
 
-                if ($drop === 1) {
-                    $success = $this->sendSalesReportToVendor($drawing, $filePath);
+                if (true === $drop) {
+                    $success = $this->sendSalesReportToVendor($registrationDrawing, $filePath);
 
                     if ($success) {
                         try {
                             $this->sendMail(
                                 Constants::SUCCESS_MAIL_CODE,
-                                explode(';', str_replace(' ', '', $drawing->getRecipients())),
+                                explode(';', str_replace(' ', '', $registrationDrawing->getRecipients())),
                                 ['fileName' => $fileName, 'totalLines' => $totalLines, 'totalCancelled' => $totalCancellations]
                             );
                         } catch (\Exception $e) {
@@ -136,69 +93,23 @@ class ExportService
         }
     }
 
-    /**
-     * @param array $header
-     * @param array $lines
-     * @param string $delimiter
-     * @return Writer
-     * @throws \League\Csv\CannotInsertRecord
-     * @throws \League\Csv\Exception
-     */
-    public function exportCSV(array $header, array $lines, string $delimiter = ';'): Writer
-    {
-        $writer = Writer::createFromStream(fopen('php://temp', 'rb+'));
-        $writer->setDelimiter($delimiter);
-        $writer->setOutputBOM(ByteSequence::BOM_UTF8);
-        $writer->insertOne($header);
-        $writer->insertAll($lines);
-
-        return $writer;
-    }
-
-    /**
-     * @param array $fields
-     * @return string
-     */
-    public function exportFixedLength(array $fields): string
-    {
-        $text = '';
-
-        foreach ($fields as $field) {
-            $text .= implode('', $field)."\n";
-        }
-
-        return $text;
-    }
-
-    /**
-     * @param RegistrationDrawing $drawing
-     * @param string $filePath
-     * @param SymfonyStyle|null $outputStyle
-     * @param OutputInterface|null $output
-     * @return bool
-     */
-    public function sendSalesReportToVendor(
-        RegistrationDrawing $drawing,
-        string $filePath,
-        SymfonyStyle $outputStyle = null,
-        OutputInterface $output = null
-    ): bool
+    public function sendSalesReportToVendor(RegistrationDrawingInterface $registrationDrawing, string $filePath, SymfonyStyle|null $outputStyle = null): bool
     {
         $success = false;
 
         $rsaSrc = "~www-data/.ssh/id_rsa";
-        $sendMode = $drawing->getSendMode();
-        $depositAddress = $drawing->getDepositAddress();
-        $user = $drawing->getUser();
-        $password = $drawing->getPassword();
-        $host = $drawing->getHost();
-        $port = $drawing->getPort();
+        $sendMode = $registrationDrawing->getSendMode();
+        $depositAddress = $registrationDrawing->getDepositAddress();
+        $user = $registrationDrawing->getUser();
+        $password = $registrationDrawing->getPassword();
+        $host = $registrationDrawing->getHost();
+        $port = $registrationDrawing->getPort();
 
         // si depose SFTP
         if ($sendMode === 'SSH') {
-            $command = "echo 'put \"$filePath\"' | sftp -o StrictHostKeyChecking=no -i $rsaSrc -P $port $user@$host:\"$depositAddress\"";
+            $command = "echo 'put \"$filePath\"' | sftp  -o StrictHostKeyChecking=no -o HostKeyAlgorithms=ssh-rsa -o PubkeyAcceptedAlgorithms=+ssh-rsa -o UserKnownHostsFile=/dev/null -i $rsaSrc -P $port $user@$host:\"$depositAddress\"";
         } else {
-            $lftpOption = "set sftp:connect-program 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
+            $lftpOption = "set sftp:connect-program 'ssh -o UserKnownHostsFile=/dev/null -o HostKeyAlgorithms=ssh-rsa -o StrictHostKeyChecking=no'";
             $command = "lftp -c \"$lftpOption; connect sftp://$user:$password@$host:$port;put -O '$depositAddress' '$filePath'\"";
         }
 
@@ -208,10 +119,10 @@ class ExportService
         $process = Process::fromShellCommandline($command);
 
         try {
-            $process->run() ;
+            $process->run();
         } catch (\Exception $e) {
             if (!is_null($outputStyle)) {
-                $outputStyle->writeln("Erreur pendant la depose SFTP : ".$e->getMessage());
+                $outputStyle->writeln("Erreur pendant la depose SFTP : " . $e->getMessage());
             }
 
             $this->sendMail(
@@ -235,14 +146,8 @@ class ExportService
         return $success;
     }
 
-    /**
-     * @param string $mailCode
-     * @param array $to
-     * @param array $datas
-     * @return void
-     */
     public function sendMail(string $mailCode, array $to, array $datas): void
     {
-        $this->emailSender->send($mailCode, $to, $datas, [], [], [], []);
+        $this->emailSender->send($mailCode, $to, $datas);
     }
 }

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:gedmo="http://gediminasm.org/schemas/orm/doctrine-extensions-mapping"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <mapped-superclass name="Akki\SyliusRegistrationDrawingBundle\Entity\DrawingFieldAssociation"
+                       table="akki_registration_drawing_field_association">
+
+        <id name="id" column="id" type="integer">
+            <generator strategy="AUTO"/>
+        </id>
+
+        <field name="drawingId" column="drawing_id" type="integer"/>
+
+        <field name="fieldId" column="field_id" type="integer"/>
+
+        <field name="order" type="integer" column="ordre" nullable="true"/>
+
+        <field name="position" type="integer" nullable="true"/>
+
+        <field name="length" type="integer" nullable="true"/>
+
+        <field name="format" type="string" nullable="true"/>
+
+        <field name="selection" type="string" nullable="true"/>
+
+        <field name="name" type="string" nullable="true"/>
+
+        <field name="createdAt" column="created_at" type="datetime">
+            <gedmo:timestampable on="create"/>
+        </field>
+        <field name="updatedAt" column="updated_at" type="datetime">
+            <gedmo:timestampable on="update"/>
+        </field>
+
+    </mapped-superclass>
+</doctrine-mapping>

@@ -1,0 +1,12 @@
+<container xmlns="http://symfony.com/schema/dic/services">
+    <imports>
+        <import resource="services/commands.xml"/>
+        <import resource="services/events.xml"/>
+        <import resource="services/exports.xml"/>
+        <import resource="services/files.xml"/>
+        <import resource="services/filesystems.xml"/>
+        <import resource="services/forms.xml"/>
+        <import resource="services/menus.xml"/>
+        <import resource="services/twig.xml"/>
+    </imports>
+</container>
