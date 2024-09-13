@@ -93,7 +93,7 @@ final readonly class ExportDrawing implements ExportDrawingInterface
 
             $fileContent = $writer->getContent();
         } else {
-            $fileContent = $this->exportCsv->exportFixedLength($fields);
+            $fileContent = $this->exportCsv->exportFixedLength($fields,$registrationDrawing->getEncoding() === Constants::ENCODING_UTF8);
         }
 
         if ($registrationDrawing->getEncoding() === Constants::ENCODING_ANSI) {

@@ -15,6 +15,8 @@ final class ExportCsv implements ExportCsvInterface
         $writer->setDelimiter($delimiter);
         if ($withBom) {
             $writer->setOutputBOM(ByteSequence::BOM_UTF8);
+        } else {
+            $writer->setEndOfLine("\r\n");
         }
         $writer->insertOne($header);
         $writer->insertAll($lines);
@@ -22,12 +24,14 @@ final class ExportCsv implements ExportCsvInterface
         return $writer;
     }
 
-    public function exportFixedLength(array $fields): string
+    public function exportFixedLength(array $fields, bool $withBom = true): string
     {
         $text = '';
 
+        $endOfLine = $withBom ? "\n" : "\r\n";
+
         foreach ($fields as $field) {
-            $text .= implode('', $field) . "\n";
+            $text .= implode('', $field) . $endOfLine;
         }
 
         return $text;
