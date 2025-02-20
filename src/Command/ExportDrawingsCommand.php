@@ -11,6 +11,8 @@ use Akki\SyliusRegistrationDrawingBundle\Service\GeneratedFileServiceInterface;
 use DateTime;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Sylius\Component\Core\Model\Order;
+use Sylius\Component\Core\Model\Payment;
 use Sylius\Component\Core\Model\TaxonInterface;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Symfony\Component\Console\Command\Command;
@@ -124,6 +126,7 @@ class ExportDrawingsCommand extends Command
                 }
 
                 $orders = $this->orderRepository->findAllTransmittedForDrawingExport($drawing, $startDate, $endDate, $otherTitles);
+                $this->removeUnSucceededOrderPaymentStatus($orders);
 
                 $fileName = $drawing->getFormat() === Constants::CSV_FORMAT ? "{$drawing->getName()}_{$startDateFormated}_$endDateFormated.csv" : "{$drawing->getName()}_{$startDateFormated}_$endDateFormated.txt";
                 $filePath = $this->kernelProjectDir . Constants::DIRECTORY_PUBLIC . Constants::DIRECTORY_EXPORT . $fileName;
@@ -186,4 +189,30 @@ class ExportDrawingsCommand extends Command
         return Command::SUCCESS;
     }
 
+
+    private function removeUnSucceededOrderPaymentStatus(array &$orders): void
+    {
+        $ordersSucceededStatus = [];
+
+        /** @var Order $order */
+        foreach ($orders as $order) {
+            /** @var Payment $payment */
+            foreach ($order->getPayments() as $payment) {
+                if ($payment->getMethod()?->getGatewayConfig()?->getFactoryName() !== 'lyra_marketplace') {
+                    continue;
+                }
+
+                if (!isset($payment->getDetails()['order'])) {
+                    continue;
+                }
+
+                $orderDetails = json_decode($payment->getDetails()['order'], true);
+                if ('SUCCEEDED' === ($orderDetails['status'] ?? '')) {
+                    $ordersSucceededStatus = $order;
+                }
+            }
+        }
+
+        $orders = $ordersSucceededStatus;
+    }
 }
