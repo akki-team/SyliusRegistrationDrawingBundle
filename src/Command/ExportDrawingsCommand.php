@@ -208,7 +208,7 @@ class ExportDrawingsCommand extends Command
 
                 $orderDetails = json_decode($payment->getDetails()['order'], true);
                 if ('SUCCEEDED' === ($orderDetails['status'] ?? '')) {
-                    $ordersSucceededStatus = $order;
+                    $ordersSucceededStatus[] = $order;
                 }
             }
         }
