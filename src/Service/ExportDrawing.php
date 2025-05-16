@@ -10,6 +10,7 @@ use Akki\SyliusRegistrationDrawingBundle\Entity\RegistrationDrawing;
 use Akki\SyliusRegistrationDrawingBundle\Helpers\Constants;
 use Akki\SyliusRegistrationDrawingBundle\Helpers\MbHelper;
 use Akki\SyliusRegistrationDrawingBundle\Repository\DrawingFieldAssociationRepository;
+use Akki\SyliusRegistrationDrawingBundle\Resolver\OrderItemMovementTypeResolverInterface;
 use Sylius\Component\Core\Model\Order;
 use Sylius\Component\Core\Model\OrderItem;
 use Sylius\Component\Core\OrderPaymentStates;
@@ -24,6 +25,7 @@ final readonly class ExportDrawing implements ExportDrawingInterface
         private ExportCsvInterface                $exportCsv,
         private DrawingFieldAssociationRepository $drawingFieldAssociationRepository,
         private RepositoryInterface               $drawingFieldRepository,
+        private OrderItemMovementTypeResolverInterface $orderItemMovementTypeResolver,
     )
     {
     }
@@ -66,7 +68,7 @@ final readonly class ExportDrawing implements ExportDrawingInterface
                 if ($isValidProduct) {
                     $data = $this->prepareDrawingfieldsToExport($registrationDrawing, $item);
 
-                    if ($isRefunded) {
+                    if ($this->orderItemMovementTypeResolver->isOrderItemCanceled($item)) {
                         $totalCancellations++;
                     } else {
                         $totalLines++;
@@ -176,7 +178,7 @@ final readonly class ExportDrawing implements ExportDrawingInterface
             }
 
             // Gestion du champ "Type mouvement" si paiement remboursé
-            if (($field->getName() === Constants::MOVEMENT_TYPE_FIELD) && ($orderItem->getOrder()->getPaymentState() === OrderPaymentStates::STATE_REFUNDED)) {
+            if (($field->getName() === Constants::MOVEMENT_TYPE_FIELD) && $this->orderItemMovementTypeResolver->isOrderItemCanceled($orderItem)) {
                 $data = OrderPaymentTransitions::TRANSITION_REFUND;
             }
 
