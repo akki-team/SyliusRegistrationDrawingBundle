@@ -7,6 +7,7 @@
         <import resource="services/filesystems.xml"/>
         <import resource="services/forms.xml"/>
         <import resource="services/menus.xml"/>
+        <import resource="services/resolvers.xml"/>
         <import resource="services/twig.xml"/>
     </imports>
 </container>
