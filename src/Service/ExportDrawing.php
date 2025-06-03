@@ -15,7 +15,10 @@ use Sylius\Component\Core\Model\Order;
 use Sylius\Component\Core\Model\OrderItem;
 use Sylius\Component\Core\OrderPaymentStates;
 use Sylius\Component\Core\OrderPaymentTransitions;
+use Sylius\Component\Core\Model\OrderItemInterface;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
+use Sylius\RefundPlugin\Entity\CreditMemoInterface;
+use Sylius\RefundPlugin\Repository\CreditMemoRepositoryInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Intl\Countries;
 
@@ -26,6 +29,7 @@ final readonly class ExportDrawing implements ExportDrawingInterface
         private DrawingFieldAssociationRepository $drawingFieldAssociationRepository,
         private RepositoryInterface               $drawingFieldRepository,
         private OrderItemMovementTypeResolverInterface $orderItemMovementTypeResolver,
+        private CreditMemoRepositoryInterface     $creditMemoRepository
     )
     {
     }
@@ -40,20 +44,19 @@ final readonly class ExportDrawing implements ExportDrawingInterface
         $totalLines = 0;
         $totalCancellations = 0;
 
+        $periodStart = new \DateTime($registrationDrawing->getPeriodicity() === Constants::PERIODICITY_WEEKLY ? Constants::EN_DAYS[$registrationDrawing->getDay()] . ' last week midnight' : 'first day of last month midnight');
+        $periodEnd = (clone $periodStart)->modify($registrationDrawing->getPeriodicity() === Constants::PERIODICITY_WEEKLY ? '+7 days' : 'last day of this month')->setTime(23, 59, 59);
+
         /** @var Order $order */
         foreach ($orders as $order) {
-            $isRefunded = $order->getPaymentState() === OrderPaymentStates::STATE_REFUNDED;
-            $periodStart = $registrationDrawing->getPeriodicity() === Constants::PERIODICITY_WEEKLY ? Constants::EN_DAYS[$registrationDrawing->getDay()] . ' last week midnight' : 'first day of last month midnight';
-
-            // On ne prends pas en compte les commandes annulées dans la période précédente définie
-            if ($isRefunded && ($order->getCheckoutCompletedAt() > new \DateTime($periodStart))) {
-                continue;
-            }
-
             $items = $order->getItems();
 
             /** @var OrderItem $item */
             foreach ($items as $item) {
+                if (!$this->canExportOrderItem($item, $periodStart, $periodEnd)) {
+                    continue;
+                }
+
                 $product = $item->getProduct();
                 $isValidProduct = false;
 
@@ -278,5 +281,53 @@ final readonly class ExportDrawing implements ExportDrawingInterface
         }
 
         return $value;
+    }
+
+    private function canExportOrderItem(OrderItemInterface $orderItem, \DateTimeInterface $startDate, \DateTimeInterface $endDate): bool
+    {
+        $paidInPeriod = $this->isDateInPeriod($orderItem->getOrder()->getCheckoutCompletedAt() ?? $orderItem->getOrder()->getCreatedAt(), $startDate, $endDate);
+        $refundedInPeriod = $this->hasItemBeenRefundedInPeriod($orderItem, $startDate, $endDate);
+
+        // Do not include item in export if it was paid and refunded in the export period
+        return !($paidInPeriod && $refundedInPeriod);
+    }
+
+    private function getCreditMemosForOrderItem(OrderItemInterface $orderItem): array
+    {
+        $creditMemos = $this->creditMemoRepository->findByOrderId((string)$orderItem->getOrder()->getId());
+        if (count($creditMemos) === 0) {
+            return [];
+        }
+
+        return array_filter($creditMemos, function (CreditMemoInterface $creditMemo) use ($orderItem) {
+            foreach ($creditMemo->getLineItems() as $creditMemoItem) {
+                if ($creditMemoItem->getProduct()->getId() === $orderItem->getProduct()->getId()) {
+                    return true;
+                }
+            }
+
+            return false;
+        });
+    }
+
+    private function hasItemBeenRefundedInPeriod(OrderItemInterface $orderItem, \DateTimeInterface $dateDebut, \DateTimeInterface $dateFin): bool
+    {
+        if (!$this->orderItemMovementTypeResolver->isOrderItemCanceled($orderItem)) {
+            return false;
+        }
+
+        $creditMemos = $this->getCreditMemosForOrderItem($orderItem);
+        foreach ($creditMemos as $creditMemo) {
+            if ($this->isDateInPeriod($creditMemo->getIssuedAt(), $dateDebut, $dateFin)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function isDateInPeriod(\DateTimeInterface $date, \DateTimeInterface $dateStart, \DateTimeInterface $dateEnd): bool
+    {
+        return $date >= $dateStart && $date <= $dateEnd;
     }
 }
