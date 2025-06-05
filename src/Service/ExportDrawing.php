@@ -288,8 +288,9 @@ final readonly class ExportDrawing implements ExportDrawingInterface
         $paidInPeriod = $this->isDateInPeriod($orderItem->getOrder()->getCheckoutCompletedAt() ?? $orderItem->getOrder()->getCreatedAt(), $startDate, $endDate);
         $refundedInPeriod = $this->hasItemBeenRefundedInPeriod($orderItem, $startDate, $endDate);
 
-        // Do not include item in export if it was paid and refunded in the export period
-        return !($paidInPeriod && $refundedInPeriod);
+        // Include item if it was paid or refunded in export period
+        // But do not include if it was *both* paid and refunded in the export period
+        return $paidInPeriod xor $refundedInPeriod;
     }
 
     private function getCreditMemosForOrderItem(OrderItemInterface $orderItem): array
