@@ -34,7 +34,7 @@ final readonly class ExportDrawing implements ExportDrawingInterface
     {
     }
 
-    public function exportDrawing(RegistrationDrawing $registrationDrawing, array $orders, string $filePath, $otherTitles): array
+    public function exportDrawing(RegistrationDrawing $registrationDrawing, array $orders, string $filePath, $otherTitles, \DateTimeInterface $periodStart, \DateTimeInterface $periodEnd): array
     {
         $headers = $this->prepareDrawingHeaderToCSVExport($registrationDrawing);
         $registrationDrawingVendors = $registrationDrawing->getVendors()->toArray();
@@ -43,9 +43,6 @@ final readonly class ExportDrawing implements ExportDrawingInterface
         $fields = [];
         $totalLines = 0;
         $totalCancellations = 0;
-
-        $periodStart = new \DateTime($registrationDrawing->getPeriodicity() === Constants::PERIODICITY_WEEKLY ? Constants::EN_DAYS[$registrationDrawing->getDay()] . ' last week midnight' : 'first day of last month midnight');
-        $periodEnd = (clone $periodStart)->modify($registrationDrawing->getPeriodicity() === Constants::PERIODICITY_WEEKLY ? '+7 days' : 'last day of this month')->setTime(23, 59, 59);
 
         /** @var Order $order */
         foreach ($orders as $order) {
