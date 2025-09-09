@@ -132,7 +132,7 @@ class ExportDrawingsCommand extends Command
                 $filePath = $this->kernelProjectDir . Constants::DIRECTORY_PUBLIC . Constants::DIRECTORY_EXPORT . $fileName;
 
                 if (!empty($orders)) {
-                    $export = $this->exportDrawing->exportDrawing($drawing, $orders, $filePath, $otherTitles);
+                    $export = $this->exportDrawing->exportDrawing($drawing, $orders, $filePath, $otherTitles, $startDate, $endDate);
                     $totalLines = $export[1];
                     $totalCancellations = $export[2];
 

@@ -51,7 +51,7 @@ final readonly class ExportService implements ExportServiceInterface
         $filePath = $this->kernelProjectDir . Constants::DIRECTORY_PUBLIC . Constants::DIRECTORY_EXPORT . $fileName;
 
         if (!empty($orders)) {
-            $export = $this->exportDrawing->exportDrawing($registrationDrawing, $orders, $filePath, $otherTitles);
+            $export = $this->exportDrawing->exportDrawing($registrationDrawing, $orders, $filePath, $otherTitles, $startDate, $endDate);
             $totalLines = $export[1];
             $totalCancellations = $export[2];
 
