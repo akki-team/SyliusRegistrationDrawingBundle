@@ -13,29 +13,29 @@ class RegistrationDrawing implements RegistrationDrawingInterface
 
     protected int|null $id = null;
 
-    protected string $name;
+    protected string|null $name = null;
 
-    protected string $format;
+    protected string|null $format = null;
 
     protected string|null $delimiter = null;
 
-    protected string $periodicity;
+    protected string|null $periodicity = null;
 
-    protected string $day;
+    protected string|null $day = null;
 
-    protected string $sendMode;
+    protected string|null $sendMode = null;
 
-    protected string $depositAddress;
+    protected string|null $depositAddress = null;
 
-    protected string $user;
+    protected string|null $user = null;
 
-    protected string $host;
+    protected string|null $host = null;
 
-    protected int $port;
+    protected int|null $port = null;
 
     protected string|null $password = null;
 
-    protected string $recipients;
+    protected string|null $recipients = null;
 
     protected string|null $currencyFormat = null;
 
@@ -62,22 +62,22 @@ class RegistrationDrawing implements RegistrationDrawingInterface
         return $this->id;
     }
 
-    public function getName(): string
+    public function getName(): string|null
     {
         return $this->name;
     }
 
-    public function setName(string $name): void
+    public function setName(string|null $name): void
     {
         $this->name = $name;
     }
 
-    public function getFormat(): string
+    public function getFormat(): string|null
     {
         return $this->format;
     }
 
-    public function setFormat(string $format): void
+    public function setFormat(string|null $format): void
     {
         $this->format = $format;
     }
@@ -92,52 +92,52 @@ class RegistrationDrawing implements RegistrationDrawingInterface
         $this->delimiter = $delimiter;
     }
 
-    public function getPeriodicity(): string
+    public function getPeriodicity(): string|null
     {
         return $this->periodicity;
     }
 
-    public function setPeriodicity(string $periodicity): void
+    public function setPeriodicity(string|null $periodicity): void
     {
         $this->periodicity = $periodicity;
     }
 
-    public function getDay(): string
+    public function getDay(): string|null
     {
         return $this->day;
     }
 
-    public function setDay(string $day): void
+    public function setDay(string|null $day): void
     {
         $this->day = $day;
     }
 
-    public function getSendMode(): string
+    public function getSendMode(): string|null
     {
         return $this->sendMode;
     }
 
-    public function setSendMode(string $sendMode): void
+    public function setSendMode(string|null $sendMode): void
     {
         $this->sendMode = $sendMode;
     }
 
-    public function getDepositAddress(): string
+    public function getDepositAddress(): string|null
     {
         return $this->depositAddress;
     }
 
-    public function setDepositAddress(string $depositAddress): void
+    public function setDepositAddress(string|null $depositAddress): void
     {
         $this->depositAddress = $depositAddress;
     }
 
-    public function getUser(): string
+    public function getUser(): string|null
     {
         return $this->user;
     }
 
-    public function setUser(string $user): void
+    public function setUser(string|null $user): void
     {
         $this->user = $user;
     }
@@ -162,22 +162,22 @@ class RegistrationDrawing implements RegistrationDrawingInterface
         $this->generatedFiles = $generatedFiles;
     }
 
-    public function getHost(): string
+    public function getHost(): string|null
     {
         return $this->host;
     }
 
-    public function setHost(string $host): void
+    public function setHost(string|null $host): void
     {
         $this->host = $host;
     }
 
-    public function getPort(): int
+    public function getPort(): int|null
     {
         return $this->port;
     }
 
-    public function setPort(int $port): void
+    public function setPort(int|null $port): void
     {
         $this->port = $port;
     }
@@ -192,12 +192,12 @@ class RegistrationDrawing implements RegistrationDrawingInterface
         $this->password = $password;
     }
 
-    public function getRecipients(): string
+    public function getRecipients(): string|null
     {
         return $this->recipients;
     }
 
-    public function setRecipients(string $recipients): void
+    public function setRecipients(string|null $recipients): void
     {
         $this->recipients = $recipients;
     }
@@ -250,6 +250,6 @@ class RegistrationDrawing implements RegistrationDrawingInterface
 
     public function __toString(): string
     {
-        return $this->getName();
+        return $this->getName() ?? '';
     }
 }

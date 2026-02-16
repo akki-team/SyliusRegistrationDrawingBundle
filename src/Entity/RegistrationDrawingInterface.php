@@ -11,37 +11,37 @@ use Sylius\Component\Resource\Model\TimestampableInterface;
 
 interface RegistrationDrawingInterface extends ResourceInterface, TimestampableInterface
 {
-    public function getName(): string;
+    public function getName(): string|null;
 
-    public function setName(string $name): void;
+    public function setName(string|null $name): void;
 
-    public function getFormat(): string;
+    public function getFormat(): string|null;
 
-    public function setFormat(string $format): void;
+    public function setFormat(string|null $format): void;
 
     public function getDelimiter(): string|null;
 
     public function setDelimiter(string|null $delimiter): void;
 
-    public function getPeriodicity(): string;
+    public function getPeriodicity(): string|null;
 
-    public function setPeriodicity(string $periodicity): void;
+    public function setPeriodicity(string|null $periodicity): void;
 
-    public function getDay(): string;
+    public function getDay(): string|null;
 
-    public function setDay(string $day): void;
+    public function setDay(string|null $day): void;
 
-    public function getSendMode(): string;
+    public function getSendMode(): string|null;
 
-    public function setSendMode(string $sendMode): void;
+    public function setSendMode(string|null $sendMode): void;
 
-    public function getDepositAddress(): string;
+    public function getDepositAddress(): string|null;
 
-    public function setDepositAddress(string $depositAddress): void;
+    public function setDepositAddress(string|null $depositAddress): void;
 
-    public function getUser(): string;
+    public function getUser(): string|null;
 
-    public function setUser(string $user): void;
+    public function setUser(string|null $user): void;
 
     public function getVendors(): Collection|ArrayCollection;
 
@@ -55,21 +55,21 @@ interface RegistrationDrawingInterface extends ResourceInterface, TimestampableI
 
     public function setGeneratedFiles(Collection|ArrayCollection $generatedFiles): void;
 
-    public function getHost(): string;
+    public function getHost(): string|null;
 
-    public function setHost(string $host): void;
+    public function setHost(string|null $host): void;
 
-    public function getPort(): int;
+    public function getPort(): int|null;
 
-    public function setPort(int $port): void;
+    public function setPort(int|null $port): void;
 
     public function getPassword(): string|null;
 
     public function setPassword(string|null $password): void;
 
-    public function getRecipients(): string;
+    public function getRecipients(): string|null;
 
-    public function setRecipients(string $recipients): void;
+    public function setRecipients(string|null $recipients): void;
 
     public function getCurrencyFormat(): string|null;
 
