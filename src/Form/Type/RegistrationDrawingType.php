@@ -10,6 +10,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 final class RegistrationDrawingType extends AbstractResourceType
 {
@@ -19,6 +20,9 @@ final class RegistrationDrawingType extends AbstractResourceType
             ->add('name', TextType::class, [
                 'required' => true,
                 'label' => 'sylius_registration_drawing.form.registration_drawing.name',
+                'constraints' => [
+                    new NotBlank(['groups' => ['sylius']]),
+                ],
             ])
             ->add('encoding', ChoiceType::class, [
                 'required' => true,
@@ -26,6 +30,9 @@ final class RegistrationDrawingType extends AbstractResourceType
                 'choices' => Constants::ENCODINGS,
                 'expanded' => false,
                 'multiple' => false,
+                'constraints' => [
+                    new NotBlank(['groups' => ['sylius']]),
+                ],
             ])
             ->add('format', ChoiceType::class, [
                 'required' => true,
@@ -33,6 +40,9 @@ final class RegistrationDrawingType extends AbstractResourceType
                 'choices' => Constants::OUTPUT_FORMATS,
                 'expanded' => false,
                 'multiple' => false,
+                'constraints' => [
+                    new NotBlank(['groups' => ['sylius']]),
+                ],
             ])
             ->add('delimiter', ChoiceType::class, [
                 'required' => true,
@@ -40,6 +50,9 @@ final class RegistrationDrawingType extends AbstractResourceType
                 'choices' => Constants::DELIMITERS,
                 'expanded' => false,
                 'multiple' => false,
+                'constraints' => [
+                    new NotBlank(['groups' => ['sylius']]),
+                ],
             ])
             ->add('periodicity', ChoiceType::class, [
                 'required' => true,
@@ -47,6 +60,9 @@ final class RegistrationDrawingType extends AbstractResourceType
                 'choices' => Constants::PERIODICITY,
                 'expanded' => false,
                 'multiple' => false,
+                'constraints' => [
+                    new NotBlank(['groups' => ['sylius']]),
+                ],
             ])
             ->add('day', ChoiceType::class, [
                 'required' => true,
@@ -54,6 +70,9 @@ final class RegistrationDrawingType extends AbstractResourceType
                 'choices' => Constants::DAYS,
                 'expanded' => false,
                 'multiple' => false,
+                'constraints' => [
+                    new NotBlank(['groups' => ['sylius']]),
+                ],
             ])
             ->add('currencyFormat', ChoiceType::class, [
                 'required' => true,
@@ -61,6 +80,9 @@ final class RegistrationDrawingType extends AbstractResourceType
                 'choices' => Constants::CURRENCY_FORMATS,
                 'expanded' => false,
                 'multiple' => false,
+                'constraints' => [
+                    new NotBlank(['groups' => ['sylius']]),
+                ],
             ])
             ->add('currencyDelimiter', ChoiceType::class, [
                 'required' => true,
@@ -68,6 +90,9 @@ final class RegistrationDrawingType extends AbstractResourceType
                 'choices' => Constants::CURRENCY_DELIMITERS,
                 'expanded' => false,
                 'multiple' => false,
+                'constraints' => [
+                    new NotBlank(['groups' => ['sylius']]),
+                ],
             ])
             ->add('send_mode', ChoiceType::class, [
                 'required' => true,
@@ -75,14 +100,23 @@ final class RegistrationDrawingType extends AbstractResourceType
                 'choices' => Constants::SENDING_METHODS,
                 'expanded' => false,
                 'multiple' => false,
+                'constraints' => [
+                    new NotBlank(['groups' => ['sylius']]),
+                ],
             ])
             ->add('deposit_address', TextType::class, [
                 'required' => true,
                 'label' => 'sylius_registration_drawing.form.registration_drawing.deposit_address',
+                'constraints' => [
+                    new NotBlank(['groups' => ['sylius']]),
+                ],
             ])
             ->add('user', TextType::class, [
                 'required' => true,
                 'label' => 'sylius_registration_drawing.form.registration_drawing.user',
+                'constraints' => [
+                    new NotBlank(['groups' => ['sylius']]),
+                ],
             ])
             ->add('password', TextType::class, [
                 'required' => false,
@@ -91,14 +125,23 @@ final class RegistrationDrawingType extends AbstractResourceType
             ->add('host', TextType::class, [
                 'required' => true,
                 'label' => 'sylius_registration_drawing.form.registration_drawing.host',
+                'constraints' => [
+                    new NotBlank(['groups' => ['sylius']]),
+                ],
             ])
             ->add('port', IntegerType::class, [
                 'required' => true,
                 'label' => 'sylius_registration_drawing.form.registration_drawing.port',
+                'constraints' => [
+                    new NotBlank(['groups' => ['sylius']]),
+                ],
             ])
             ->add('recipients', TextType::class, [
                 'required' => true,
                 'label' => 'sylius_registration_drawing.form.registration_drawing.recipients',
+                'constraints' => [
+                    new NotBlank(['groups' => ['sylius']]),
+                ],
             ]);
     }
 
